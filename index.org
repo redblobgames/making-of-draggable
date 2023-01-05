@@ -6,7 +6,7 @@
 
 * TEST 1 - event log
 
-[[href:eventlog.html]]
+[[href:eventlog.html][eventlog.html]]
 
 Testing a click:
 
@@ -23,8 +23,10 @@ Testing a click:
 
 * TEST 2 - dragging
 
+[[href:draggable.html][draggable.html]]
+
 - Need touchstart.prevent to prevent scrolling
-- Need pointerdown.prevent to prevent double click from selecting text (or maybe user-select:none)
+- Need either pointerdown.prevent or user-select:none to prevent double click from selecting text
 
 TODO: make the draggable version of this test, with something flickering every time an event comes in
 
