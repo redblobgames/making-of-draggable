@@ -1,0 +1,34 @@
+#+title: Test page: pointerevent log
+#+date: <2023-01-04>
+
+This diagram has a <text> and <circle> inside a <g>, and the <g> has an event logger. The reason I have nested elements is that you can see how pointerover/pointerout differs from pointerenter/pointerleave.
+
+#+begin_export html
+<figure class="w-full">
+  <svg viewBox="-330 -32 660 64">
+    <rect x="-330" y="-32" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g>
+      <circle fill="red" stroke="black" stroke-width="0.5" r="30" />
+      <text font-size="16" text-anchor="middle" dy="0.4em" fill="white">Test</text>
+    </g>
+  </svg>
+  <figcaption>Logging pointerevents other than move</figcaption>
+  <button onclick="clearPre()">Clear log</button>
+  <pre class="w-full" id="log"/>
+</figure>
+
+<style>
+  svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); }
+</style>
+
+<x:footer>
+  <svg width="0" height="0">
+    <defs>
+      <pattern id="pattern-dots" width="10" height="10" patternUnits="userSpaceOnUse">
+        <circle cx="5" cy="5" fill="hsl(0 10% 80%)" r="1" />
+      </pattern>
+    </defs>
+  </svg>
+  <script src="eventlog.js"></script>
+</x:footer>
+#+end_export

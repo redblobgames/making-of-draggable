@@ -1,0 +1,87 @@
+#+title: Draggable objects, 2022
+#+date: <2022-12-23 Fri>
+#+draft: t
+
+[[href:/x/1845-draggable/][I had previously written up how I handle draggable objects]] with a reusable library, in 2017 and 2018. Since then we have [[https://caniuse.com/pointer][pointer events]] (2020) including [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture]], and that means I can greatly simplify how things work. I'm primarily dragging inside svg and canvas, so I am not using the [[https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API][HTML5 drag and drop API]].
+
+* TEST 1 - event log
+
+[[href:eventlog.html]]
+
+Testing a click:
+
+- Desktop:
+  - Firefox/Mac, Chrome/Mac, Safari/Mac, Firefox/Windows, Chrome/Windows, Edge/Windows, Firefox/Linux all produce pointerdown, mousedown, pointerup, mouseup, click
+  - Firefox/Mac: if loading a page and the mouse is already over an element, will fire mouseover,mouseenter but not pointerover,pointerenter until the mouse is moved a tiny bit {need to test on Firefox/Windows, Firefox/Linux but probably does the same there}
+  - Mac: if you mouse down over the circle and then alt+tab to another window and then release the mouse, the web page still gets pointerup, mouseup, pointerout, pointerleave, mouseout,  mouseleave (!). It also gets those if you put the computer to sleep. On Windows, it will go out as soon as you press alt+tab, and not come back when you switch to the same app, whereas on Mac it triggers pointerover etc when you come back to the app (further testing needed)
+  - Firefox vs Chrome (both Mac and Windows): if your mouse goes under the element when you scroll the page with the keyboard, Firefox will fire mouseover, mouseenter whereas Chrome will fire pointerover, pointerenter, mouseover, mouseenter. I feel like Chrome is doing the right thing here. [TODO: [[https://bugzilla.mozilla.org/][file a bug]]]
+
+- Mobile:
+  - Safari/iOS, Firefox/Android, Chrome/Android all produce pointerdown, touchstart, pointerup, touchend, but if quick: also produce [mousedown, mouseup, click]
+  - Android: contextmenu event if holding down; need to preventDefault to prevent the menu from showing up
+  - Android: if there's text in the draggable event, need to use user-select:none to prevent text from being selected. If it's in the middle of text, might be best to apply apply it only during a drag event; otherwise it would prevent text selection when not dragging.
+
+* TEST 2 - dragging
+
+- Need touchstart.prevent to prevent scrolling
+- Need pointerdown.prevent to prevent double click from selecting text (or maybe user-select:none)
+
+TODO: make the draggable version of this test, with something flickering every time an event comes in
+
+Things to try with the draggable test (not yet implemented)
+
+Desktop: 
+
+Try holding down and dragging outside the diagram
+
+Try holding down and dragging outside the window
+
+Try holding down then Alt+Tab
+
+Mobile:
+
+Try holding down on the drag handle then move up / down; it won't scroll
+
+Try holding down elsewhere on the svg and move up / down; it should scroll
+
+Try holding down and then try to rescale with pinching (ios & android: won't pinch if you hold down on drag handle)
+
+Try: holding down and then rotate (ios: will rotate the page but dragging still works; android: won't rotate until you let go)
+
+TODO: test tablet
+
+* Old way
+
+* New way
+
+* Vue way
+
+* Variations
+
+* Notes
+
+https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge but not safari/firefox https://caniuse.com/mdn-api_element_pointerrawupdate_event
+
+https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
+
+
+Source: [[file:draggable.js]]
+
+#+begin_export html
+<style>
+  svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); }
+</style>
+
+<x:footer>
+  <svg width="0" height="0">
+    <defs>
+      <pattern id="pattern-dots" width="10" height="10" patternUnits="userSpaceOnUse">
+        <circle cx="5" cy="5" fill="hsl(0 10% 80%)" r="1" />
+      </pattern>
+    </defs>
+  </svg>
+  <script src="draggable.js"></script>
+  Created 23 Dec 2022; &#160;
+  <!-- hhmts start -->Last modified: 04 Jan 2023<!-- hhmts end -->
+</x:footer>
+#+end_export
