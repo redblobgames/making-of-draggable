@@ -1,5 +1,6 @@
 #+title: Test page: pointerevent log
 #+date: <2023-01-04>
+#+nocomments: t
 
 This diagram has a <text> and <circle> inside a <g>, and the <g> has an event logger. The reason I have nested elements is that you can see how pointerover/pointerout differs from pointerenter/pointerleave.
 
@@ -16,9 +17,35 @@ This diagram has a <text> and <circle> inside a <g>, and the <g> has an event lo
   <button onclick="clearPre()">Clear log</button>
   <pre class="w-full" id="log"/>
 </figure>
+#+end_export
 
+The second test shows the event data: (pointer type can be =mouse=, =pen=, =touch= ; pressure can be 0 to around 4)
+
+#+begin_export html
+<figure class="w-full">
+  <div style="display:grid; grid-template-columns: 100px 1fr 1fr">
+    <div id="testbox" style="width:100px;height:100px;background:cyan;user-select:none">TEST</div>
+    <pre id="pointerdata"/>
+    <div>
+      <pre id="forcedata"/>
+      <pre id="touchdata"/>
+    </div>
+  </div>
+</figure>
+#+end_export
+
+Using =preventDefault()= on a pointer event should cancel the corresponding mouse event or touch event.
+
+https://developer.mozilla.org/en-US/docs/Web/API/Force_Touch_events seems to be active on my mac laptop (touchpad is force sensitive) but /not/ on my phone
+
+On iPhone I don't get a TouchEvent.force or PointerEvent.pressure. On Android I do get that value in both Chrome and Firefox.
+
+Related: https://patrickhlauke.github.io/touch/ and https://patrickhlauke.github.io/getting-touchy-presentation/ (lists touch event order, talks about gestures, which events you can override, hybrid touch events with mouse, lots more)
+
+#+begin_export html
 <style>
-  svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); }
+  svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); user-select: none; }
+  pre { width: unset; max-width: 100%; }
 </style>
 
 <x:footer>

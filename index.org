@@ -4,6 +4,8 @@
 
 [[href:/x/1845-draggable/][I had previously written up how I handle draggable objects]] with a reusable library, in 2017 and 2018. Since then we have [[https://caniuse.com/pointer][pointer events]] (2020) including [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture]], and that means I can greatly simplify how things work. I'm primarily dragging inside svg and canvas, so I am not using the [[https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API][HTML5 drag and drop API]].
 
+I'm running my tests on Gecko (Mac, Windows, Linux, Android), Blink (Mac, Windows, Linux, Android), WebKit (Mac, iPhone, iPad).
+
 * TEST 1 - event log
 
 [[href:eventlog.html][eventlog.html]]
@@ -23,32 +25,10 @@ Testing a click:
 
 * TEST 2 - dragging
 
-[[href:draggable.html][draggable.html]]
+[[href:tests.html][tests.html]]
 
 - Need touchstart.prevent to prevent scrolling
 - Need either pointerdown.prevent or user-select:none to prevent double click from selecting text
-
-TODO: make the draggable version of this test, with something flickering every time an event comes in
-
-Things to try with the draggable test (not yet implemented)
-
-Desktop: 
-
-Try holding down and dragging outside the diagram
-
-Try holding down and dragging outside the window
-
-Try holding down then Alt+Tab
-
-Mobile:
-
-Try holding down on the drag handle then move up / down; it won't scroll
-
-Try holding down elsewhere on the svg and move up / down; it should scroll
-
-Try holding down and then try to rescale with pinching (ios & android: won't pinch if you hold down on drag handle)
-
-Try: holding down and then rotate (ios: will rotate the page but dragging still works; android: won't rotate until you let go)
 
 TODO: test tablet
 
@@ -62,12 +42,11 @@ TODO: test tablet
 
 * Notes
 
+=pointerdown= + =pointerup= will trigger =click= (left mouse button) or =auxclick= (middle mouse button) or =contextmenu= (right mouse button)
+
 https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge but not safari/firefox https://caniuse.com/mdn-api_element_pointerrawupdate_event
 
 https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
-
-
-Source: [[file:draggable.js]]
 
 #+begin_export html
 <style>
@@ -82,8 +61,7 @@ Source: [[file:draggable.js]]
       </pattern>
     </defs>
   </svg>
-  <script src="draggable.js"></script>
   Created 23 Dec 2022; &#160;
-  <!-- hhmts start -->Last modified: 04 Jan 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 19 Jan 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
