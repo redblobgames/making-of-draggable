@@ -23,6 +23,9 @@ function convertPixelToSvgCoord(event) {
 
 let log = document.querySelector("#log");
 let svg = document.querySelector("main figure svg");
+let showHoverEvents = document.querySelector("#show-hover");
+let showMouseTouchEvents = document.querySelector("#show-mouse-touch");
+let capturePointerDownEvents = document.querySelector("#capture-pointerdown");
 let draggable = svg.querySelector("g");
 
 let eventNames = `
@@ -38,6 +41,13 @@ pointermove
 touchmove
 webkitmouseforcechanged`.trim().split(/\s/);
 
+const listOfHoverEvents = `
+pointerover mouseover pointerout mouseout
+pointerenter mouseenter pointerleave mouseleave`.trim().split(/\s/);
+
+// TODO: https://w3c.github.io/pointerevents/#dfn-coalesced-events and predicted events might be interesting but I don't know which browsers support that
+
+
 // First test on the page shows the event log except for move events
 let outputQueue = [];
 function showEvents() {
@@ -49,23 +59,37 @@ function showEvents() {
 }
 showEvents();
 
+function updateButtonState(event) {
+    if (event.type !== 'pointermove' && event.type !== 'pointerup' && event.type !== 'pointerdown') return;
+    let rects = document.querySelectorAll("#buttons > rect");
+    console.log(event.type, event.buttons);
+    for (let b = 0; b < rects.length; b++) {
+        rects[b].style.fill = (event.buttons & (1 << b)) ? "hsl(150 50% 60%)" : "hsl(30 20% 50%)";
+    }
+}
+
 for (let type of eventNames) {
     draggable.addEventListener(type, (event) => {
+        updateButtonState(event);
         let output = event.type;
-        if (event.pointerId !== undefined) output += "." + event.pointerId;
-        if (event.target.tagName === 'text') output += ".T";
-        if (event.target.tagName === 'circle') output += ".C";
+        // if (event.type === 'contextmenu') event.preventDefault();
+
+        if (!showHoverEvents.checked && listOfHoverEvents.includes(event.type)) return;
+        if (!showMouseTouchEvents.checked && (event.type.startsWith("mouse") || event.type.startsWith("touch"))) return;
+        
+        // if (event.pointerId !== undefined) output += "." + event.pointerId;
+        if (event.button >= 0) output += "." + (['left', 'middle', 'right'][event.button] ?? event.button);
+        output += `<${event.target.tagName}>`;
+        if (!event.isPrimary) output += "[!primary]";
         outputQueue.push(output);
+        if (capturePointerDownEvents.checked && type === 'pointerdown') draggable.setPointerCapture(event.pointerId);
     });
 }
 
-// draggable.addEventListener('pointermove', (event) => {
-//     let p = convertPixelToSvgCoord(event);
-//     draggable.style.transform = `translate(${p.x}px, ${p.y}px)`;
-// });
+draggable.addEventListener('pointermove', updateButtonState);
 
 function clearPre() {
-    pre.textContent = "";
+    log.textContent = "";
 }
 
 

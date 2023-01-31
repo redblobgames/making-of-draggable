@@ -18,11 +18,26 @@ Things to try on Mobile:
 - Try holding down and then try to rescale with pinching (ios & android: won't pinch if you hold down on draggable object)
 - Try: holding down and then rotate (ios: will rotate the page but dragging still works; android: won't rotate until you let go)
 
-TODO: demos of all the failed code, including mousemove on the element, mousemove on the document, not handling user-select:none (fail: text selected while dragging), being too aggressive on user-select:none (fail: can't select text when not dragging).
-
 TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for this?
 
-* Test 2a - SVG single element
+• what if you select all text on the page and then try to drag a circle in my diagram? it turns out drag text outside of a browser is an operation, and this interferes with the dragging of the circle
+• what if you have two mice plugged in and then you hold down the button on one, start dragging, then click on the other?
+• what if you use the ipad as a second screen, and use the stylus on the ipad as a mouse on your mac?
+• and vice versa, what if you use the mouse on the mac on the ipad?
+• what if you press harder on the mac touchpad? do you get force pressure events?
+• what if you have a draggable object inside another draggable object?
+• what if you long press on a circle that also has text inside it?
+• what if you start the drag by using your finger, but then you use another finger to "pinch zoom"?
+• what if you use two separate fingers to drag two separate objects?
+• what if you use two separate fingers to drag one object?
+• what if you start a drag on a phone, and then rotate the phone while you're still dragging?
+• what if you start a drag on a desktop and then use Alt+Tab to switch to another window?
+• what if you start a drag and then put the computer to sleep in the middle of the drag?
+• what if while you're dragging, you middle click which starts a scroll operation? 
+•what if you unplug the mouse during a drag?
+- what if you press left button, then ctrl, then release left button? on mac/firefox this gives pointerdown.left pointerup.right; on mac/chrome, mac/safari, and windows/* and linux/* it gives pointerdown.left pointerup.left
+
+* Test: SVG single element
 :PROPERTIES:
 :CUSTOM_ID: test-2a-svg-single-element
 :END:
@@ -41,7 +56,7 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 - Basic tests work
 - On desktop, scrolling while dragging doesn't drag until you move your mouse a tiny amount. This could be solved either with a timer or by catching the scroll event. Low priority for me.
 
-* Test 2b - SVG nested element with text
+* Test: SVG nested element with text
 :PROPERTIES:
 :CUSTOM_ID: test-2b-svg-nested-element-with-text
 :END:
@@ -69,7 +84,7 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 - While dragging, I set CSS ~user-select: none~. This prevents selecting the text by dragging or double clicking (desktop) or long press (mobile). But I don't want this /all/ the time. When not dragging, I want the text to be selectable.
 - On desktop, if you select the text of the page and then try to drag it, it will let you drag that text outside the browser. But if you also try to drag this circle the two drag handlers will intefere. Use ~preventDefault()~ on the =dragstart= event to fix this.
 
-* Test 2c - Canvas drag to draw
+* Test: Canvas drawing
 :PROPERTIES:
 :CUSTOM_ID: test-2c-canvas-drag-to-draw
 :END:
@@ -81,7 +96,7 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 </figure>
 #+end_export
 
-* Test 2d - Canvas drag a circle
+* Test: Canvas dragging
 :PROPERTIES:
 :CUSTOM_ID: test-2d-canvas-drag-a-handle
 :END:
@@ -96,7 +111,7 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 
 - If I put a second finger on the diagram it jumps to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I need to use the =.pointerId= field to make sure the =pointermove= event I got is for the same finger that started the drag.
 
-* Test 2e - HTML div absolute positioned
+* Test: HTML div absolute positioned
 :PROPERTIES:
 :CUSTOM_ID: test-2e-html-div-absolute-positioned
 :END:
@@ -113,7 +128,7 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 
 - It is possible to place the box outside the container by placing it on the right, then shrinking the browser size. I'm going to leave this up to the application and not try to solve it generically.
 
-* Test 2f - HTML div css transform
+* Test: HTML div css transform
 :PROPERTIES:
 :CUSTOM_ID: test-2f-html-div-css-transform
 :END:

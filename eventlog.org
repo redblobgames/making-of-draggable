@@ -1,4 +1,4 @@
-#+title: Test page: pointerevent log
+#+title: Draggable objects: test page with pointerevent log
 #+date: <2023-01-04>
 #+nocomments: t
 
@@ -9,12 +9,24 @@ This diagram has a <text> and <circle> inside a <g>, and the <g> has an event lo
   <svg viewBox="-330 -32 660 64">
     <rect x="-330" y="-32" width="100%" height="100%" fill="url(#pattern-dots)" />
     <g>
-      <circle fill="red" stroke="black" stroke-width="0.5" r="30" />
+      <circle fill="hsl(0 50% 50%)" stroke="black" stroke-width="0.5" r="30" />
       <text font-size="16" text-anchor="middle" dy="0.4em" fill="white">Test</text>
+    </g>
+    <g id="buttons">
+      <rect x="-320" y="-10" width="20" height="20" />
+      <rect x="-280" y="-10" width="20" height="20" />
+      <rect x="-295" y="-5" width="10" height="10" />
+      <g fill="white" font-size="10" font-family="sans-serif" text-anchor="middle">
+        <text x="-310">L</text>
+        <text x="-270">R</text>
+      </g>
     </g>
   </svg>
   <figcaption>Logging pointerevents other than move</figcaption>
-  <button onclick="clearPre()">Clear log</button>
+  <label><input id="show-hover" type="checkbox" /> Show over/out, enter/leave</label>
+  <br/><label><input id="show-mouse-touch" type="checkbox" /> Show mouse+touch events also</label>
+  <br/><label><input id="capture-pointerdown" type="checkbox" /> Capture move events on pointerdown</label>
+  <br/><button onclick="clearPre()">Clear log</button>
   <pre class="w-full" id="log"/>
 </figure>
 #+end_export
@@ -40,12 +52,36 @@ https://developer.mozilla.org/en-US/docs/Web/API/Force_Touch_events seems to be 
 
 On iPhone I don't get a TouchEvent.force or PointerEvent.pressure. On Android I do get that value in both Chrome and Firefox.
 
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=506801][Chrome has a bug about]] the up event not following the contextmenu, and a [[https://bugs.chromium.org/p/chromium/issues/detail?id=570469][followup bug]] and [[https://bugs.chromium.org/p/chromium/issues/detail?id=154329][related bug]] about enter/leave events. The =mouseleave= event doesn't get sent on =contextmenu=.
+
+https://github.com/WICG/auxclick/issues/1 - says contextmenu should be after mousedown on linux, after mouseup on windows, and auxclick should be after contextmenu. But auxclick runs before contextmenu on windows.
+
+[[https://javascript.info/mouse-events-basics][javascript.info]] has a demo of click event logging but theirs does /not/ run into the same problem as I have with the contextmenu. It's because they trap the =contextmenu= event so the up event is correct.
+
+https://w3c.github.io/uievents/#event-type-auxclick
+
+On Mac, ctrl+click triggers =contextmenu= without triggering up/down or click events.
+
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=1264930]] → a =contextmenu= should produce a PointerEvent that has =.pointerId= the same as the id of the event that produced that menu. It is fixed on Chrome but it is undefined on Firefox, because Firefox 110 produces a MouseEvent not a PointerEvent.
+
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=958776]] → asks for =contextmenu= to fire =pointercancel=. It can't fire =pointerup= because that looks like a =click=.
+
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=958776]] → reports that in Chrome 21, right click /does/ fire =mouseup= but only if it's quick; otherwise it doesn't fire =mouseup=.
+
+https://bugs.chromium.org/p/chromium/issues/detail?id=627889 → chrome decided not to issue pointercancel after a contextmenu
+
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=149091]] lists platform and browser differences as of 2017.
+
+https://twitter.com/kaleidealogy/status/1430871635968634880 → pointer down and pointer up may not be on the same button. It says =pointermove= will get called on subsequent button changes!! This is different from mouse events!! https://w3c.github.io/pointerevents/#chorded-button-interactions 
+
 Related: https://patrickhlauke.github.io/touch/ and https://patrickhlauke.github.io/getting-touchy-presentation/ (lists touch event order, talks about gestures, which events you can override, hybrid touch events with mouse, lots more)
 
 #+begin_export html
 <style>
   svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); user-select: none; }
   pre { width: unset; max-width: 100%; }
+
+  #buttons rect { stroke: white; stroke-width: 0.5px; fill: gray; }
 </style>
 
 <x:footer>

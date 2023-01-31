@@ -12,7 +12,7 @@ function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
 
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
- * and viewBox */
+ * and viewBox) */
 function convertPixelToSvgCoord(event) {
     const svg = event.currentTarget.ownerSVGElement;
     let p = svg.createSVGPoint();
@@ -96,7 +96,6 @@ const svgDragHandlersCommon = {
     onpointermove(event) {
         if (!this.dragging) return;
         let {x, y} = convertPixelToSvgCoord(event);
-        // TODO: need to test whether the offset tracking gets messed up by screen rotation or diagram resizing (e.g. size set in vh/vw)
         this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
     },
     ondragstart(event) {
