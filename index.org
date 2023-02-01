@@ -29,7 +29,7 @@ This is the simple model in my head:
 #+begin_src dot :file build/state.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> dragging [label = "pointerdown"];
@@ -39,20 +39,23 @@ digraph {
 #+end_src
 
 #+results:
-[[file:diagram-state.svg]]
+[[file:build/state.svg]]
 
 However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations.
 
 {{ TODO :: just show the answer!! the rest of the page is explanation and demos of the things that go wrong }}
 
 * Mouse events only
+:PROPERTIES:
+:CUSTOM_ID: mouse-events
+:END:
 
 The simplest thing to do is to capture =mousedown=, =mouseup=, and =mousemove= on the circle element. If the move occurs while dragging, then move the circle to the mouse position.
 
 #+begin_src dot :file build/mouse-local.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> initial [label = "mousemove"];
@@ -62,22 +65,12 @@ digraph {
 }
 #+end_src
 
-#+results:
-[[file:diagram-mouse-local.svg]]
-
 Try the demo:
 
 #+begin_export html
-<figure id="mouse-events-local" class="w-full">
+<figure id="diagram-mouse-events-local" class="w-full">
   <svg viewBox="-330 -50 660 100">
     <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <g class="draggable">
-      <circle stroke="black" stroke-width="0.5" r="30" />
-      <g font-size="14" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
-      </g>
-    </g>
   </svg>
   <figcaption>Drag using mouse events on circle</figcaption>
 </figure>
@@ -93,7 +86,7 @@ To fix these problems we can use =mousedown= on the circle to add =mousemove= an
 #+begin_src dot :file build/mouse-document.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> dragging [label = "mousedown"];
@@ -108,16 +101,9 @@ digraph {
 Try it out. It works better.
 
 #+begin_export html
-<figure id="mouse-events-document" class="w-full">
+<figure id="diagram-mouse-events-document" class="w-full">
   <svg viewBox="-330 -50 660 100">
     <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <g class="draggable">
-      <circle stroke="black" stroke-width="0.5" r="30" />
-      <g font-size="14" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
-      </g>
-    </g>
   </svg>
   <figcaption>Drag using mouse events on document</figcaption>
 </figure>
@@ -131,13 +117,16 @@ There are still a few issues, which we'll solve one by one.
 - Right clicking the circle will bring up a context menu, which leaves the circle stuck in drag mode.
 
 * Touch events
+:PROPERTIES:
+:CUSTOM_ID: touch-events
+:END:
 
 Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example.
 
 #+begin_src dot :file build/touch.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> initial [label = "touchmove"];
@@ -148,16 +137,9 @@ digraph {
 #+end_src
 
 #+begin_export html
-<figure id="touch-events" class="w-full">
+<figure id="diagram-touch-events" class="w-full">
   <svg viewBox="-330 -50 660 100">
     <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <g class="draggable">
-      <circle stroke="black" stroke-width="0.5" r="30" />
-      <g font-size="14" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
-      </g>
-    </g>
   </svg>
   <figcaption>Drag using touch events</figcaption>
 </figure>
@@ -169,13 +151,16 @@ There are a few problems to deal with:
 - Long pressing on the text will select it or bring up a context menu. This leaves us stuck in the dragging state.
 
 * Pointer events
+:PROPERTIES:
+:CUSTOM_ID: pointer-events
+:END:
 
 Pointer events attempt to unify mouse and touch events. They offer a choice of whether =pointermove= goes to the element ("regular" mode, works like mouse events) it's under or to the element that received =pointerdown= ("capture" mode, works like touch events). If the =pointerdown= was triggered by a mouse, it will use regular mode, and if it was triggered by touch, it will use capture mode. To switch to capture mode, use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture()]], or to switch to regular mode use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/releasePointerCapture][releasePointerCapture()]]. For dragging objects I want capture mode. There's also a =pointercancel= that gets called if the browser wants to take over and is telling us we should stop tracking the pointer.
 
 #+begin_src dot :file build/pointer.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> initial [label = "pointermove"];
@@ -192,16 +177,9 @@ digraph {
 Try the demo with either a mouse or touch device:
 
 #+begin_export html
-<figure id="pointer-events" class="w-full">
+<figure id="diagram-pointer-events" class="w-full">
   <svg viewBox="-330 -50 660 100">
     <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <g class="draggable">
-      <circle stroke="black" stroke-width="0.5" r="30" />
-      <g font-size="14" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
-      </g>
-    </g>
   </svg>
   <figcaption>Drag using pointer events</figcaption>
 </figure>
@@ -212,7 +190,7 @@ This demo has the same problems as the previous two, but it's simpler than havin
 #+begin_src dot :file build/mouse-and-touch.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
     initial -> dragging [label = "mousedown"];
@@ -309,7 +287,7 @@ So here's a tricky one. If you are using multiple buttons at the same time, what
 #+begin_src dot :cmd circo :file build/multiple-buttons.svg :exports results
 digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
 
     neither;
     leftbutton [label = "left\nbutton"];
@@ -401,9 +379,18 @@ https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
 
 https://domevents.dev/ shows how dom events bubble from parent to child then back up to parent, and what happens if you stop propagation
 
+#+begin_comment
+https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-executing-all-of-the-babel-source-blocks says that there's no really good way to tell org babel to regenerate the diagrams only explicitly and not automatically on export :-(
+#+end_comment
+
+
 #+begin_export html
 <style>
-  svg { background: #eee; box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3); width: 100%; }
+  svg { 
+    background: #eee; 
+    box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3); 
+    width: calc(1.2 * var(--body-width)); 
+  }
 
   details { padding: 0 1em; }
   details p { margin: 0.5em; padding: 0 1em; }

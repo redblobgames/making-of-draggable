@@ -22,16 +22,28 @@ function convertPixelToSvgCoord(event, el=event.currentTarget) {
 }
 
 
-function makePositionState(el) {
+/** Make a draggable circle in the svg and keep some state for it */
+function makePositionState(selector, options={}) {
+    const container = document.querySelector(selector);
+    const svg = container.querySelector("svg");
+    const el = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+    el.classList.add('draggable');
+    el.innerHTML = `
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="14" text-anchor="middle" fill="white">
+        <text dy="0.0em">Drag</text>
+        <text dy="1.0em">me</text>
+      </g>`;
+    svg.appendChild(el);
+
     const bounds = {left: -300, right: 300, top: -20, bottom: 20};
-    let pos = {x: 0, y: 0};
+    let pos = {x: options.x ?? 0, y: options.y ?? 0};
     function draw() {
         el.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
     }
-
     draw();
-    return {
-        el,
+
+    let state = {
         dragging: null, // either null or value set by handler
         get pos() { return pos; },
         set pos({x, y}) {
@@ -42,12 +54,12 @@ function makePositionState(el) {
             draw();
         },
     };
+
+    return {el, state};
 }
 
 function diagram_mouse_events_local() {
-    const el = document.querySelector("#mouse-events-local .draggable");
-    let state = makePositionState(el);
-
+    let {state, el} = makePositionState("#diagram-mouse-events-local");
     let dragging = false;
 
     el.addEventListener('mousedown', (_event) => {
@@ -66,8 +78,7 @@ function diagram_mouse_events_local() {
 
 
 function diagram_mouse_events_document() {
-    const el = document.querySelector("#mouse-events-document .draggable");
-    let state = makePositionState(el);
+    let {state, el} = makePositionState("#diagram-mouse-events-document");
 
     el.addEventListener('mousedown', (event) => {
         function mousemove(event) {
@@ -87,8 +98,7 @@ function diagram_mouse_events_document() {
 
 
 function diagram_touch_events() {
-    const el = document.querySelector("#touch-events .draggable");
-    let state = makePositionState(el);
+    let {state, el} = makePositionState("#diagram-touch-events");
 
     el.addEventListener('touchstart', (event) => {
         state.dragging = true;
@@ -111,8 +121,7 @@ function diagram_touch_events() {
 }
 
 function diagram_pointer_events() {
-    const el = document.querySelector("#pointer-events .draggable");
-    let state = makePositionState(el);
+    let {state, el} = makePositionState("#diagram-pointer-events");
 
     el.addEventListener('pointerdown', (event) => {
         state.dragging = true;
@@ -146,8 +155,7 @@ function diagram_pointer_events() {
 
 
 function diagram_pointer_events_fixed() {
-    const el = document.querySelector("#pointer-events .draggable");
-    let state = makePositionState(el);
+    let {state, el} = makePositionState("#pointer-events");
 
     el.addEventListener('pointerdown', (event) => {
         let {x, y} = convertPixelToSvgCoord(event);
