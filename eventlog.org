@@ -74,6 +74,7 @@ https://bugs.chromium.org/p/chromium/issues/detail?id=627889 → chrome decided 
 
 https://twitter.com/kaleidealogy/status/1430871635968634880 → pointer down and pointer up may not be on the same button. It says =pointermove= will get called on subsequent button changes!! This is different from mouse events!! https://w3c.github.io/pointerevents/#chorded-button-interactions 
 
+I can't seem to see button4 or button5 in these events.
 
 #+begin_export html
 <style>

@@ -121,7 +121,7 @@ There are still a few issues, which we'll solve one by one.
 :CUSTOM_ID: touch-events
 :END:
 
-Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example.
+Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example. If for any reason the browser needs to cancel the touch sequence, it sends =touchcancel=.
 
 #+begin_src dot :file build/touch.svg :exports results
 digraph {
@@ -133,6 +133,7 @@ digraph {
     initial -> dragging [label = "touchstart"];
     dragging -> dragging [label = "touchmove"];
     dragging -> initial [label = "touchend"];
+    dragging -> initial [label = "touchcancel"];
 }
 #+end_src
 
@@ -155,7 +156,29 @@ There are a few problems to deal with:
 :CUSTOM_ID: pointer-events
 :END:
 
-Pointer events attempt to unify mouse and touch events. They offer a choice of whether =pointermove= goes to the element ("regular" mode, works like mouse events) it's under or to the element that received =pointerdown= ("capture" mode, works like touch events). If the =pointerdown= was triggered by a mouse, it will use regular mode, and if it was triggered by touch, it will use capture mode. To switch to capture mode, use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture()]], or to switch to regular mode use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/releasePointerCapture][releasePointerCapture()]]. For dragging objects I want capture mode. There's also a =pointercancel= that gets called if the browser wants to take over and is telling us we should stop tracking the pointer.
+To handle both mouse and touch events we end up having lots of different event handlers:
+
+#+begin_src dot :file build/mouse-and-touch.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> dragging [label = "mousedown"];
+    dragging -> dragging [label = "document\nmousemove"];
+    dragging -> initial [label = "document\nmouseup"];
+    initial -> initial [label = "touchmove"];
+    initial -> dragging [label = "touchstart"];
+    dragging -> dragging [label = "touchmove"];
+    dragging -> initial [label = "touchend"];
+    dragging -> initial [label = "touchcancel"];
+}
+#+end_src
+
+#+results:
+[[file:build/mouse-and-touch.svg]]
+
+Pointer events attempt to unify mouse and touch events. The [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][pointer capture]] feature lets us use the simpler logic that doesn't require us to add/remove global event handlers to the document like we had to with mouse events.
 
 #+begin_src dot :file build/pointer.svg :exports results
 digraph {
@@ -172,9 +195,9 @@ digraph {
 #+end_src
 
 #+results:
-[[file:diagram-pointer.svg]]
+[[file:build/pointer.svg]]
 
-Try the demo with either a mouse or touch device:
+Much simpler! Try the demo with either a mouse or touch device:
 
 #+begin_export html
 <figure id="diagram-pointer-events" class="w-full">
@@ -185,27 +208,7 @@ Try the demo with either a mouse or touch device:
 </figure>
 #+end_export
 
-This demo has the same problems as the previous two, but it's simpler than having to write both the document style and non-document style event handlers:
-
-#+begin_src dot :file build/mouse-and-touch.svg :exports results
-digraph {
-    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
-    edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
-    
-    rankdir=LR;
-    initial -> dragging [label = "mousedown"];
-    dragging -> dragging [label = "document\nmousemove"];
-    dragging -> initial [label = "document\nmouseup"];
-    initial -> initial [label = "touchmove"];
-    initial -> dragging [label = "touchstart"];
-    dragging -> dragging [label = "touchmove"];
-    dragging -> initial [label = "touchend"];
-}
-#+end_src
-
-#+results:
-[[file:build/mouse-and-touch.svg]]
-
+There are several things we still need to fix.
 
 ** Fix: text selection
 
@@ -217,7 +220,12 @@ But I might want to select the text. So a better fix is to apply this only while
 
 This problem won't happen in Canvas and WebGL because that text is unselectable.
 
-TODO: demo
+TODO: demo with three objects, one that always has the css, one that never has it, and one that only has it while dragging
+
+| Try this    | Watch for        | Circle 1 | Circle 2 | Circle 3 |
+|-------------+------------------+----------+----------+----------|
+| drag circle | text is selected | yes ⛌   | no ✓    | no ✓    |
+| drag text   | text is selected | yes ✓   | no ⛌    | yes ✓   |
 
 ** Fix: scrolling with touch
 
@@ -227,7 +235,17 @@ Fix: CSS ~touch-action: none~ on the diagram.
 
 But this prevents scrolling anywhere in the diagram. So a better fix is to apply it only to the circle. We can do this for SVG diagrams because each element has its own CSS separate from the containing diagram. But we can't do the same for Canvas or WebGL diagams, because elements don't have their own CSS. So another possible fix is to =preventDefault()= on =touchstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
 
-TODO: demo
+TODO: demo with four separate diagrams side by side
+
+1. default
+2. touch-action none on diagram
+3. touch-action none on circle
+4. touchstart.preventdefault
+
+| Try this     | Watch for    | Circle 1 | Circle 2 | Circle 3 | Circle 4 |
+|--------------+--------------+----------+----------+----------+----------|
+| drag circle  | page scrolls | yes ⛌   | no ✓    | no ✓    | no ✓    |
+| drag diagram | page scrolls | yes ✓   | no ⛌    | yes ✓   | yes ✓   |
 
 ** Fix: text drag
 
@@ -236,6 +254,10 @@ Try selecting all text on the page, then drag the circle. This will trigger /tex
 Fix is: =preventDefault()= on =dragstart= on the circle. This works in SVG but not in Canvas or WebGL. For those, check that the pointer is on the circle and conditionally prevent default.
 
 TODO: demo
+
+| Try this    | Watch for       | Circle 1 | Circle 2 |
+|-------------+-----------------+----------+----------|
+| drag circle | page text drags | yes ⛌   | no ✓    |
 
 ** Fix: context menu
 
@@ -267,12 +289,20 @@ What should we do?
 
 TODO: demo of both solutions?
 
+| Try this              | Watch for    | Circle 1 | Circle 2 | Circle 3 |
+|-----------------------+--------------+----------+----------+----------|
+| right click on circle | circle moves | yes ⛌   | no ?     | yes ?    |
+| right drag on circle  | circle moves |          |          |          |
 
 ** Feature: handle drag offset
 
 This is not implementation specific, but a design issue. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
 
 TODO: demo both ways (although it duplicates little-details page) ; could draw something showing the pick up point
+
+| Try this                 | Watch for    | Circle 1 | Circle 2 |
+|--------------------------+--------------+----------+----------|
+| drag from edge of circle | circle jumps | yes ⛌   | no ✓    |
 
 ** Feature: handle multitouch
 
