@@ -2,11 +2,366 @@
 #+date: <2022-12-23 Fri>
 #+draft: t
 
-[[href:/x/1845-draggable/][I had previously written up how I handle draggable objects]] with a reusable library, in 2017 and 2018. Since then we have [[https://caniuse.com/pointer][pointer events]] (2020) including [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture]], and that means I can greatly simplify how things work. I'm primarily dragging inside svg and canvas, so I am not using the [[https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API][HTML5 drag and drop API]].
+Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.
 
-I'm running my tests on Gecko (Mac, Windows, Linux, Android), Blink (Mac, Windows, Linux, Android), WebKit (Mac, iPhone, iPad).
+#+begin_export html
+<details>
+<summary>History →</summary>
+<p>
+From 2011 to 2014 I used <a href="https://github.com/d3/d3-drag">d3-drag</a>, but for my non-d3 projects, I ended up developing my own mouse+touch code, which I wrote about <a href="/x/1845-draggable/">in 2018</a>.
+</p>
 
-* TEST 1 - event log
+<p>
+By 2012 MS IE had added support for <a href="https://developer.mozilla.org/en-US/docs/Web/API/Pointer_events">pointer events</a> which unify and simplify mouse+touch handling. <a href="https://caniuse.com/pointer">Chrome added support in 2017; Firefox in 2018; Safari in 2020</a>.
+</p>
+
+<p>
+Over the years browsers have changed the rules, including in 2017 when
+<a href="https://developer.chrome.com/blog/scrolling-intervention/">Chrome changed some events to default to passive mode</a> which causes the page to scroll while you're trying to drag the object. This <a href="https://github.com/WICG/interventions/issues/18#issuecomment-276531695">broke some pages</a>. Safari <a href="https://github.com/WICG/interventions/issues/18#issuecomment-368703063">made this change in 2018</a>. Firefox maintained backwards compatibility.
+</p>
+</details>
+#+end_export
+
+I've run tests on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad).
+
+This is the simple model in my head:
+
+#+begin_src dot :file build/state.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> dragging [label = "pointerdown"];
+    dragging -> dragging [label = "pointermove"];
+    dragging -> initial [label = "pointerup"];
+}
+#+end_src
+
+#+results:
+[[file:diagram-state.svg]]
+
+However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations.
+
+{{ TODO :: just show the answer!! the rest of the page is explanation and demos of the things that go wrong }}
+
+* Mouse events only
+
+The simplest thing to do is to capture =mousedown=, =mouseup=, and =mousemove= on the circle element. If the move occurs while dragging, then move the circle to the mouse position.
+
+#+begin_src dot :file build/mouse-local.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> initial [label = "mousemove"];
+    initial -> dragging [label = "mousedown"];
+    dragging -> dragging [label = "mousemove"];
+    dragging -> initial [label = "mouseup"];
+}
+#+end_src
+
+#+results:
+[[file:diagram-mouse-local.svg]]
+
+Try the demo:
+
+#+begin_export html
+<figure id="mouse-events-local" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g class="draggable">
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="14" text-anchor="middle" fill="white">
+        <text dy="0.0em">Drag</text>
+        <text dy="1.0em">me</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>Drag using mouse events on circle</figcaption>
+</figure>
+#+end_export
+
+This might seem like it works but it works badly.
+
+- If you move the pointer quickly it is no longer over the circle, it stops receiving events.
+- If you release the button while not on the circle, it will get stuck in the "dragging" state.
+
+To fix these problems we can use =mousedown= on the circle to add =mousemove= and =mouseup= on the /document/. Then on =mouseup= we remove the =mousemove= and =mouseup= from the document.
+
+#+begin_src dot :file build/mouse-document.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> dragging [label = "mousedown"];
+    dragging -> dragging [label = "document\nmousemove"];
+    dragging -> initial [label = "document\nmouseup"];
+}
+#+end_src
+
+#+results:
+[[file:build/mouse-document.svg]]
+
+Try it out. It works better.
+
+#+begin_export html
+<figure id="mouse-events-document" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g class="draggable">
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="14" text-anchor="middle" fill="white">
+        <text dy="0.0em">Drag</text>
+        <text dy="1.0em">me</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>Drag using mouse events on document</figcaption>
+</figure>
+#+end_export
+
+There are still a few issues, which we'll solve one by one.
+
+- This code doesn't handle touch events.
+- The text can get selected while trying to drag the circle.
+- If you select all the text on the page, the drag can apply to the text instead of the circle.
+- Right clicking the circle will bring up a context menu, which leaves the circle stuck in drag mode.
+
+* Touch events
+
+Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example.
+
+#+begin_src dot :file build/touch.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> initial [label = "touchmove"];
+    initial -> dragging [label = "touchstart"];
+    dragging -> dragging [label = "touchmove"];
+    dragging -> initial [label = "touchend"];
+}
+#+end_src
+
+#+begin_export html
+<figure id="touch-events" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g class="draggable">
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="14" text-anchor="middle" fill="white">
+        <text dy="0.0em">Drag</text>
+        <text dy="1.0em">me</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>Drag using touch events</figcaption>
+</figure>
+#+end_export
+
+There are a few problems to deal with:
+
+- When dragging the circle around, the page will scroll. That's because /both/ our drag handler /and/ the browser's scroll handler are active.
+- Long pressing on the text will select it or bring up a context menu. This leaves us stuck in the dragging state.
+
+* Pointer events
+
+Pointer events attempt to unify mouse and touch events. They offer a choice of whether =pointermove= goes to the element ("regular" mode, works like mouse events) it's under or to the element that received =pointerdown= ("capture" mode, works like touch events). If the =pointerdown= was triggered by a mouse, it will use regular mode, and if it was triggered by touch, it will use capture mode. To switch to capture mode, use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][setPointerCapture()]], or to switch to regular mode use [[https://developer.mozilla.org/en-US/docs/Web/API/Element/releasePointerCapture][releasePointerCapture()]]. For dragging objects I want capture mode. There's also a =pointercancel= that gets called if the browser wants to take over and is telling us we should stop tracking the pointer.
+
+#+begin_src dot :file build/pointer.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> initial [label = "pointermove"];
+    initial -> dragging [label = "pointerstart"];
+    dragging -> dragging [label = "pointermove"];
+    dragging -> initial [label = "pointerend"];
+    dragging -> initial [label = "pointercancel"];
+}
+#+end_src
+
+#+results:
+[[file:diagram-pointer.svg]]
+
+Try the demo with either a mouse or touch device:
+
+#+begin_export html
+<figure id="pointer-events" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g class="draggable">
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="14" text-anchor="middle" fill="white">
+        <text dy="0.0em">Drag</text>
+        <text dy="1.0em">me</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>Drag using pointer events</figcaption>
+</figure>
+#+end_export
+
+This demo has the same problems as the previous two, but it's simpler than having to write both the document style and non-document style event handlers:
+
+#+begin_src dot :file build/mouse-and-touch.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+    
+    rankdir=LR;
+    initial -> dragging [label = "mousedown"];
+    dragging -> dragging [label = "document\nmousemove"];
+    dragging -> initial [label = "document\nmouseup"];
+    initial -> initial [label = "touchmove"];
+    initial -> dragging [label = "touchstart"];
+    dragging -> dragging [label = "touchmove"];
+    dragging -> initial [label = "touchend"];
+}
+#+end_src
+
+#+results:
+[[file:build/mouse-and-touch.svg]]
+
+
+** Fix: text selection
+
+When dragging the circle, the text inside gets selected sometimes.
+
+Fix: CSS ~user-select: none~ on the circle. 
+
+But I might want to select the text. So a better fix is to apply this only while dragging.
+
+This problem won't happen in Canvas and WebGL because that text is unselectable.
+
+TODO: demo
+
+** Fix: scrolling with touch
+
+On touch devices, single-finger drag will scroll the page. But single-finger drag also drags the circle. By default, it will do /both/.
+
+Fix: CSS ~touch-action: none~ on the diagram.
+
+But this prevents scrolling anywhere in the diagram. So a better fix is to apply it only to the circle. We can do this for SVG diagrams because each element has its own CSS separate from the containing diagram. But we can't do the same for Canvas or WebGL diagams, because elements don't have their own CSS. So another possible fix is to =preventDefault()= on =touchstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
+
+TODO: demo
+
+** Fix: text drag
+
+Try selecting all text on the page, then drag the circle. This will trigger /text dragging/ on many browser+OS combination, where you can drag some text as an alternative to copy/paste. I want to allow this, /except/ when dragging the circle.
+
+Fix is: =preventDefault()= on =dragstart= on the circle. This works in SVG but not in Canvas or WebGL. For those, check that the pointer is on the circle and conditionally prevent default.
+
+TODO: demo
+
+** Fix: context menu
+
+This one was a little tricky. Try right clicking the circle. It will bring up a context menu. That itself is fine. Unfortunately the events aren't consistent across platforms:
+
+#+attr_html: :class standard
+| Windows     | Mac         | Linux       |
+|-------------+-------------+-------------|
+| =pointerdown= | =pointerdown= | =pointerdown= |
+| =pointerup=   |             |             |
+| =auxclick=    |             |             |
+| =contextmenu= | =contextmenu= | =contextmenu= |
+|             | =pointerup= † |             |
+|             | =auxclick= †  |             |
+
+Why? The main reason is that OS conventions are different. Windows brings up the context menu on /right click/, which happens after /mouse up/. But Mac brings up the context menu on /mouse down/, and the click and up events go to the menu, not to the page. On Linux, if you dismiss the context menu by left clicking, the /mouse down/ event goes to the context menu (which you can't see) but the /mouse up/ event goes to the page. So you see an extra mouse up event (this is expected, since the up and down events can go to different places).
+
+† these events are sent to the context menu and are not seen by our page, unless we =preventDefault()= on =contextmenu=.
+
+The problem is that if I'm using =pointerdown= and then =pointerup= to track the state of the mouse, and I never get =pointerup=, my code thinks I'm still holding the button down (and the browser's pointer capture is still active).
+
+What should we do?
+
+- https://www.w3.org/TR/pointerevents/#the-pointerdown-event says =preventDefault()= on =pointerdown= does /not/ stop click or =contextmenu= events. I can =preventDefault()= on =contextmenu= to prevent the menu. But I still want to get =pointerup= and/or =pointercancel=! I think I have to treat =contextmenu= as the up event which means I'll get multiple up events on Windows.
+
+- https://w3c.github.io/pointerevents/#the-button-property says =button= = 0. indicates the primary button. This would let me exclude middle button and right button.
+
+- on pointermove, if we have pointer capture, we could check the state of the buttons?? TODO: test this!  it's mentioned as a workaround on https://github.com/w3c/pointerevents/issues/408
+
+TODO: demo of both solutions?
+
+
+** Feature: handle drag offset
+
+This is not implementation specific, but a design issue. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
+
+TODO: demo both ways (although it duplicates little-details page) ; could draw something showing the pick up point
+
+** Feature: handle multitouch
+
+isPrimary vs pointer id; need to test what happens if there are two independent drags going on
+
+** Feature: handle simultaneous dragging
+
+** TODO: what about multiple buttons?
+
+So here's a tricky one. If you are using multiple buttons at the same time, what happens? The Pointer Events spec says that the /first/ button that was pressed leads to a =pointerdown= event, and the /last/ one that was released leads to a =pointerup= event. But that means we might get a up event on a different button than the down event.
+
+#+begin_src dot :cmd circo :file build/multiple-buttons.svg :exports results
+digraph {
+    node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
+    edge [fontname=Courier, fontsize=10, fontcolor="#225522", color="#999999", fillcolor="#ffffff"];
+
+    neither;
+    leftbutton [label = "left\nbutton"];
+    rightbutton [label = "right\nbutton"];
+    bothbuttons [label = "both\nbuttons"];
+
+    neither -> leftbutton [label = "pointerdown\nleft"];
+    neither -> rightbutton [label = "pointerdown\nright"];
+    leftbutton -> neither [label = "pointerup\nleft"];
+    leftbutton -> bothbuttons [label = "pointermove"];
+    rightbutton -> neither [label = "pointerup\nright"];
+    rightbutton -> bothbuttons [label = "pointermove"];
+    bothbuttons -> leftbutton [label = "pointermove"];
+    bothbuttons -> rightbutton [label = "pointermove"];
+}
+#+end_src
+
+#+results:
+[[file:build/multiple-buttons.svg]]
+
+This doesn't seem to be what I want, but [[https://www.w3.org/TR/pointerevents/#chorded-button-interactions][it's what Pointer Events do]]. The workaround is to check the button state in =pointermove=. I think this is where I draw the line, and say that I'm not going to worry about this case.
+
+Mouse Events behave the way I want but don't handle touch events.
+
+** TODO: what about  multiple mice?
+
+- mousedown (mouse 1)
+- mousedown (mouse 2)
+- mouseup (mouse 2)
+- I stop dragging but the mouse that started the drag is still dragging
+
+Does =PointerEvent.pointerId= help here?
+
+What happens when ipad is used to control mouse, or mouse is used to control ipad?
+
+
+TODO: test middle clicking to drag, like some mice support on Windows and maybe Linux
+
+TODO: test left click drag, then right button down, then left/right up. Since I only have one dragging state it might get confused.
+
+https://www.w3.org/TR/pointerevents/#the-primary-pointer says
+
+#+begin_quote
+Current operating systems and user agents don't usually have a concept of multiple mouse inputs. When more than one mouse device is present (for instance, on a laptop with both a trackpad and an external mouse), all mouse devices are generally treated as a single device - movements on any of the devices are translated to movement of a single mouse pointer, and there is no distinction between button presses on different mouse devices. For this reason, there will usually only be a single mouse pointer, and that pointer will be primary.
+#+end_quote
+
+
+** TODO: test nested dragging
+
+* Vue version
+
+* Notes - event log
 
 [[href:eventlog.html][eventlog.html]]
 
@@ -23,7 +378,7 @@ Testing a click:
   - Android: contextmenu event if holding down; need to preventDefault to prevent the menu from showing up
   - Android: if there's text in the draggable event, need to use user-select:none to prevent text from being selected. If it's in the middle of text, might be best to apply apply it only during a drag event; otherwise it would prevent text selection when not dragging.
 
-* TEST 2 - dragging
+* Notes on dragging
 
 [[href:tests.html][tests.html]]
 
@@ -32,11 +387,7 @@ Testing a click:
 
 TODO: test tablet
 
-* Old way
-
-* New way
-
-* Vue way
+* Vue
 
 * Variations
 
@@ -48,9 +399,25 @@ https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge bu
 
 https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
 
+https://domevents.dev/ shows how dom events bubble from parent to child then back up to parent, and what happens if you stop propagation
+
 #+begin_export html
 <style>
-  svg { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); }
+  svg { background: #eee; box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3); width: 100%; }
+
+  details { padding: 0 1em; }
+  details p { margin: 0.5em; padding: 0 1em; }
+  details[open] { 
+    background: linear-gradient(to right, hsl(200 10% 95%), white);
+    border: 2px solid hsl(200 10% 70%); 
+    border-right-width: 0; 
+  }
+
+  .draggable { cursor: grab; }
+  .dragging { cursor: grabbing; }
+
+  .draggable circle { fill: hsl(0 50% 50%); }
+  .dragging circle { fill: hsl(200 50% 50%); }
 </style>
 
 <x:footer>
@@ -61,7 +428,9 @@ https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
       </pattern>
     </defs>
   </svg>
+  <script type="module" src="draggable.js"></script>
+
   Created 23 Dec 2022; &#160;
-  <!-- hhmts start -->Last modified: 19 Jan 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 31 Jan 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

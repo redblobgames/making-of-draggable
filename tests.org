@@ -46,9 +46,6 @@ Things to try with touch:
 
 ⁴I have a solution but haven't implemented or tested it
 
-• what if you press harder on the mac touchpad? do you get force pressure events?
-• what if you have a draggable object inside another draggable object?
-
 
 * Test: SVG single element
 :PROPERTIES:

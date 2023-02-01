@@ -31,7 +31,7 @@ This diagram has a <text> and <circle> inside a <g>, and the <g> has an event lo
 </figure>
 #+end_export
 
-The second test shows the event data: (pointer type can be =mouse=, =pen=, =touch= ; pressure can be 0 to around 4)
+The second test shows the event data: (pointer type can be =mouse=, =pen=, =touch= ; pressure can be 0 to around 4, and mac trackpads can send pressure data)
 
 #+begin_export html
 <figure class="w-full">
@@ -74,7 +74,6 @@ https://bugs.chromium.org/p/chromium/issues/detail?id=627889 → chrome decided 
 
 https://twitter.com/kaleidealogy/status/1430871635968634880 → pointer down and pointer up may not be on the same button. It says =pointermove= will get called on subsequent button changes!! This is different from mouse events!! https://w3c.github.io/pointerevents/#chorded-button-interactions 
 
-Related: https://patrickhlauke.github.io/touch/ and https://patrickhlauke.github.io/getting-touchy-presentation/ (lists touch event order, talks about gestures, which events you can override, hybrid touch events with mouse, lots more)
 
 #+begin_export html
 <style>
