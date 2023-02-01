@@ -1,41 +1,54 @@
-#+title: Test page: draggable handles
+#+title: Draggable handles: test page with scenarios
 #+date: <2023-01-04>
 #+nocomments: t
 
-*My goal*: write the simplest event handlers for dragging an object around inside a =<svg>= or =<canvas>= or =<div>=. It should handle both mouse and touch events. It should handle as many edge cases as reasonably possible.
+#+begin_aside
+This is a test page with six tests of drag handling (svg, svg+text, canvas drawing, canvas dragging, div absolute positioned, div transformed). On the main page I only look at svg+text.
+#+end_aside
 
-Things to try on Desktop: 
+Things to try with a mouse:
 
-- Try holding down and dragging outside the diagram, and coming back. Or let go outside the diagram.
-- Try holding down and dragging outside the window, then let go of the mouse.
-- Try holding down then Alt+Tab.
-- Try scrolling while dragging.
+- Drag outside the diagram, and come back {should still be dragging}
+- Drag outside the diagram, and let go of the mouse button, then come back into the diagram {should stop dragging}
+- Drag outside the window, then let go of the mouse button {should stop dragging}
+- Drag with the right button {should not drag, but bring up the context menu}
 
-Things to try on Mobile:
+- Drag with the middle button {should not drag, but enable autoscroll}
+- Drag with the left button, then hold down right button, continue drag, then release left button, then move mouse, then release right button {should stop dragging when releasing left button¹}
+- Drag with the left button, then hold down Ctrl, then release the left button {Mac/Firefox behaves differently, giving =pointerdown.left= and then =pointerup.right= whereas other browsers give =pointerdown.left= and =pointerup.left=}
+- While dragging, Alt+Tab (Cmd+Tab) to switch windows, then let go of the mouse button {should stop dragging}
+- While dragging, use keyboard to scroll {should still be dragging²}
+- While dragging, use scrollwheel to scroll {should still be dragging²}
+- While dragging, use middle button to scroll {should still be dragging²}
+- While dragging, resize the window {should still be dragging²}
+- Select all text on page, then drag the circle {should drag the circle, not the text}
+- Plug in two mice, start dragging on one, click on the other {want this to continue dragging, but it won't³}
+- On Mac, use an iPad as a second screen, drag with stylus on a mac browser {should drag}
+- While dragging, put the computer to sleep and then wake it up and continue the drag {??}
+- While dragging, unplug the mouse and plug it back in {??}
 
-- Try holding down on the drag circle then move up / down; it won't scroll
-- Try holding down elsewhere on the diagram and move up / down; it should scroll
-- Try holding down and then try to rescale with pinching (ios & android: won't pinch if you hold down on draggable object)
-- Try: holding down and then rotate (ios: will rotate the page but dragging still works; android: won't rotate until you let go)
+¹I have a solution, have tested it and it works
+²it won't update until you nudge the mouse pointer
+³this is a limitation of the OS level mouse handling
 
-TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for this?
+Things to try with touch:
 
-• what if you select all text on the page and then try to drag a circle in my diagram? it turns out drag text outside of a browser is an operation, and this interferes with the dragging of the circle
-• what if you have two mice plugged in and then you hold down the button on one, start dragging, then click on the other?
-• what if you use the ipad as a second screen, and use the stylus on the ipad as a mouse on your mac?
-• and vice versa, what if you use the mouse on the mac on the ipad?
+- Drag the circle up or down {should not scroll the page}
+- Drag the diagram up or down {should scroll the page}
+- Long press on the circle {should not select the text or bring up a menu}
+- Use two separate fingers to drag two separate objects {should both drag independently}
+
+- Use two separate fingers to drag one object {should only drag with the first finger⁴}
+- Drag with one finger then try to pinch zoom with a second finger {should not zoom}
+- Drag with one finger then try to pinch zoom with two other fingers {??}
+- Drag with one finger then rotate the phone {will rotate and continue dragging on iOS; will not rotate on Android}
+- On iPad, use Mac "continuity" to drag with the mouse on an ipad browser {should drag}
+
+⁴I have a solution but haven't implemented or tested it
+
 • what if you press harder on the mac touchpad? do you get force pressure events?
 • what if you have a draggable object inside another draggable object?
-• what if you long press on a circle that also has text inside it?
-• what if you start the drag by using your finger, but then you use another finger to "pinch zoom"?
-• what if you use two separate fingers to drag two separate objects?
-• what if you use two separate fingers to drag one object?
-• what if you start a drag on a phone, and then rotate the phone while you're still dragging?
-• what if you start a drag on a desktop and then use Alt+Tab to switch to another window?
-• what if you start a drag and then put the computer to sleep in the middle of the drag?
-• what if while you're dragging, you middle click which starts a scroll operation? 
-•what if you unplug the mouse during a drag?
-- what if you press left button, then ctrl, then release left button? on mac/firefox this gives pointerdown.left pointerup.right; on mac/chrome, mac/safari, and windows/* and linux/* it gives pointerdown.left pointerup.left
+
 
 * Test: SVG single element
 :PROPERTIES:
@@ -149,7 +162,6 @@ TODO: nested dragging, maybe a circle inside a circle. Need stopPropagation for 
 :END:
 
 /None/ of these handle CSS transforms on the parent elements. This is an unsolved issue, not only for me, but also other libraries like d3.js. See https://github.com/d3/d3-selection/issues/67  and https://bugzilla.mozilla.org/show_bug.cgi?id=1610093 . There's probably /something/ we can do using =window.getComputedStyle(element)= but this is a low priority for me, as I almost never use css transforms above a draggable element.
-
 
 #+begin_export html
 <style>
