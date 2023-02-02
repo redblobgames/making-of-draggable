@@ -1,9 +1,9 @@
-#+title: Draggable handles: test page with scenarios
+#+title: Draggable objects, different types
 #+date: <2023-01-04>
 #+nocomments: t
 
 #+begin_aside
-This is a test page with six tests of drag handling (svg, svg+text, canvas drawing, canvas dragging, div absolute positioned, div transformed). On the main page I only look at svg+text.
+On the main page I test different event handlers. On this page I test dragging /different kinds of things/.
 #+end_aside
 
 Things to try with a mouse:
@@ -11,11 +11,12 @@ Things to try with a mouse:
 - Drag outside the diagram, and come back {should still be dragging}
 - Drag outside the diagram, and let go of the mouse button, then come back into the diagram {should stop dragging}
 - Drag outside the window, then let go of the mouse button {should stop dragging}
-- Drag with the right button {should not drag, but bring up the context menu}
+- Right click on the circle {should not drag, but bring up the context menu}
+- Right button drag the circle {should not drag, but bring up the context menu on Mac or Linux, or do nothing on Windows}
 
 - Drag with the middle button {should not drag, but enable autoscroll}
-- Drag with the left button, then hold down right button, continue drag, then release left button, then move mouse, then release right button {should stop dragging when releasing left button¹}
-- Drag with the left button, then hold down Ctrl, then release the left button {Mac/Firefox behaves differently, giving =pointerdown.left= and then =pointerup.right= whereas other browsers give =pointerdown.left= and =pointerup.left=}
+- Drag with the left button, then hold down right button, continue drag, then release left button, then move mouse, then release right button {should stop dragging when releasing left button; I want a different behavior from [[http://wpt.live/pointerevents/pointerevent_pointercapture-not-lost-in-chorded-buttons.html][this test]]}
+- Chords¹: drag with the left button, then hold down Ctrl, then release the left button {Mac/Firefox behaves differently, giving =pointerdown.left= and then =pointerup.right= whereas other browsers give =pointerdown.left= and =pointerup.left=}
 - While dragging, Alt+Tab (Cmd+Tab) to switch windows, then let go of the mouse button {should stop dragging}
 - While dragging, use keyboard to scroll {should still be dragging²}
 - While dragging, use scrollwheel to scroll {should still be dragging²}
@@ -27,10 +28,6 @@ Things to try with a mouse:
 - While dragging, put the computer to sleep and then wake it up and continue the drag {??}
 - While dragging, unplug the mouse and plug it back in {??}
 
-¹I have a solution, have tested it and it works
-²it won't update until you nudge the mouse pointer
-³this is a limitation of the OS level mouse handling
-
 Things to try with touch:
 
 - Drag the circle up or down {should not scroll the page}
@@ -40,11 +37,16 @@ Things to try with touch:
 
 - Use two separate fingers to drag one object {should only drag with the first finger⁴}
 - Drag with one finger then try to pinch zoom with a second finger {should not zoom}
-- Drag with one finger then try to pinch zoom with two other fingers {??}
+- Drag with one finger then try to pinch zoom with two other fingers {does not zoom, not sure what it should do}
 - Drag with one finger then rotate the phone {will rotate and continue dragging on iOS; will not rotate on Android}
 - On iPad, use Mac "continuity" to drag with the mouse on an ipad browser {should drag}
 
-⁴I have a solution but haven't implemented or tested it
+Notes:
+
+- ¹solution [[http://wpt.live/pointerevents/pointerevent_pointermove_on_chorded_mouse_button.html][based on pointermove getting called for button changes]]
+- ²it won't update until you nudge the mouse pointer
+- ³this is a limitation of the OS level mouse handling
+- ⁴I have a solution but haven't implemented or tested it
 
 
 * Test: SVG single element
@@ -70,8 +72,6 @@ Things to try with touch:
 :PROPERTIES:
 :CUSTOM_ID: test-2b-svg-nested-element-with-text
 :END:
-
-{ aren't there three versions of this? one where I use target for pointer capture, one with currentTarget, and one that uses user-select none?  maybe checkboxes }
 
 #+begin_export html
 <figure class="w-full">
@@ -99,6 +99,8 @@ Things to try with touch:
 :CUSTOM_ID: test-2c-canvas-drag-to-draw
 :END:
 
+The same drag event handlers can be used for drawing instead of moving an object:
+
 #+begin_export html
 <figure class="w-full">
   <canvas width="660" height="100" style="cursor:crosshair"/>
@@ -119,7 +121,7 @@ Things to try with touch:
 </figure>
 #+end_export
 
-- If I put a second finger on the diagram it jumps to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I need to use the =.pointerId= field to make sure the =pointermove= event I got is for the same finger that started the drag.
+- ⁴if I put a second finger on the diagram it jumps to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I need to use the =.pointerId= field to make sure the =pointermove= event I got is for the same finger that started the drag.
 
 * Test: HTML div absolute positioned
 :PROPERTIES:
@@ -171,6 +173,9 @@ Things to try with touch:
   circle.draggable.dragging, .dragging circle { fill: hsl(200 50% 50%); }
   div.draggable { background: hsl(0 50% 50%); color: white; }
   div.draggable.dragging { background: hsl(200 50% 50%); }
+
+  circle.captured, .captured circle { stroke: hsl(200 100% 70%); stroke-width: 2px; }
+  div.captured { border: 2px solid hsl(200 100% 70%); }
 
 </style>
 
