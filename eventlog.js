@@ -33,6 +33,7 @@ click dblclick auxclick contextmenu
 mousedown mouseup mouseenter mouseleave mouseover mouseout
 pointerdown pointerup pointercancel pointerenter pointerleave pointerover pointerout
 touchstart touchend touchcancel
+gotpointercapture lostpointercapture
 webkitmouseforcewillbegin webkitmouseforcedown webkitmouseforceup`.trim().split(/\s/);
 
 let moveEventNames = `
@@ -60,7 +61,7 @@ function showEvents() {
 showEvents();
 
 function updateButtonState(event) {
-    if (event.type !== 'pointermove' && event.type !== 'pointerup' && event.type !== 'pointerdown') return;
+    if (event.type !== 'pointermove' && event.type !== 'pointerup' && event.type !== 'pointerdown' && event.type !== 'pointercancel') return;
     let rects = document.querySelectorAll("#buttons > rect");
     console.log(event.type, event.buttons);
     for (let b = 0; b < rects.length; b++) {
@@ -68,6 +69,7 @@ function updateButtonState(event) {
     }
 }
 
+// draggable = document;
 for (let type of eventNames) {
     draggable.addEventListener(type, (event) => {
         updateButtonState(event);
@@ -135,4 +137,3 @@ force:              ${touch.force}`;
         // There's also event.webkitForce on MouseEvent
     });
 }
-

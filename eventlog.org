@@ -62,7 +62,7 @@ https://w3c.github.io/uievents/#event-type-auxclick
 
 On Mac, ctrl+click triggers =contextmenu= without triggering up/down or click events.
 
-[[https://bugs.chromium.org/p/chromium/issues/detail?id=1264930]] → a =contextmenu= should produce a PointerEvent that has =.pointerId= the same as the id of the event that produced that menu. It is fixed on Chrome but it is undefined on Firefox, because Firefox 110 produces a MouseEvent not a PointerEvent.
+[[https://bugs.chromium.org/p/chromium/issues/detail?id=1264930]] → a =contextmenu= should produce a PointerEvent that has =.pointerId= the same as the id of the event that produced that menu. It is fixed on Chrome but it is undefined on Firefox, because [[https://wpt.fyi/results/pointerevents/pointerevent_contextmenu_is_a_pointerevent.html%3Fmouse?label=master&label=experimental&view=subtest][Firefox 110 and Safari 13 produce a MouseEvent not a PointerEvent]].
 
 [[https://bugs.chromium.org/p/chromium/issues/detail?id=958776]] → asks for =contextmenu= to fire =pointercancel=. It can't fire =pointerup= because that looks like a =click=.
 
@@ -75,6 +75,13 @@ https://bugs.chromium.org/p/chromium/issues/detail?id=627889 → chrome decided 
 https://twitter.com/kaleidealogy/status/1430871635968634880 → pointer down and pointer up may not be on the same button. It says =pointermove= will get called on subsequent button changes!! This is different from mouse events!! https://w3c.github.io/pointerevents/#chorded-button-interactions 
 
 I can't seem to see button4 or button5 in these events.
+
+https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge but not safari/firefox https://caniuse.com/mdn-api_element_pointerrawupdate_event
+
+https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
+
+
+[[https://wpt.fyi/results/pointerevents][List of pointer event tests and whether they pass in each browser and each device type]]
 
 #+begin_export html
 <style>
