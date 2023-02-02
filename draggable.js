@@ -37,14 +37,29 @@ function makePositionState(selector, options={}) {
     svg.appendChild(el);
 
     const bounds = {left: -300, right: 300, top: -20, bottom: 20};
+    let dragging = null; // either null or value set by handler
     let pos = {x: options.x ?? 0, y: options.y ?? 0};
     function draw() {
         el.setAttribute('transform', `translate(${pos.x}, ${pos.y})`);
+        // NOTE: in a real project I usually put these on a class,
+        // and then use el.classList.toggle('dragging', dragging)
+        el.style.cursor =
+            dragging? "grabbing" : "grab";
+        el.querySelector("text").textContent =
+            dragging ? "Dragging" : "Drag";
+        el.querySelector("circle").style.fill =
+            dragging? "hsl(200 50% 50%)" : "hsl(0 50% 50%)";
     }
     draw();
 
     let state = {
-        dragging: null, // either null or value set by handler
+        get dragging() {
+            return dragging;
+        },
+        set dragging(d) {
+            dragging = d;
+            draw();
+        },
         get pos() { return pos; },
         set pos({x, y}) {
             pos = {
@@ -58,139 +73,142 @@ function makePositionState(selector, options={}) {
     return {el, state};
 }
 
+
 function diagram_mouse_events_local() {
     let {state, el} = makePositionState("#diagram-mouse-events-local");
-    let dragging = false;
 
-    el.addEventListener('mousedown', (_event) => {
-        el.classList.add('dragging');
-        dragging = true;
-    });
-    el.addEventListener('mouseup', (_event) => {
-        el.classList.remove('dragging');
-        dragging = false;
-    });
-    el.addEventListener('mousemove', (event) => {
-        if (!dragging) return;
+    function mousedown(_event) {
+        state.dragging = true;
+    }
+    function mouseup(_event) {
+        state.dragging = null;
+    }
+    function mousemove(event) {
+        if (!state.dragging) return;
         state.pos = convertPixelToSvgCoord(event, el);
-    });
+    }
+    
+    el.addEventListener('mousedown', mousedown);
+    el.addEventListener('mouseup', mouseup);
+    el.addEventListener('mousemove', mousemove);
 }
 
 
 function diagram_mouse_events_document() {
     let {state, el} = makePositionState("#diagram-mouse-events-document");
 
-    el.addEventListener('mousedown', (event) => {
-        function mousemove(event) {
-            state.pos = convertPixelToSvgCoord(event, el);
-        }
-        function mouseup(event) {
-            document.removeEventListener('mousemove', mousemove);
-            document.removeEventListener('mouseup', mouseup);
-            el.classList.remove('dragging');
-        }
-            
-        el.classList.add('dragging');
-        document.addEventListener('mousemove', mousemove);
-        document.addEventListener('mouseup', mouseup);
-    });
+    function globalMousemove(event) {
+        state.pos = convertPixelToSvgCoord(event, el);
+        state.dragging = true;
+    }
+    function globalMouseup(_event) {
+        document.removeEventListener('mousemove', globalMousemove);
+        document.removeEventListener('mouseup', globalMouseup);
+        state.dragging = null;
+    }
+    
+    function mousedown(event) {
+        document.addEventListener('mousemove', globalMousemove);
+        document.addEventListener('mouseup', globalMouseup);
+    }
+    
+    el.addEventListener('mousedown', mousedown);
 }
 
 
 function diagram_touch_events() {
     let {state, el} = makePositionState("#diagram-touch-events");
 
-    el.addEventListener('touchstart', (event) => {
+    function start(_event) {
         state.dragging = true;
-        // TODO: demonstrate event.preventDefault();
-        el.classList.add('dragging');
-    });
-    el.addEventListener('touchend', (event) => {
+    }
+    function end(_event) {
         state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('touchcancel', (event) => {
-        state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('touchmove', (event) => {
+    }
+    function move(event) {
         if (!state.dragging) return;
         let {x, y} = convertPixelToSvgCoord(event.changedTouches[0], el);
         state.pos = {x, y};
-    });
+    }
+    
+    el.addEventListener('touchstart', start);
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
+    el.addEventListener('touchmove', move);
 }
+
 
 function diagram_pointer_events() {
     let {state, el} = makePositionState("#diagram-pointer-events");
 
-    el.addEventListener('pointerdown', (event) => {
+    function start(event) {
         state.dragging = true;
-        el.classList.add('dragging');
-        // TODO: make pointer capture optional
         el.setPointerCapture(event.pointerId);
-    });
-    el.addEventListener('pointerup', (event) => {
+    }
+    function end(_event) {
         state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('pointercancel', (event) => {
-        state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('pointermove', (event) => {
+    }
+    function move(event) {
         if (!state.dragging) return;
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = convertPixelToSvgCoord(event.changedTouches[0], el);
         state.pos = {x, y};
-    });
-
-    // TODO: show these visually, maybe in a separate diagram
-    // NOTE: if the pointer event was a touch, it automatically captures
-    el.addEventListener('gotpointercapture', () => {
-        console.log('gotpointercapture');
-    });
-    el.addEventListener('lostpointercapture', () => {
-        console.log('lostpointercapture');
-    });
+    }
+    
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    el.addEventListener('pointermove', move);
 }
 
 
-function diagram_pointer_events_fixed() {
-    let {state, el} = makePositionState("#pointer-events");
+function diagram_pointer_events_fixed(options) {
+    let {state, el} = makePositionState("#diagram-pointer-events-fixed");
 
-    el.addEventListener('pointerdown', (event) => {
+    function start(event) {
+        console.log(event.type, event.button);
+        // TODO: make the button check optional
+        if (event.button !== 0) return;
+        // TODO: ctrl+click filtering on mac/chrome
+        if (event.ctrlKey) return;
         let {x, y} = convertPixelToSvgCoord(event);
         // TODO: make the offset optional
         state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
-        el.classList.add('dragging');
         // TODO: make pointer capture optional
         el.setPointerCapture(event.pointerId);
-    });
-    el.addEventListener('pointerup', (event) => {
-        state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('pointercancel', (event) => {
-        state.dragging = false;
-        el.classList.remove('dragging');
-    });
-    el.addEventListener('pointermove', (event) => {
+        // TODO: user-select:none, optional
+        el.style.userSelect = 'none';
+    }
+
+    function end(_event) {
+        console.log(_event.type, event.button);
+        state.dragging = null;
+        // TODO: user-select:none, optional
+        el.style.userSelect = '';
+    }
+
+    function move(event) {
         if (!state.dragging) return;
+        // TODO: make button status optional
+        if (!(event.buttons & 1)) return end(event);
         let {x, y} = convertPixelToSvgCoord(event);
+        // TODO: make offset optional
         state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
-    });
+    }
+        
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    el.addEventListener('pointermove', move)
 
-    // TODO: show these visually, maybe in a separate diagram
-    // NOTE: if the pointer event was a touch, it automatically captures
-    el.addEventListener('gotpointercapture', () => {
-        console.log('gotpointercapture');
-    });
-    el.addEventListener('lostpointercapture', () => {
-        console.log('lostpointercapture');
-    });
-
-    // TODO: touchstart.preventDefault, optional
-    // TODO: user-select:none, optional
-    // TODO: cursor + background color + shadow + rotation feedback, optional?
+    el.addEventListener('gotpointercapture', (e) => console.log(e.type, e.button));
+    el.addEventListener('lostpointercapture', (e) => console.log(e.type, e.button));
+    
+    // TODO: optional
+    // el.addEventListener('lostpointercapture', end);
+    // TODO: optional
+    el.addEventListener('touchstart', (event) => event.preventDefault());
+    // TODO: optional
+    el.addEventListener('dragstart', (event) => event.preventDefault());
 }
 
 
@@ -199,4 +217,6 @@ diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
 diagram_pointer_events();
-// diagram_pointer_events_fixed();
+diagram_pointer_events_fixed();
+
+// console.log(diagram_pointer_events_fixed.toString().split("\n"));

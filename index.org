@@ -1,8 +1,20 @@
 #+title: Draggable objects, 2022
 #+date: <2022-12-23 Fri>
 #+draft: t
+#+options: toc:nil
 
-Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.
+Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's what I want to support:
+
+#+begin_export html
+<figure id="diagram-pointer-events-fixed" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Drag the circle with mouse or touch</figcaption>
+</figure>
+#+end_export
+
+#+toc: headlines 1
 
 #+begin_export html
 <details>
@@ -22,7 +34,7 @@ Over the years browsers have changed the rules, including in 2017 when
 </details>
 #+end_export
 
-I've run tests on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad).
+I've run tests on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad). I have /not/ tested on hoverable stylus, hybrid touch+mouse devices, or voice input.
 
 This is the simple model in my head:
 
@@ -187,9 +199,9 @@ digraph {
     
     rankdir=LR;
     initial -> initial [label = "pointermove"];
-    initial -> dragging [label = "pointerstart"];
+    initial -> dragging [label = "pointerdown"];
     dragging -> dragging [label = "pointermove"];
-    dragging -> initial [label = "pointerend"];
+    dragging -> initial [label = "pointerup"];
     dragging -> initial [label = "pointercancel"];
 }
 #+end_src
@@ -293,6 +305,8 @@ TODO: demo of both solutions?
 |-----------------------+--------------+----------+----------+----------|
 | right click on circle | circle moves | yes ⛌   | no ?     | yes ?    |
 | right drag on circle  | circle moves |          |          |          |
+
+
 
 ** Feature: handle drag offset
 
@@ -403,12 +417,6 @@ TODO: test tablet
 
 =pointerdown= + =pointerup= will trigger =click= (left mouse button) or =auxclick= (middle mouse button) or =contextmenu= (right mouse button)
 
-https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge but not safari/firefox https://caniuse.com/mdn-api_element_pointerrawupdate_event
-
-https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
-
-https://domevents.dev/ shows how dom events bubble from parent to child then back up to parent, and what happens if you stop propagation
-
 #+begin_comment
 https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-executing-all-of-the-babel-source-blocks says that there's no really good way to tell org babel to regenerate the diagrams only explicitly and not automatically on export :-(
 #+end_comment
@@ -429,12 +437,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
     border: 2px solid hsl(200 10% 70%); 
     border-right-width: 0; 
   }
-
-  .draggable { cursor: grab; }
-  .dragging { cursor: grabbing; }
-
-  .draggable circle { fill: hsl(0 50% 50%); }
-  .dragging circle { fill: hsl(200 50% 50%); }
 </style>
 
 <x:footer>
@@ -448,6 +450,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
   <script type="module" src="draggable.js"></script>
 
   Created 23 Dec 2022; &#160;
-  <!-- hhmts start -->Last modified: 31 Jan 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 01 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
