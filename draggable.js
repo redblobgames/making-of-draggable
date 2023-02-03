@@ -45,8 +45,10 @@ function makePositionState(selector, options={}) {
         // and then use el.classList.toggle('dragging', dragging)
         el.style.cursor =
             dragging? "grabbing" : "grab";
-        el.querySelector("text").textContent =
-            dragging ? "Dragging" : "Drag";
+        if (options.changeText) {
+            el.querySelector("text").textContent =
+                dragging ? "Dragging" : "Drag";
+        }
         el.querySelector("circle").style.fill =
             dragging? "hsl(200 50% 50%)" : "hsl(0 50% 50%)";
     }
@@ -138,61 +140,50 @@ function diagram_touch_events() {
 }
 
 
-function diagram_pointer_events() {
-    let {state, el} = makePositionState("#diagram-pointer-events");
-
-    function start(event) {
-        state.dragging = true;
-        el.setPointerCapture(event.pointerId);
-    }
-    function end(_event) {
-        state.dragging = false;
-    }
-    function move(event) {
-        if (!state.dragging) return;
-        let {x, y} = convertPixelToSvgCoord(event.changedTouches[0], el);
-        state.pos = {x, y};
-    }
-    
-    el.addEventListener('pointerdown', start);
-    el.addEventListener('pointerup', end);
-    el.addEventListener('pointercancel', end);
-    el.addEventListener('pointermove', move);
+function makeOptions() {
+    return {
+        x: 0,
+        y: 0,
+        changeText: true,
+        left: true,
+        ctrl: true,
+        offset: true,
+        capture: true,
+        text: true,
+        scroll: true,
+        systemdrag: true,
+        chord: true,
+        capture: true,
+    };
 }
 
-
-function diagram_pointer_events_fixed(options) {
-    let {state, el} = makePositionState("#diagram-pointer-events-fixed");
+function diagram_pointer_events_fixed(selector, options) {
+    let {state, el} = makePositionState(selector, options);
 
     function start(event) {
         console.log(event.type, event.button);
-        // TODO: make the button check optional
-        if (event.button !== 0) return;
-        // TODO: ctrl+click filtering on mac/chrome
-        if (event.ctrlKey) return;
+        if (options.left) if (event.button !== 0) return;
+        if (options.ctrl) if (event.ctrlKey) return;
         let {x, y} = convertPixelToSvgCoord(event);
-        // TODO: make the offset optional
-        state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
-        // TODO: make pointer capture optional
-        el.setPointerCapture(event.pointerId);
-        // TODO: user-select:none, optional
-        el.style.userSelect = 'none';
+        if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
+        if (!options.offset) state.dragging = true;
+        if (options.capture) el.setPointerCapture(event.pointerId);
+        if (options.text) el.style.userSelect = 'none';
     }
 
-    function end(_event) {
-        console.log(_event.type, event.button);
-        state.dragging = null;
-        // TODO: user-select:none, optional
-        el.style.userSelect = '';
+    function end(event) {
+        console.log(event.type, event.button);
+        if (options.offset) state.dragging = null;
+        if (!options.offset) state.dragging = false;
+        if (options.text) el.style.userSelect = '';
     }
 
     function move(event) {
         if (!state.dragging) return;
-        // TODO: make button status optional
-        if (!(event.buttons & 1)) return end(event);
+        if (options.chords) if (!(event.buttons & 1)) return end(event);
         let {x, y} = convertPixelToSvgCoord(event);
-        // TODO: make offset optional
-        state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
+        if (options.offset) state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
+        if (!options.offset) state.pos = {x, y};
     }
         
     el.addEventListener('pointerdown', start);
@@ -200,15 +191,9 @@ function diagram_pointer_events_fixed(options) {
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
 
-    el.addEventListener('gotpointercapture', (e) => console.log(e.type, e.button));
-    el.addEventListener('lostpointercapture', (e) => console.log(e.type, e.button));
-    
-    // TODO: optional
-    // el.addEventListener('lostpointercapture', end);
-    // TODO: optional
-    el.addEventListener('touchstart', (event) => event.preventDefault());
-    // TODO: optional
-    el.addEventListener('dragstart', (event) => event.preventDefault());
+    if (options.capture) el.addEventListener('lostpointercapture', end);
+    if (options.scroll) el.addEventListener('touchstart', (event) => event.preventDefault());
+    if (options.systemdrag) el.addEventListener('dragstart', (event) => event.preventDefault());
 }
 
 
@@ -216,7 +201,7 @@ function diagram_pointer_events_fixed(options) {
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
-diagram_pointer_events();
-diagram_pointer_events_fixed();
+diagram_pointer_events_fixed("#diagram-pointer-events", {});
+diagram_pointer_events_fixed("#diagram-pointer-events-fixed", makeOptions());
 
 // console.log(diagram_pointer_events_fixed.toString().split("\n"));

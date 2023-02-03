@@ -77,7 +77,7 @@ digraph {
 }
 #+end_src
 
-Try the demo:
+Try the demo with a mouse:
 
 #+begin_export html
 <figure id="diagram-mouse-events-local" class="w-full">
@@ -148,6 +148,8 @@ digraph {
     dragging -> initial [label = "touchcancel"];
 }
 #+end_src
+
+Try the demo with a touch device:
 
 #+begin_export html
 <figure id="diagram-touch-events" class="w-full">
@@ -228,7 +230,7 @@ When dragging the circle, the text inside gets selected sometimes.
 
 Fix: CSS ~user-select: none~ on the circle. 
 
-But I might want to select the text. So a better fix is to apply this only while dragging.
+If I want to select the text when not dragging the circle (left drag, right click, long press, or keyboard), I can apply that CSS only while dragging.
 
 This problem won't happen in Canvas and WebGL because that text is unselectable.
 
@@ -512,6 +514,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
   <script type="module" src="draggable.js"></script>
 
   Created 23 Dec 2022; &#160;
-  <!-- hhmts start -->Last modified: 01 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 02 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
