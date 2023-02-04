@@ -236,6 +236,7 @@ const diagrams = [
             this.setCursor(event);
             if (!this.dragging) return;
             if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
+            let {x, y} = convertPixelToCanvasCoord(event);
             this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
         },
         ondragstart(event) {

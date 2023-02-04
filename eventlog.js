@@ -63,7 +63,7 @@ showEvents();
 function updateButtonState(event) {
     if (event.type !== 'pointermove' && event.type !== 'pointerup' && event.type !== 'pointerdown' && event.type !== 'pointercancel') return;
     let rects = document.querySelectorAll("#buttons > rect");
-    console.log(event.type, event.buttons);
+    console.log(Date.now() % 100000, event.type, event.buttons);
     for (let b = 0; b < rects.length; b++) {
         rects[b].style.fill = (event.buttons & (1 << b)) ? "hsl(150 50% 60%)" : "hsl(30 20% 50%)";
     }

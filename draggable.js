@@ -27,16 +27,15 @@ function makePositionState(selector, options={}) {
     const container = document.querySelector(selector);
     const svg = container.querySelector("svg");
     const el = document.createElementNS("http://www.w3.org/2000/svg", 'g');
-    el.classList.add('draggable');
+    const radius = options.radius ?? 30;
     el.innerHTML = `
-      <circle stroke="black" stroke-width="0.5" r="30" />
+      <circle stroke="black" stroke-width="0.5" r="${radius}" />
       <g font-size="14" text-anchor="middle" fill="white">
         <text dy="0.0em">Drag</text>
         <text dy="1.0em">me</text>
       </g>`;
     svg.appendChild(el);
 
-    const bounds = {left: -300, right: 300, top: -20, bottom: 20};
     let dragging = null; // either null or value set by handler
     let pos = {x: options.x ?? 0, y: options.y ?? 0};
     function draw() {
@@ -64,9 +63,11 @@ function makePositionState(selector, options={}) {
         },
         get pos() { return pos; },
         set pos({x, y}) {
+            const [left, top, width, height] =
+                  svg.getAttribute("viewBox").split(" ").map((s) => parseFloat(s));
             pos = {
-                x: clamp(x, bounds.left, bounds.right),
-                y: clamp(y, bounds.top, bounds.bottom)
+                x: clamp(x, left + radius, left + width - radius),
+                y: clamp(y, top + radius, top + height - radius),
             };
             draw();
         },

@@ -46,6 +46,8 @@ The second test shows the event data: (pointer type can be =mouse=, =pen=, =touc
 </figure>
 #+end_export
 
+https://patrickhlauke.github.io/touch/ has a lot of touch event tests
+
 Using =preventDefault()= on a pointer event should cancel the corresponding mouse event or touch event.
 
 https://developer.mozilla.org/en-US/docs/Web/API/Force_Touch_events seems to be active on my mac laptop (touchpad is force sensitive) but /not/ on my phone
