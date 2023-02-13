@@ -46,7 +46,7 @@ Notes:
 - ¹solution [[http://wpt.live/pointerevents/pointerevent_pointermove_on_chorded_mouse_button.html][based on pointermove getting called for button changes]]
 - ²it won't update until you nudge the mouse pointer
 - ³this is a limitation of the OS level mouse handling
-- ⁴I have a solution but haven't implemented or tested it
+- ⁴I have a solution but rarely use it
 
 
 * Test: SVG single element
@@ -121,7 +121,7 @@ The same drag event handlers can be used for drawing instead of moving an object
 </figure>
 #+end_export
 
-- ⁴if I put a second finger on the diagram it jumps to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I need to use the =.pointerId= field to make sure the =pointermove= event I got is for the same finger that started the drag.
+- ⁴if I put a second finger on the diagram it had been jumping to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I checked the =.pointerId= field in the =pointermove= event to make sure it matches the =.pointerId= from the =pointerdown= event.
 
 * Test: HTML div absolute positioned
 :PROPERTIES:
@@ -154,6 +154,57 @@ The same drag event handlers can be used for drawing instead of moving an object
   <button>Reset</button>
 </figure>
 #+end_export
+
+
+* Test: HTML div with a link
+:PROPERTIES:
+:CUSTOM_ID: test-2g-html-with-link
+:END:
+
+#+begin_export html
+<figure class="w-full">
+  <div class="diagram" style="position:relative;width:100%;height:100px">
+    <div class="draggable" style="position:absolute;width:10em;height:2.5em">abc 
+<a href="/" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
+  </div>
+  <figcaption>Try left, middle, right clicking the link</figcaption>
+  <button>Reset</button>
+</figure>
+#+end_export
+
+- The dragging code intercepts the left button so you can't click on the link.
+- You can still middle click or right click on the link.
+
+However in this demo you can click the link or drag with it:
+
+#+begin_export html
+<figure class="w-full">
+  <div class="diagram" style="position:relative;width:100%;height:100px">
+    <div class="draggable" style="position:absolute;width:10em;height:2.5em">abc 
+<a href="/" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
+  </div>
+  <figcaption>Now try clicking the link</figcaption>
+  <button>Reset</button>
+</figure>
+#+end_export
+
+This was a little tricky and I don't know if it handles all cases but:
+
+- on =pointerdown=, /don't/ capture; instead, set a flag ~moved=false~
+- on =pointermove=, if =moved= is still =false=, capture
+- on =pointermove=, set ~moved=true~
+- on =click=, if =moved= is =true=, =event.preventDefault()=
+
+In general though I don't try to do this type of thing. I don't put links inside my draggable objects.
+
+* Test: Draggable with a nested draggable
+:PROPERTIES:
+:CUSTOM_ID: test-2h-nested-draggable
+:END:
+
+I don't have a test here but try [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh][this test]], where both the yellow and red boxes are draggable.
+
+- use =stopPropagation()= to prevent the pointer event from going up to the parent element
 
 * Notes
 :PROPERTIES:

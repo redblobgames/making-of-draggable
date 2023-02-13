@@ -97,7 +97,7 @@ const svgDragHandlersCommon = {
         this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
     },
     ondragstart(event) {
-        // Prevent dragging text
+        // Prevent dragging text/images
         event.preventDefault();
     },
     ontouchstart(event) {
@@ -132,7 +132,7 @@ const divDragHandlersCommon = {
         this.pos = {x: event.clientX + this.dragging.dx, y: event.clientY + this.dragging.dy};
     },
     ondragstart(event) {
-        // Prevent dragging text
+        // Prevent dragging text/images
         event.preventDefault();
     },
     ontouchstart(event) {
@@ -183,7 +183,7 @@ const diagrams = [
             this.pos = {x, y};
         },
         ondragstart(event) {
-            // Prevent dragging text
+            // Prevent dragging text/images
             event.preventDefault();
         },
         ontouchstart(event) {
@@ -221,7 +221,8 @@ const diagrams = [
             if (event.button !== 0 || event.ctrlKey) return;
             let initialPos = convertPixelToCanvasCoord(event);
             if (!this.isOverDragHandle(initialPos)) return;
-            this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y};
+            this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y,
+                             pointerId: event.pointerId};
             event.currentTarget.setPointerCapture(event.pointerId);
         },
         onpointerup(event) {
@@ -236,11 +237,12 @@ const diagrams = [
             this.setCursor(event);
             if (!this.dragging) return;
             if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
+            if (event.pointerId !== this.dragging.pointerId) return; // different finger dragging
             let {x, y} = convertPixelToCanvasCoord(event);
             this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
         },
         ondragstart(event) {
-            // Prevent dragging text
+            // Prevent dragging text/images
             event.preventDefault();
         },
         ontouchstart(event) {
@@ -250,19 +252,54 @@ const diagrams = [
         },
     },
     {
+        ...divDragHandlersCommon,
         el: "div.draggable",
         draw() {
             this.el.style.left = this.pos.x + 'px';
             this.el.style.top = this.pos.y + 'px';
         },
-        ...divDragHandlersCommon
     },
     {
+        ...divDragHandlersCommon,
         el: "div.draggable",
         draw() {
             this.el.style.transform = `translate(${this.pos.x}px, ${this.pos.y}px)`;
         },
-        ...divDragHandlersCommon
+    },
+    // div with a link inside, but want the drag to override the link
+    {
+        ...divDragHandlersCommon,
+        el: "div.draggable",
+        draw() {
+            this.el.style.left = this.pos.x + 'px';
+            this.el.style.top = this.pos.y + 'px';
+        },
+    },
+    // div with a link inside, but want the link to override the drag
+    {
+        ...divDragHandlersCommon,
+        el: "div.draggable",
+        onpointerdown(event) {
+            divDragHandlersCommon.onpointerdown.call(this, event);
+            event.currentTarget.releasePointerCapture(event.pointerId); // undo divDragHandlersCommon
+            this.moved = false; // wait until first pointermove to capture
+        },
+        onpointermove(event) {
+            if (!this.moved) {
+                event.currentTarget.setPointerCapture(event.pointerId);
+                this.moved = true;
+            }
+            divDragHandlersCommon.onpointermove.call(this, event);
+        },
+        onclick(event) {
+            // If we've moved the mouse then it's a drag and don't
+            // let the click go through.
+            if (this.moved) event.preventDefault();
+        },
+        draw() {
+            this.el.style.left = this.pos.x + 'px';
+            this.el.style.top = this.pos.y + 'px';
+        },
     },
 ];
 
