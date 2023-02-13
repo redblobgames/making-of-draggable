@@ -6,9 +6,9 @@
 Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's what I want to support:
 
 #+begin_export html
-<figure id="diagram-pointer-events-fixed" class="w-full">
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+<figure id="diagram-pointer-events-fixed">
+  <svg viewBox="-220 -75 440 150">
+    <rect x="-220" y="-75" width="100%" height="100%" fill="url(#pattern-dots)" />
   </svg>
   <figcaption>Drag the circle with mouse or touch</figcaption>
 </figure>
@@ -447,6 +447,54 @@ Current operating systems and user agents don't usually have a concept of multip
 
 * Vue version
 
+I think it'll look something like this
+
+#+begin_src xml
+<template>
+  <g
+    :transform="`translate(${pos.x},${pos.y})`"
+    @pointerdown.left="start" @pointerup="end" 
+    @pointermove="dragging ? move($event) : null"
+    @pointercancel="end" @lostpointercapture="end"
+    @touchstart.prevent="" @dragstart.prevent="">
+    :class="{dragging}"
+    <slot />
+  </g>
+</template>
+
+<style>
+  g { cursor: grab; }
+  g.dragging { user-select: none; cursor: grabbing; }
+</style>
+
+<script setup>
+// pos is a prop {x: y:}
+
+const dragging = ref(false);
+
+function start(event) {
+  if (event.ctrlKey) return;
+  let {x, y} = convertPixelToSvgCoord(event);
+  dragging.value = {dx: pos.x - x, dy: pos.y - y,
+                    pointerId: event.pointerId};
+  el.setPointerCapture(event.pointerId);
+}
+
+function end(event) {
+  dragging.value = null;
+}
+
+function move(event) {
+  if (!(event.buttons & 1)) return end(event);
+  if (event.pointerId !== dragging.value.pointerId) return;
+  let {x, y} = convertPixelToSvgCoord(event);
+  $emit('move', {
+    x: x + dragging.value.dx,
+    y: y + dragging.value.dy,
+  });
+}
+</script>
+#+end_src
 * Notes - event log
 
 [[href:eventlog.html][eventlog.html]]
@@ -472,8 +520,6 @@ Testing a click:
 - Need either pointerdown.prevent or user-select:none to prevent double click from selecting text
 
 TODO: test tablet
-
-* Vue
 
 * Variations
 
@@ -514,6 +560,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
   <script type="module" src="draggable.js"></script>
 
   Created 23 Dec 2022; &#160;
-  <!-- hhmts start -->Last modified: 02 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 13 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
