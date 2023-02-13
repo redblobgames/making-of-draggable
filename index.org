@@ -53,9 +53,13 @@ digraph {
 #+results:
 [[file:build/state.svg]]
 
-However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations.
+However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations. Right click can trigger the context menu. Here's the code I ended up with:
 
-{{ TODO :: just show the answer!! the rest of the page is explanation and demos of the things that go wrong }}
+#+begin_export html
+<pre data-code="pointer" data-show="*"/>
+#+end_export
+
+On the rest of the page I'll show the code that didn't work, and explain how to fix it.
 
 * Mouse events only
 :PROPERTIES:
@@ -76,6 +80,10 @@ digraph {
     dragging -> initial [label = "mouseup"];
 }
 #+end_src
+
+#+begin_export html
+<pre data-code="mouseLocal" />
+#+end_export
 
 Try the demo with a mouse:
 
@@ -110,6 +118,9 @@ digraph {
 #+results:
 [[file:build/mouse-document.svg]]
 
+#+begin_export html
+<pre data-code="mouseGlobal" />
+#+end_export
 Try it out. It works better.
 
 #+begin_export html
@@ -149,6 +160,10 @@ digraph {
 }
 #+end_src
 
+#+begin_export html
+<pre data-code="touch" />
+#+end_export
+
 Try the demo with a touch device:
 
 #+begin_export html
@@ -170,7 +185,7 @@ There are a few problems to deal with:
 :CUSTOM_ID: pointer-events
 :END:
 
-To handle both mouse and touch events we end up having lots of different event handlers:
+To handle both mouse and touch events we end up having lots of different event handlers, and that's what I had to do [[/x/1845-draggable/][before 2021]]:
 
 #+begin_src dot :file build/mouse-and-touch.svg :exports results
 digraph {
@@ -211,6 +226,10 @@ digraph {
 #+results:
 [[file:build/pointer.svg]]
 
+#+begin_export html
+<pre data-code="pointer" />
+#+end_export
+
 Much simpler! Try the demo with either a mouse or touch device:
 
 #+begin_export html
@@ -229,6 +248,10 @@ There are several things we still need to fix.
 When dragging the circle, the text inside gets selected sometimes.
 
 Fix: CSS ~user-select: none~ on the circle. 
+
+#+begin_export html
+<pre data-code="pointer" data-highlight="text" />
+#+end_export
 
 If I want to select the text when not dragging the circle (left drag, right click, long press, or keyboard), I can apply that CSS only while dragging.
 
@@ -416,7 +439,7 @@ digraph {
 #+results:
 [[file:build/multiple-buttons.svg]]
 
-This doesn't seem to be what I want, but [[https://www.w3.org/TR/pointerevents/#chorded-button-interactions][it's what Pointer Events do]]. The workaround is to check the button state in =pointermove=. I think this is where I draw the line, and say that I'm not going to worry about this case.
+This doesn't seem to be what I want, but [[https://www.w3.org/TR/pointerevents/#chorded-button-interactions][it's what Pointer Events do]]. The workaround is to check the button state in =pointermove=. But /pointer capture/ continues until you release /all/ the buttons, unless you explicitly release capture.
 
 Mouse Events behave the way I want but don't handle touch events.
 
@@ -444,6 +467,8 @@ Current operating systems and user agents don't usually have a concept of multip
 
 
 ** TODO: test nested dragging
+
+- need =stopPropagation()= to prevent inner draggable from passing events up to outer draggable
 
 * Vue version
 
@@ -547,6 +572,17 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
     border: 2px solid hsl(200 10% 70%); 
     border-right-width: 0; 
   }
+
+  /* Prism.js theme, want to use mostly subdued colors */
+  .token.operator { font-weight: bold; }
+  .token.parameter { font-weight: bold; }
+  .token.punctuation, .token.parameter .token.punctuation { color: #c9c9c4; }
+  .token.keyword { color: hsl(220 20% 50%); font-weight: bold; }
+  .token.keyword + .token.function { color: hsl(220 50% 50%); font-weight: bold; }
+  .token.number { color: #000; }
+  .token.string { color: #888; }
+  /* I also want to highlight certain lines */
+  .highlight { background: hsl(180 75% 90%); }
 </style>
 
 <x:footer>
@@ -557,9 +593,13 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
       </pattern>
     </defs>
   </svg>
+  <!-- https://prismjs.com/download.html#themes=prism&languages=clike+javascript -->
+  <script src="build/prism.js"></script>
   <script type="module" src="draggable.js"></script>
 
-  Created 23 Dec 2022; &#160;
+  Created 23 Dec 2022
+  with the help of
+  <a href="https://prismjs.com/">Prism.js</a>; &#160;
   <!-- hhmts start -->Last modified: 13 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

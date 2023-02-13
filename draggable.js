@@ -77,9 +77,7 @@ function makePositionState(selector, options={}) {
 }
 
 
-function diagram_mouse_events_local() {
-    let {state, el} = makePositionState("#diagram-mouse-events-local");
-
+function makeDraggableMouseLocal(state, el) {
     function mousedown(_event) {
         state.dragging = true;
     }
@@ -97,9 +95,7 @@ function diagram_mouse_events_local() {
 }
 
 
-function diagram_mouse_events_document() {
-    let {state, el} = makePositionState("#diagram-mouse-events-document");
-
+function makeDraggableMouseGlobal(state, el) {
     function globalMousemove(event) {
         state.pos = convertPixelToSvgCoord(event, el);
         state.dragging = true;
@@ -119,9 +115,7 @@ function diagram_mouse_events_document() {
 }
 
 
-function diagram_touch_events() {
-    let {state, el} = makePositionState("#diagram-touch-events");
-
+function makeDraggableTouch(state, el) {
     function start(_event) {
         state.dragging = true;
     }
@@ -158,11 +152,8 @@ function makeOptions() {
     };
 }
 
-function diagram_pointer_events_fixed(selector, options) {
-    let {state, el} = makePositionState(selector, options);
-
+function makeDraggable(state, el, options) {
     function start(event) {
-        console.log(event.type, event.button);
         if (options.left) if (event.button !== 0) return;
         if (options.ctrl) if (event.ctrlKey) return;
         let {x, y} = convertPixelToSvgCoord(event);
@@ -173,7 +164,6 @@ function diagram_pointer_events_fixed(selector, options) {
     }
 
     function end(event) {
-        console.log(event.type, event.button);
         if (options.offset) state.dragging = null;
         if (!options.offset) state.dragging = false;
         if (options.text) el.style.userSelect = '';
@@ -191,18 +181,86 @@ function diagram_pointer_events_fixed(selector, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-
     if (options.capture) el.addEventListener('lostpointercapture', end);
-    if (options.scroll) el.addEventListener('touchstart', (event) => event.preventDefault());
-    if (options.systemdrag) el.addEventListener('dragstart', (event) => event.preventDefault());
+    if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault());
+    if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault());
 }
 
+function diagram_mouse_events_local() {
+    let {state, el} = makePositionState("#diagram-mouse-events-local");
+    makeDraggableMouseLocal(state, el);
+}
+
+function diagram_mouse_events_document() {
+    let {state, el} = makePositionState("#diagram-mouse-events-document");
+    makeDraggableMouseGlobal(state, el);
+}
+
+function diagram_touch_events() {
+    let {state, el} = makePositionState("#diagram-touch-events");
+    makeDraggableTouch(state, el);
+}
+
+function diagram_pointer_events(selector, options) {
+    let {state, el} = makePositionState(selector, options);
+    return makeDraggable(state, el, options);
+}
 
 
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
-diagram_pointer_events_fixed("#diagram-pointer-events", {});
-diagram_pointer_events_fixed("#diagram-pointer-events-fixed", makeOptions());
+diagram_pointer_events("#diagram-pointer-events", {});
+diagram_pointer_events("#diagram-pointer-events-fixed", makeOptions());
 
-// console.log(diagram_pointer_events_fixed.toString().split("\n"));
+// Generate and syntax highlight sample code
+for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
+    // show="*" selects all; otherwise list the flag names space separated
+    let show = codeOutput.dataset.show ?? "";
+    let options = show === '*'? makeOptions() : {};
+    for (let option of show.split(" ")) {
+        options[option] = true;
+    }
+    // highlight= should be a list of flag names to highlight
+    let highlight = {};
+    for (let option of (codeOutput.dataset.highlight ?? "").split(" ")) {
+        options[option] = true;
+        highlight[option] = true;
+    }
+
+    // code="mouseLocal|mouseGlobal|touch|pointer" to select which source code to show
+    // note that only pointer has any options
+    let code = {
+        mouseLocal: makeDraggableMouseLocal,
+        mouseGlobal: makeDraggableMouseGlobal,
+        touch: makeDraggableTouch,
+        pointer: makeDraggable,
+    }[codeOutput.dataset.code];
+
+    let lines = [];
+    let highlightedLines = new Set();
+    for (let line of code.toString().split("\n")) {
+        let m = line.match(/(.*?)if \((!?)options\.(\w+?)\) (.*)/);
+        if (m) {
+            let [_, indent, invert, option, restOfLine] = m;
+            let keepLine = (!!options[option] === (invert === ""));
+            if (!keepLine) continue;
+            if (highlight[option]) highlightedLines.add(lines.length);
+            line = `${indent}${restOfLine}`;
+        }
+        lines.push(line);
+    }
+
+    let html = Prism.highlight(lines.join("\n"),
+                               Prism.languages.javascript,
+                               'javascript');
+    html = html.split("\n").map((line, lineNumber) => {
+        if (highlightedLines.has(lineNumber)) {
+            let m = line.match(/^(\s*)(\S.*)$/);
+            line = `${m[1]}<span class="highlight">${m[2]}</span>`;
+        }
+        return line;
+    }).join("\n");
+    
+    codeOutput.innerHTML = html;
+}
