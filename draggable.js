@@ -215,21 +215,21 @@ diagram_pointer_events("#diagram-pointer-events-fixed", makeOptions());
 
 // These diagrams are presented in order, each one building upon the last
 let options = {changeText: true};
-diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -150});
-diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 150});
-
-// For this one I don't want to change the text
-options = {changeText: false, capture: true};
-diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "1", x: -100});
-diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...options, text: true, line2: "3", x: 100});
-options = {...options, changeText: true, text: true};
 
 diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line1: "No", line2: "scroll"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "1", x: -100});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "2", x: -150});
 diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "3", x: 0, class: "touch-none"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 100});
-options = {...options, changeText: true, text: true};
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 150});
+options = {...options, scroll: true};
+
+diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 175});
+options = {...options, capture: true};
+
+diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "1", x: -150});
+diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 150});
+options = {...options, text: true};
 
 
 // Generate and syntax highlight sample code

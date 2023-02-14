@@ -85,7 +85,7 @@ digraph {
 <pre data-code="mouseLocal" />
 #+end_export
 
-Try the demo with a mouse:
+*Try* the demo with a mouse:
 
 #+begin_export html
 <figure id="diagram-mouse-events-local" class="w-full">
@@ -164,7 +164,7 @@ digraph {
 <pre data-code="touch" />
 #+end_export
 
-Try the demo with a touch device:
+*Try* the demo with a touch device:
 
 #+begin_export html
 <figure id="diagram-touch-events" class="w-full">
@@ -230,7 +230,7 @@ digraph {
 <pre data-code="pointer" data-show="capture" />
 #+end_export
 
-Much simpler! Try the demo with either a mouse or touch device:
+Much simpler! *Try* the demo with either a mouse or touch device:
 
 #+begin_export html
 <figure id="diagram-pointer-events" class="w-full">
@@ -243,7 +243,49 @@ Much simpler! Try the demo with either a mouse or touch device:
 
 There are several things we still need to fix. It behaves particularly badly on touch devices because scrolling makes us lose pointer capture.
 
-** Fix: capture
+** Fix: scrolling with touch
+:PROPERTIES:
+:CUSTOM_ID: touch-action
+:END:
+
+On touch devices, single-finger drag will scroll the page. But single-finger drag /also/ drags the circle. By default, it will do /both/! The simplest fix is to add CSS ~touch-action: none~ on the diagram. But this prevents scrolling /anywhere/ in the diagram:
+
+#+begin_export html
+<figure id="diagram-touch-action-all" class="w-full">
+  <svg viewBox="-330 -50 660 100" class="touch-none">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Stop touch from scrolling anywhere on the diagram</figcaption>
+</figure>
+#+end_export
+
+*Try* dragging the circle on a touch device. It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either, but I want it to. I looked for a better fix.
+
+I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram. The natural thing to try is applying the CSS to the circle alone. Another possible fix is to =preventDefault()= on =touchstart=.
+
+| Try this     | Watch for    | Demo above | Circle 2 | Circle 3 | Circle 4 |
+|--------------+--------------+------------+----------+----------+----------|
+| drag circle  | page scrolls | no ✓      | yes ⛌   | no ✓    | no ✓    |
+| drag diagram | page scrolls | no ⛌      | yes ✓   | yes ✓   | yes ✓   |
+
+#+begin_export html
+<figure id="diagram-touch-action" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Dragging affects scrolling</figcaption>
+</figure>
+#+end_export
+
+*Try* these on a touch device. The earlier demo (=touch-action:none= on the diagram) stops scrolling on the circle and also on the diagram. Circle 2 (default) doesn't stop scrolling on either. Circle 3 (=touch-action= on the circle) behaves badly. It looks like the CSS has to be on the diagram to have an effect; applying it only to the circle is not enough. Circle 4 (=preventDefault()= on =touchstart=) behaves the way I want, and this is the code for it:
+
+#+begin_export html
+<pre data-code="pointer" data-show="capture" data-highlight="scroll" />
+#+end_export
+
+The simplest solution is to apply CSS ~touch-action: none~ to the entire diagram, but you're like me, and that isn't what you want, then use the code above to stop scrolling /only/ on the draggable objects. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
+
+** Fix: capture the mouse
 :PROPERTIES:
 :CUSTOM_ID: fix-capture
 :END:
@@ -267,10 +309,10 @@ The pointer capture feature lets us track the pointer even when it's not on the 
 </figure>
 #+end_export
 
-*Try* this demo with the mouse. On touch devices it still loses pointer capture because of scrolling, which we'll fix later on this page. Pointer capture requires one additional line of code for common cases, or a second to handle some edge cases:
+*Try* this demo with a mouse. Touch devices automatically capture so they won't show a difference here. Pointer capture requires one additional line of code for common cases, or a second to handle some edge cases:
 
 #+begin_export html
-<pre data-code="pointer" data-highlight="capture" />
+<pre data-code="pointer" data-show="scroll" data-highlight="capture" />
 #+end_export
 
 ** Fix: text selection
@@ -294,51 +336,11 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 </figure>
 #+end_export
 
-*Try* with a mouse: dragging Circle 1 a few times and you'll see sometimes the text gets selected. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
+*Try* dragging Circle 1 with the mouse a few times and you'll see sometimes the text gets selected. With touch devices, long press can select the text. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
 
 #+begin_export html
-<pre data-code="pointer" data-show="capture" data-highlight="text" />
+<pre data-code="pointer" data-show="capture scroll" data-highlight="text" />
 #+end_export
-
-** Fix: scrolling with touch
-
-On touch devices, single-finger drag will scroll the page. But single-finger drag also drags the circle. By default, it will do /both/. The fix is to add CSS ~touch-action: none~ on the diagram. But this prevents scrolling /anywhere/ in the diagram:
-
-#+begin_export html
-<figure id="diagram-touch-action-all" class="w-full">
-  <svg viewBox="-330 -50 660 100" class="touch-none">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-  </svg>
-  <figcaption>Stop touch from scrolling anywhere on the diagram</figcaption>
-</figure>
-#+end_export
-
-
-*Try* dragging the circle on a touch device. It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either. I want it to. So I looked for a better fix.
-
-I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram. The natural thing to try is applying the CSS to the circle alone. Another possible fix is to =preventDefault()= on =touchstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
-
-| Try this     | Watch for    | Demo above | Circle 2 | Circle 3 | Circle 4 |
-|--------------+--------------+------------+----------+----------+----------|
-| drag circle  | page scrolls | no ✓      | yes ⛌   | no ✓    | no ✓    |
-| drag diagram | page scrolls | no ⛌      | yes ✓   | yes ✓   | yes ✓   |
-
-#+begin_export html
-<figure id="diagram-touch-action" class="w-full">
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-  </svg>
-  <figcaption>Dragging affects scrolling</figcaption>
-</figure>
-#+end_export
-
-*Try* these on a touch device. Dragging Circle 2 will scroll the page. Dragging Circle 3 behaves badly. It looks like =touch-action= has to be on the diagram to have an effect; applying it only to the circle is not enough. Dragging Circle 4 behaves the way I want, and this is the code for it:
-
-#+begin_export html
-<pre data-code="pointer" data-show="capture text" data-highlight="scroll" />
-#+end_export
-
-The simplest solution is to apply CSS ~touch-action: none~ to the entire diagram, but you're like me, and that isn't what you want, then use the code above to stop scrolling /only/ on the draggable objects.
 
 ** Fix: text drag
 
