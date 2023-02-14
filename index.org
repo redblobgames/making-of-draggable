@@ -364,7 +364,9 @@ Windows, Linux, and Mac support inter-application /drag and drop/ of text and im
 </figure>
 #+end_export
 
-*Try* this demo with a mouse. Select the text around the diagram, then drag Circle 1. On most desktop systems I've tested, the text dragging takes priority over the circle dragging. Circle 2 prioritizes the circle dragging. Behavior varies a little bit across browsers and operating systems. The fix is one extra line:
+*Try* this demo with a mouse.
+@@html:<button onclick="diagramSystemDragSetSelection()">Select the text</button>@@
+around the diagram, then drag Circle 1. On most desktop systems I've tested, text or image dragging takes priority over the circle dragging by default. Circle 2 prioritizes the circle dragging. Behavior varies a little bit across browsers and operating systems. The fix is one extra line:
 
 #+begin_export html
 <pre data-code="pointer" data-show="capture scroll text" data-highlight="systemdrag" />

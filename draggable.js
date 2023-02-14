@@ -232,8 +232,8 @@ diagram_pointer_events("#diagram-text-select", {...options, changeText: false, t
 diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 150});
 options = {...options, text: true};
 
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line2: "2", x: 175});
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -175});
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 175});
 options = {...options, systemdrag: true};
 
 // Generate and syntax highlight sample code
@@ -286,4 +286,15 @@ for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
     }).join("\n");
     
     codeOutput.innerHTML = html;
+}
+
+window.diagramSystemDragSetSelection = function() {
+    const figure = document.querySelector("#diagram-systemdrag");
+    const ttList = figure.querySelectorAll("tt");
+    let range = document.createRange();
+    range.setStart(ttList[0], 0);
+    range.setEndAfter(ttList[1]);
+    let selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
