@@ -6,7 +6,7 @@
 Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's what I want to support:
 
 #+begin_export html
-<figure id="diagram-pointer-events-fixed">
+<figure id="diagram-introduction">
   <svg viewBox="-220 -75 440 150">
     <rect x="-220" y="-75" width="100%" height="100%" fill="url(#pattern-dots)" />
   </svg>
@@ -136,7 +136,7 @@ There are still a few issues, which we'll solve one by one.
 
 - This code doesn't handle touch events.
 - The text can get selected while trying to drag the circle.
-- If you select all the text on the page, the drag can apply to the text instead of the circle.
+- If you the text around the diagram, the drag can apply to the text instead of the circle.
 - Right clicking the circle will bring up a context menu, which leaves the circle stuck in drag mode.
 
 * Touch events
@@ -241,7 +241,7 @@ Much simpler! *Try* the demo with either a mouse or touch device:
 </figure>
 #+end_export
 
-There are several things we still need to fix. It behaves particularly badly on touch devices because scrolling makes us lose pointer capture.
+Circle 1 uses the code above, but needs improvement. Circle 2 uses the code from the top of the page, and behaves much better. Let's go through each of the fixes—
 
 ** Fix: scrolling with touch
 :PROPERTIES:
@@ -286,7 +286,7 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 <pre data-code="pointer" data-show="capture" data-highlight="scroll" />
 #+end_export
 
-Note that ~.preventDefault()~ on =pointerstart= isn't what we need; it has to be =touchstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
+Note that the ~.preventDefault()~ needs to be on =touchstart=, not on =pointerstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
 
 ** Fix: capture the mouse
 :PROPERTIES:
@@ -345,17 +345,30 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 <pre data-code="pointer" data-show="capture scroll" data-highlight="text" />
 #+end_export
 
-** Fix: text drag
+** Fix: text and image drag
 
-Try selecting all text on the page, then drag the circle. This will trigger /text dragging/ on many browser+OS combination, where you can drag some text as an alternative to copy/paste. I want to allow this, /except/ when dragging the circle.
+Windows, Linux, and Mac support inter-application /drag and drop/ of text and images, and an alternative to copy/paste. This interferes with the object dragging on my pages. The fix is to ~preventDefault()~ on =dragstart=.
 
-Fix is: =preventDefault()= on =dragstart= on the circle. This works in SVG but not in Canvas or WebGL. For those, check that the pointer is on the circle and conditionally prevent default.
+| Try this                 | Watch for       | Circle 1 | Circle 2 |
+|--------------------------+-----------------+----------+----------|
+| select text, drag circle | page text drags | yes ⛌    | no ✓    |
 
-TODO: demo
+#+begin_export html
+<figure id="diagram-systemdrag" class="w-full">
+  <div><b>Select text</b> → <tt>[from here</tt></div>
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <div><tt>to here]</tt> ←</div>
+  <figcaption>Selected text interferes with dragging</figcaption>
+</figure>
+#+end_export
 
-| Try this    | Watch for       | Circle 1 | Circle 2 |
-|-------------+-----------------+----------+----------|
-| drag circle | page text drags | yes ⛌   | no ✓    |
+*Try* this demo with a mouse. Select the text around the diagram, then drag Circle 1. On most desktop systems I've tested, the text dragging takes priority over the circle dragging. Circle 2 prioritizes the circle dragging. Behavior varies a little bit across browsers and operating systems. The fix is one extra line:
+
+#+begin_export html
+<pre data-code="pointer" data-show="capture scroll text" data-highlight="systemdrag" />
+#+end_export
 
 ** Fix: context menu
 
@@ -668,6 +681,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
   Created 23 Dec 2022
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 13 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 14 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

@@ -210,11 +210,12 @@ function diagram_pointer_events(selector, options) {
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
-diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true});
-diagram_pointer_events("#diagram-pointer-events-fixed", makeOptions());
+diagram_pointer_events("#diagram-introduction", makeOptions());
 
 // These diagrams are presented in order, each one building upon the last
-let options = {changeText: true};
+let options = {changeText: true, capture: true};
+diagram_pointer_events("#diagram-pointer-events", {...options, x: -175, line1: "1"});
+diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 175, line2: "2"});
 
 diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line2: "1"});
 diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "2", x: -150});
@@ -231,6 +232,9 @@ diagram_pointer_events("#diagram-text-select", {...options, changeText: false, t
 diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 150});
 options = {...options, text: true};
 
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line2: "2", x: 175});
+options = {...options, systemdrag: true};
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
