@@ -248,6 +248,31 @@ There are several things we still need to fix.
 :CUSTOM_ID: fix-capture
 :END:
 
+The pointer capture feature lets us track the pointer even when it's not on the circle, the diagram, or even the browser window. With mouse events we had to put event handlers on =document=, but no longer.
+
+| Try this                                   | Watch for  | Circle 1 | Circle 2 |
+|--------------------------------------------+------------+----------+----------|
+| drag quickly back and forth                | drag stops | yes ⛌   | no ✓    |
+| drag outside diagram, come back in         | drag stops | yes ⛌   | no ✓    |
+| drag outside diagram, let go               | drag stops | no ⛌    | yes ✓   |
+| drag outside diagram, let go, come back in | drag stops | no ⛌    | yes ✓   |
+| drag, alt+tab to another window            | drag stops | no ⛌    | yes ✓   |
+
+#+begin_export html
+<figure id="diagram-capture" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Dragging without and with pointer capture</figcaption>
+</figure>
+#+end_export
+
+It requires one additional line of code for common cases, or a second to handle some edge cases:
+
+#+begin_export html
+<pre data-code="pointer" data-highlight="capture" />
+#+end_export
+
 ** Fix: text selection
 :PROPERTIES:
 :CUSTOM_ID: fix-user-select

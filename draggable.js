@@ -182,7 +182,7 @@ function makeDraggable(state, el, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-    if (options.capture) el.addEventListener('lostpointercapture', end);
+    if (options.capture) el.addEventListener('lostpointercapture', end); // optional
     if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault());
     if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault());
 }
@@ -211,11 +211,21 @@ function diagram_pointer_events(selector, options) {
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
-diagram_pointer_events("#diagram-pointer-events", {changeText: true});
+diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true});
 diagram_pointer_events("#diagram-pointer-events-fixed", makeOptions());
-diagram_pointer_events("#diagram-text-select", {capture: true, text: false, line2: "1", x: -100});
-diagram_pointer_events("#diagram-text-select", {capture: true, text: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {capture: true, text: true, line2: "3", x: 100});
+
+// These diagrams are presented in order, each one building upon the last
+let options = {changeText: true};
+diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -150});
+diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 150});
+
+// For this one I don't want to change the text
+options = {changeText: false, capture: true};
+diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "1", x: -100});
+diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...options, text: true, line2: "3", x: 100});
+options = {...options, changeText: true, text: true};
+
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
