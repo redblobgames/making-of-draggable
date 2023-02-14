@@ -243,26 +243,37 @@ Much simpler! Try the demo with either a mouse or touch device:
 
 There are several things we still need to fix.
 
+** Fix: capture
+:PROPERTIES:
+:CUSTOM_ID: fix-capture
+:END:
+
 ** Fix: text selection
+:PROPERTIES:
+:CUSTOM_ID: fix-user-select
+:END:
 
-When dragging the circle, the text inside gets selected sometimes.
+When dragging the circle, the text inside gets selected sometimes. To fix this, use CSS ~user-select: none~ on the circle. There are two choices: either we can apply it /all/ the time, or apply it /only/ while dragging. If I apply it all the time, then the text won't ever be selectable.
 
-Fix: CSS ~user-select: none~ on the circle. 
+| Try this        | Watch for        | Circle 1 | Circle 2 | Circle 3 |
+|-----------------+------------------+----------+----------+----------|
+| drag circle     | text is selected | yes ⛌   | no ✓    | no ✓    |
+| select all text | text is selected | yes     | no       | yes     |
 
 #+begin_export html
-<pre data-code="pointer" data-highlight="text" />
+<figure id="diagram-text-select" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Dragging affects text selection</figcaption>
+</figure>
 #+end_export
 
-If I want to select the text when not dragging the circle (left drag, right click, long press, or keyboard), I can apply that CSS only while dragging.
+*Try* dragging Circle 1 a few times and you'll see sometimes the text gets selected. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
 
-This problem won't happen in Canvas and WebGL because that text is unselectable.
-
-TODO: demo with three objects, one that always has the css, one that never has it, and one that only has it while dragging
-
-| Try this    | Watch for        | Circle 1 | Circle 2 | Circle 3 |
-|-------------+------------------+----------+----------+----------|
-| drag circle | text is selected | yes ⛌   | no ✓    | no ✓    |
-| drag text   | text is selected | yes ✓   | no ⛌    | yes ✓   |
+#+begin_export html
+<pre data-code="pointer" data-show="capture" data-highlight="text" />
+#+end_export
 
 ** Fix: scrolling with touch
 
@@ -572,6 +583,8 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
     border: 2px solid hsl(200 10% 70%); 
     border-right-width: 0; 
   }
+
+  .select-none { user-select: none; }
 
   /* Prism.js theme, want to use mostly subdued colors */
   .token.operator { font-weight: bold; }

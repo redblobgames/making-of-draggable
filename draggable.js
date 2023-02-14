@@ -23,16 +23,17 @@ function convertPixelToSvgCoord(event, el=event.currentTarget) {
 
 
 /** Make a draggable circle in the svg and keep some state for it */
-function makePositionState(selector, options={}) {
+function makePositionState(selector, options={changeText: true}) {
     const container = document.querySelector(selector);
     const svg = container.querySelector("svg");
     const el = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+    el.setAttribute('class', options.class ?? "");
     const radius = options.radius ?? 30;
     el.innerHTML = `
       <circle stroke="black" stroke-width="0.5" r="${radius}" />
       <g font-size="14" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
+        <text dy="0.0em">${options.line1 ?? 'Drag'}</text>
+        <text dy="1.0em">${options.line2 ?? 'me'}</text>
       </g>`;
     svg.appendChild(el);
 
@@ -140,10 +141,10 @@ function makeOptions() {
         x: 0,
         y: 0,
         changeText: true,
+        capture: true,
         left: true,
         ctrl: true,
         offset: true,
-        capture: true,
         text: true,
         scroll: true,
         systemdrag: true,
@@ -210,8 +211,11 @@ function diagram_pointer_events(selector, options) {
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
-diagram_pointer_events("#diagram-pointer-events", {});
+diagram_pointer_events("#diagram-pointer-events", {changeText: true});
 diagram_pointer_events("#diagram-pointer-events-fixed", makeOptions());
+diagram_pointer_events("#diagram-text-select", {capture: true, text: false, line2: "1", x: -100});
+diagram_pointer_events("#diagram-text-select", {capture: true, text: false, line2: "2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {capture: true, text: true, line2: "3", x: 100});
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
