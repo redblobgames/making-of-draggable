@@ -253,19 +253,17 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 #+begin_export html
 <figure id="diagram-touch-action-all" class="w-full">
   <svg viewBox="-330 -50 660 100" class="touch-none">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-slashes)" />
   </svg>
   <figcaption>Stop touch from scrolling anywhere on the diagram</figcaption>
 </figure>
 #+end_export
 
-*Try* dragging the circle on a touch device. It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either, but I want it to. I looked for a better fix.
+*Try* dragging the circle on a touch device. It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either, but I want it to. I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram.
 
-I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram. The natural thing to try is applying the CSS to the circle alone. Another possible fix is to =preventDefault()= on =touchstart=.
-
-| Try this     | Watch for    | Demo above | Circle 2 | Circle 3 | Circle 4 |
+| Try this     | Watch for    | Circle 1 | Circle 2 | Circle 3 | Circle 4 |
 |--------------+--------------+------------+----------+----------+----------|
-| drag circle  | page scrolls | no ✓      | yes ⛌   | no ✓    | no ✓    |
+| drag circle  | page scrolls | no ✓      | yes ⛌   | yes ⛌   | no ✓    |
 | drag diagram | page scrolls | no ⛌      | yes ✓   | yes ✓   | yes ✓   |
 
 #+begin_export html
@@ -277,13 +275,18 @@ I want to stop scrolling /only/ if dragging the circle, not when dragging the di
 </figure>
 #+end_export
 
-*Try* these on a touch device. The earlier demo (=touch-action:none= on the diagram) stops scrolling on the circle and also on the diagram. Circle 2 (default) doesn't stop scrolling on either. Circle 3 (=touch-action= on the circle) behaves badly. It looks like the CSS has to be on the diagram to have an effect; applying it only to the circle is not enough. Circle 4 (=preventDefault()= on =touchstart=) behaves the way I want, and this is the code for it:
+*Try* these on a touch device. 
+
+- The earlier demo with Circle 1 (~touch-action: none~ on the diagram) stops scrolling on the circle and also on the diagram. 
+- Circle 2 (default) doesn't stop scrolling on either. 
+- Circle 3 (~touch-action: none~ on the circle only) behaves badly. It looks like the CSS has to be on the diagram to have an effect; applying it only to the circle is not enough. 
+- Circle 4 (~.preventDefault()~ on =touchstart=) behaves the way I want, and this is the code for it:
 
 #+begin_export html
 <pre data-code="pointer" data-show="capture" data-highlight="scroll" />
 #+end_export
 
-The simplest solution is to apply CSS ~touch-action: none~ to the entire diagram, but you're like me, and that isn't what you want, then use the code above to stop scrolling /only/ on the draggable objects. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
+Note that ~.preventDefault()~ on =pointerstart= isn't what we need; it has to be =touchstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
 
 ** Fix: capture the mouse
 :PROPERTIES:
@@ -652,6 +655,9 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
     <defs>
       <pattern id="pattern-dots" width="10" height="10" patternUnits="userSpaceOnUse">
         <circle cx="5" cy="5" fill="hsl(0 10% 80%)" r="1" />
+      </pattern>
+      <pattern id="pattern-slashes" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(30 0 0)">
+        <line y2="7" fill="none" stroke="hsl(0 10% 80%)" stroke-width="1" />
       </pattern>
     </defs>
   </svg>
