@@ -149,7 +149,6 @@ function makeOptions() {
         scroll: true,
         systemdrag: true,
         chord: true,
-        capture: true,
     };
 }
 
@@ -224,6 +223,12 @@ options = {changeText: false, capture: true};
 diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "1", x: -100});
 diagram_pointer_events("#diagram-text-select", {...options, text: false, line2: "2", x: 0, class: "select-none"});
 diagram_pointer_events("#diagram-text-select", {...options, text: true, line2: "3", x: 100});
+options = {...options, changeText: true, text: true};
+
+diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line1: "No", line2: "scroll"});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "1", x: -100});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "3", x: 0, class: "touch-none"});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 100});
 options = {...options, changeText: true, text: true};
 
 
