@@ -214,28 +214,32 @@ diagram_pointer_events("#diagram-introduction", makeOptions());
 
 // These diagrams are presented in order, each one building upon the last
 let options = {changeText: true, capture: true};
-diagram_pointer_events("#diagram-pointer-events", {...options, x: -175, line1: "1"});
-diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 175, line2: "2"});
+diagram_pointer_events("#diagram-pointer-events", {...options, x: -125, line1: "1"});
+diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 125, line2: "2"});
 
 diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line2: "1"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "2", x: -150});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "2", x: -175});
 diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "3", x: 0, class: "touch-none"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 150});
+diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 175});
 options = {...options, scroll: true};
 
-diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 175});
+diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 125});
 options = {...options, capture: true};
 
-diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "1", x: -150});
+diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "1", x: -175});
 diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 150});
+diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 175});
 options = {...options, text: true};
 
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -175});
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 175});
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -125});
+diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 125});
 options = {...options, systemdrag: true};
 
+diagram_pointer_events("#diagram-contextmenu", {...options, line2: "1", x: -175});
+diagram_pointer_events("#diagram-contextmenu", {...options, left: true, line2: "2", x: 0});
+diagram_pointer_events("#diagram-contextmenu", {...options, left: true, ctrl: true, line2: "3", x: 175});
+options = {...options, left: true, ctrl: true};
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
     // show="*" selects all; otherwise list the flag names space separated

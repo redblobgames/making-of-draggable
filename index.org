@@ -374,56 +374,65 @@ around the diagram, then drag Circle 1. On most desktop systems I've tested, tex
 
 ** Fix: context menu
 
-Context menus are different across platforms, and that makes handling it tricky.
+Context menus are different across platforms, and that makes handling it tricky. I want to allow context menus without them interfering with dragging the circle.
 
-- Windows :: right click (down+up), ~Shift~ + ~F10~ key
-- Linux :: right click, right button down, ~Shift~ + ~F10~ key
-- Mac :: right button down, ~Ctrl~ + left click
-- iPhone, iPad :: long press on text only
-- Android :: long press on anything
+| System  | Activation                             |
+|---------+----------------------------------------|
+| Windows | right click (down+up), ~Shift~ + ~F10~ key |
+| Linux   | right button down, ~Shift~ + ~F10~ key     |
+| Mac     | right button down, ~Ctrl~ + left click   |
+| iOS     | long press on text only                |
+| Android | long press on anything                 |
 
-There are more ways to bring up context menus (examples: two finger tap on Mac or Windows; right side click on Windows; press-and-hold on Wacom pens) but I haven't tested all of them.
+One problem is that I will see a =pointerdown= event and only /sometimes/ a =pointerup= event. That means I might think the button is still down when it's not. It's frustrating! I realized that I should only set the dragging state on /left/ mouse button, and ignore the right mouse button. Then I don't have to worry about most of the differences.
+
+#+begin_export html
+<details>
+<summary>I made some notes during testing, but most of them don't matter for my use case.</summary>
+#+end_export
+
+Across platforms, it looks like Firefox lets the page see events outside the menu overlay, whereas Chrome doesn't let the page see any events while the menu is up.
 
 Windows, right click, no capture:
 
-- Firefox, Chrome, Edge :: pointerdown, pointerup, auxclick, contextmenu
+- Firefox, Chrome, Edge :: =pointerdown=, =pointerup=, =auxclick=, =contextmenu=
 
 Windows, right click, capture:
 
-- Firefox :: pointerdown, get capture, pointerup, lose capture, auxclick, contextmenu
-- Chrome, Edge :: pointerdown, get capture, pointerup, auxclick, lose capture, contextmenu
+- Firefox :: =pointerdown=, =gotpointercapture=, =pointerup=, =lostpointercapture=, =auxclick=, =contextmenu=
+- Chrome, Edge :: =pointerdown=, =gotpointercapture=, =pointerup=, =auxclick=, =lostpointercapture=, =contextmenu=
 
 Linux right click, no capture:
 
-- Firefox :: pointerdown, contextmenu, pointermove² while menu is up
-- Chrome :: pointerdown, contextmenu, no pointermove² while menu is up
+- Firefox :: =pointerdown=, =contextmenu=, =pointermove= while menu is up
+- Chrome :: =pointerdown=, =contextmenu=, no =pointermove= while menu is up
 
 Linux hold right down, no capture:
 
-- Firefox :: pointerdown, contextmenu, pointermove² while menu is up
-- Chrome :: pointerdown, contextmenu, no pointermove² while menu is up
+- Firefox :: =pointerdown=, =contextmenu=, =pointermove= while menu is up
+- Chrome :: =pointerdown=, =contextmenu=, no =pointermove= while menu is up
 
 Linux right click, capture:
 
-- Firefox :: pointerdown, contextmenu, get capture, pointermove² while menu is up tells us button released
-- Chrome :: pointerdown, contextmenu, get capture; not until another click do we get pointerup, lose capture
+- Firefox :: =pointerdown=, =contextmenu=, =gotpointercapture=, =pointermove= while menu is up tells us button released
+- Chrome :: =pointerdown=, =contextmenu=, =gotpointercapture=; not until another click do we get =pointerup=, =lostpointercapture=
 
 Linux hold right down, capture:
 
-- Firefox :: pointerdown, contextmenu, got capture, pointermove² while menu is up tells us button released; when releasing button, menu stays up but we get pointerup, lose capture
-- Chrome :: pointerdown, contextmenu, got capture, no pointermove² while menu is up; when releasing button, menu stays up but we don't get pointerup; not until another click do we get pointerup, click, lose capture
+- Firefox :: =pointerdown=, =contextmenu=, =gotpointercapture=, =pointermove= while menu is up tells us button released; when releasing button, menu stays up but we get =pointerup=, =lostpointercapture=
+- Chrome :: =pointerdown=, =contextmenu=, =gotpointercapture=, no =pointermove= while menu is up; when releasing button, menu stays up but we don't get =pointerup=; not until another click do we get =pointerup=, click, =lostpointercapture=
 
 Mac, ctrl + left click:
 
-- Firefox :: pointermove with buttons≠0, contextmenu (no pointerdown or pointerup)
-- Chrome :: pointerdown with button=left, contextmenu (no pointerup)
-- Safari :: pointerdown with button=left, contextmenu (no pointerup); but subsequent clicks only fire contextmenu
+- Firefox :: =pointermove= with buttons≠0, =contextmenu= (no =pointerdown= or =pointerup=)
+- Chrome :: =pointerdown= with button=left, =contextmenu= (no =pointerup=)
+- Safari :: =pointerdown= with button=left, =contextmenu= (no =pointerup=); but subsequent clicks only fire =contextmenu=
 
 Mac, right button down:
 
-- Firefox :: pointerdown with button=right, contextmenu (no pointerup)
-- Chrome :: pointerdown with button=right, contextmenu (no pointerup)
-- Safari :: pointerdown with button=right, contextmenu (no pointerup); but subsequent right clicks only fire contextmenu
+- Firefox :: =pointerdown= with button=right, =contextmenu= (no =pointerup=)
+- Chrome :: =pointerdown= with button=right, =contextmenu= (no =pointerup=)
+- Safari :: =pointerdown= with button=right, =contextmenu= (no =pointerup=); but subsequent right clicks only fire =contextmenu=
 
 If we capture events on =pointerdown=, Firefox and Safari will keep the capture even after the button is released. Chrome will keep capture until you move the mouse, and then it will release capture. [This seems like a Firefox/Safari bug to me, as pointer capture is supposed to be automatically released on mouse up]
 
@@ -431,45 +440,42 @@ It's frustrating that on Mac, there's no =pointerup= or =pointercapture= when re
 
 Android, long press:
 
-- Firefox :: pointerdown, get capture, contextmenu, pointerup, lose capture
-- Chrome :: pointerdown, get capture, contextmenu, pointerup or pointercancel¹, lose capture
+- Firefox :: =pointerdown=, get capture, =contextmenu=, =pointerup=, lose capture
+- Chrome :: =pointerdown=, get capture, =contextmenu=, =pointerup= or =pointercancel= (if the finger moves at all, this starts a scroll event which cancels the captured pointer), lose capture
 
-¹if the finger moves at all, this starts a scroll event which cancels the captured pointer
-²Firefox lets the page see events outside the menu overlay, whereas Chrome doesn't let the page see any events while the menu is up
+What are my options?
 
-------- tests --------
+- [[https://www.w3.org/TR/pointerevents/#the-pointerdown-event][The spec says about pointerdown]] that =preventDefault()=  /not/ stop click or =contextmenu= events. I can =preventDefault()= on =contextmenu= to prevent the menu. But I still want to get =pointerup= and/or =pointercancel=! I think I have to treat =contextmenu= as the up event which means I'll get multiple up events on Windows.
 
-The problem is that if I'm using =pointerdown= and then =pointerup= to track the state of the mouse, and I never get =pointerup=, my code thinks I'm still holding the button down (and the browser's pointer capture is still active).
+- [[https://w3c.github.io/pointerevents/#the-button-property][The spec says about the button property]] that =button= = 0 indicates the primary button. This is how I will exclude the middle and right buttons. But I still get a =pointerdown.left= on Mac/Chrome and Mac/Safari (but not on Mac/Firefox) so I also have to check for the ~Ctrl~ key.
 
+- Button changes not communicated through =pointerdown= or =pointerup= can still be sent on =pointermove=. It's mentioned as a workaround on [[https://github.com/w3c/pointerevents/issues/408][W3C's pointerevents issues page]].
 
-Try right clicking the circle. It will bring up a context menu. That itself is fine. Unfortunately the events aren't consistent across platforms:
-
-#+attr_html: :class standard
-| Windows     | Mac         | Linux       |
-|-------------+-------------+-------------|
-| =pointerdown= | =pointerdown= | =pointerdown= |
-| =pointerup=   |             |             |
-| =auxclick=    |             |             |
-| =contextmenu= | =contextmenu= | =contextmenu= |
-|             | =pointerup= † |             |
-|             | =auxclick= †  |             |
-
-What should we do?
-
-- https://www.w3.org/TR/pointerevents/#the-pointerdown-event says =preventDefault()= on =pointerdown= does /not/ stop click or =contextmenu= events. I can =preventDefault()= on =contextmenu= to prevent the menu. But I still want to get =pointerup= and/or =pointercancel=! I think I have to treat =contextmenu= as the up event which means I'll get multiple up events on Windows.
-
-- https://w3c.github.io/pointerevents/#the-button-property says =button= = 0. indicates the primary button. This would let me exclude middle button and right button. But I still get a =pointerdown.left= on Mac/Chrome and Mac/Safari (not on Mac/Firefox) so this may not be enough.
-
-- on pointermove, if we have pointer capture, we could check the state of the buttons?? TODO: test this!  it's mentioned as a workaround on https://github.com/w3c/pointerevents/issues/408
-
-TODO: demo of both solutions?
-
-| Try this              | Watch for    | Circle 1 | Circle 2 | Circle 3 |
-|-----------------------+--------------+----------+----------+----------|
-| right click on circle | circle moves | yes ⛌   | no ?     | yes ?    |
-| right drag on circle  | circle moves |          |          |          |
+#+begin_export html
+</details>
+#+end_export
 
 
+| Try this                   | Watch for      | Circle 1 | Circle 2 | Circle 3 |
+|----------------------------+----------------+----------+----------+----------|
+| right click on circle      | circle is blue | yes ⛌    | no ✓    | no ✓    |
+| ctrl+click on circle (mac) | circle is blue | yes ⛌    | yes ⛌    | no ✓    |
+| right drag on circle       | circle is blue | yes ⛌    | no ✓    | no ✓    |
+
+#+begin_export html
+<figure id="diagram-contextmenu" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Right mouse button down interferes with drag</figcaption>
+</figure>
+#+end_export
+
+*Try* with the mouse: right click or drag on the circles. Try dismissing the menu with a click elsewhere, or by pressing ~Esc~. Sometimes Circle 1 will get stuck in a dragging state. Behavior varies across browsers and operating systems. The fix is to only drag on left button without ~Ctrl~ pressed:
+
+#+begin_export html
+<pre data-code="pointer" data-show="capture scroll text systemdrag" data-highlight="left ctrl" />
+#+end_export
 
 ** Feature: handle drag offset
 
@@ -635,14 +641,15 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
 
 #+begin_export html
 <style>
-  svg { 
+  main svg { 
+    max-width: 90%;
     background: #eee; 
-    box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3); 
+    box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3);
     width: calc(1.2 * var(--body-width)); 
   }
 
   details { padding: 0 1em; }
-  details p { margin: 0.5em; padding: 0 1em; }
+  details p, details dl { margin: 0.5em; padding: 0 1em; }
   details[open] { 
     background: linear-gradient(to right, hsl(200 10% 95%), white);
     border: 2px solid hsl(200 10% 70%); 
