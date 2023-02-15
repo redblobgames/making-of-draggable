@@ -148,7 +148,7 @@ function makeOptions() {
         text: true,
         scroll: true,
         systemdrag: true,
-        chord: true,
+        chords: true,
     };
 }
 
@@ -244,6 +244,12 @@ options = {...options, left: true, ctrl: true};
 diagram_pointer_events("#diagram-offset", {...options, offset: false, line2: "1", x: -125});
 diagram_pointer_events("#diagram-offset", {...options, offset: true, line2: "2", x: 125});
 options = {...options, offset: true};
+
+diagram_pointer_events("#diagram-chords", {...options, chords: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-chords", {...options, chords: true, line2: "2", x: 125});
+options = {...options, chords: true};
+
+// END of diagrams; options should have everything set
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {

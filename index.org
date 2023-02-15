@@ -346,6 +346,9 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 #+end_export
 
 ** Fix: text and image drag
+:PROPERTIES:
+:CUSTOM_ID: fix-systemdrag
+:END:
 
 Windows, Linux, and Mac support inter-application /drag and drop/ of text and images, and an alternative to copy/paste. This interferes with the object dragging on my pages. The fix is to ~preventDefault()~ on =dragstart=.
 
@@ -373,6 +376,9 @@ around the diagram, then drag Circle 1. On most desktop systems I've tested, tex
 #+end_export
 
 ** Fix: context menu
+:PROPERTIES:
+:CUSTOM_ID: fix-contextmenu
+:END:
 
 Context menus are different across platforms, and that makes handling it tricky. I want to allow context menus without them interfering with dragging the circle.
 
@@ -477,7 +483,13 @@ What are my options?
 <pre data-code="pointer" data-show="capture scroll text systemdrag" data-highlight="left ctrl" />
 #+end_export
 
+This solution also handles middle button down/click, which is used for scrolling on some systems.
+Another option is to ~.preventDefault()~ on =contextmenu=, and allow dragging with the right button, but that doesn't handle the middle button.
+
 ** Feature: handle drag offset
+:PROPERTIES:
+:CUSTOM_ID: feature-offset
+:END:
 
 This is not implementation specific, but a design issue. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
 
@@ -500,17 +512,31 @@ This is not implementation specific, but a design issue. If you pick up the edge
 <pre data-code="pointer" data-show="capture scroll text systemdrag left ctrl" data-highlight="offset" />
 #+end_export
 
-I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
+Go back to the earlier diagrams on the page. Did you notice the jump? You may not have noticed, but implementing the offset does make dragging feel better. I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
 
-** Feature: handle multitouch
+** Feature: simultaneous dragging
+:PROPERTIES:
+:CUSTOM_ID: feature-simultaneous-dragging
+:END:
 
-isPrimary vs pointer id; need to test what happens if there are two independent drags going on
+I think this is an edge case, but I was curious what it would take to support. Can we drag multiple objects at once, using different fingers or different mice?
 
-** Feature: handle simultaneous dragging
+For touch, the code I presented should already work! Go back to one of the previous demos and try it. However the code doesn't handle using two fingers to drag the /same/ object. The fix is when handling =pointerdown=, save ~event.pointerId~ to =state.dragging=. Then when handling =pointermove=, ignore the even if it's not the same =pointerId=. I don't have that implemented here, but try it out [[href:tests.html#test-2d-canvas-drag-a-handle][on my canvas dragging test]].
 
-** TODO: what about multiple buttons?
+What about mice? The [[https://www.w3.org/TR/pointerevents/#the-primary-pointer][Pointer Events spec]] says
 
-So here's a tricky one. If you are using multiple buttons at the same time, what happens? The Pointer Events spec says that the /first/ button that was pressed leads to a =pointerdown= event, and the /last/ one that was released leads to a =pointerup= event. But that means we might get a up event on a different button than the down event.
+#+begin_quote
+Current operating systems and user agents don't usually have a concept of multiple mouse inputs. When more than one mouse device is present (for instance, on a laptop with both a trackpad and an external mouse), all mouse devices are generally treated as a single device - movements on any of the devices are translated to movement of a single mouse pointer, and there is no distinction between button presses on different mouse devices. For this reason, there will usually only be a single mouse pointer, and that pointer will be primary.
+#+end_quote
+
+I think there isn't any way to drag different objects with different mice.
+
+** Fix: chorded button presses
+:PROPERTIES:
+:CUSTOM_ID: fix-chords
+:END:
+
+So here's a tricky one. If you are using multiple buttons at the same time, what happens? Mouse Events send =mousedown= for each button press and =mouseup= for each button release. But Pointer Events work differently. The [[https://www.w3.org/TR/pointerevents/#chorded-button-interactions][Pointer Events spec]] says that the /first/ button that was pressed leads to a =pointerdown= event, and the /last/ one that was released leads to a =pointerup= event. But that means we might get a up event on a different button than the down event!
 
 #+begin_src dot :cmd circo :file build/multiple-buttons.svg :exports results
 digraph {
@@ -536,36 +562,34 @@ digraph {
 #+results:
 [[file:build/multiple-buttons.svg]]
 
-This doesn't seem to be what I want, but [[https://www.w3.org/TR/pointerevents/#chorded-button-interactions][it's what Pointer Events do]]. The workaround is to check the button state in =pointermove=. But /pointer capture/ continues until you release /all/ the buttons, unless you explicitly release capture.
+| Try this                                 | Watch for | Circle 1 | Circle 2 |
+|------------------------------------------+-----------+----------+----------|
+| left down, right down, left up           | dragging  | yes ⛌    | no ✓    |
 
-Mouse Events behave the way I want but don't handle touch events.
+#+begin_export html
+<figure id="diagram-chords" class="w-full">
+  <svg viewBox="-250 -60 500 120">
+    <rect x="-250" y="-60" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Multiple button presses is tricky</figcaption>
+</figure>
+#+end_export
 
-** TODO: what about  multiple mice?
+*Try* with the mouse: press the left button, press the right button (this may bring up a context menu but ignore it), then release the left button. Is the circle still dragging?
 
-- mousedown (mouse 1)
-- mousedown (mouse 2)
-- mouseup (mouse 2)
-- I stop dragging but the mouse that started the drag is still dragging
+This is where I draw the line. I don't care to handle this or many other edge cases. The fix is to check the button state in =pointermove=.
 
-Does =PointerEvent.pointerId= help here?
+#+begin_export html
+<pre data-code="pointer" data-show="capture scroll text systemdrag left ctrl offset" data-highlight="chords" />
+#+end_export
 
-What happens when ipad is used to control mouse, or mouse is used to control ipad?
+Separately, the /pointer capture/ continues until you release /all/ the buttons, unless you explicitly release capture. I'm not handling this or many other edge cases.
 
-
-TODO: test middle clicking to drag, like some mice support on Windows and maybe Linux
-
-TODO: test left click drag, then right button down, then left/right up. Since I only have one dragging state it might get confused.
-
-https://www.w3.org/TR/pointerevents/#the-primary-pointer says
-
-#+begin_quote
-Current operating systems and user agents don't usually have a concept of multiple mouse inputs. When more than one mouse device is present (for instance, on a laptop with both a trackpad and an external mouse), all mouse devices are generally treated as a single device - movements on any of the devices are translated to movement of a single mouse pointer, and there is no distinction between button presses on different mouse devices. For this reason, there will usually only be a single mouse pointer, and that pointer will be primary.
-#+end_quote
-
-
-** TODO: test nested dragging
+** Feature: nested dragging
 
 - need =stopPropagation()= to prevent inner draggable from passing events up to outer draggable
+
+Point to demo on tests page
 
 * Vue version
 
@@ -617,9 +641,12 @@ function move(event) {
 }
 </script>
 #+end_src
+
 * Notes - event log
 
 [[href:eventlog.html][eventlog.html]]
+
+TODO: most of this should move to the other page
 
 Testing a click:
 
@@ -641,13 +668,8 @@ Testing a click:
 - Need touchstart.prevent to prevent scrolling
 - Need either pointerdown.prevent or user-select:none to prevent double click from selecting text
 
-TODO: test tablet
-
 * Variations
 
-* Notes
-
-=pointerdown= + =pointerup= will trigger =click= (left mouse button) or =auxclick= (middle mouse button) or =contextmenu= (right mouse button)
 
 #+begin_comment
 https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-executing-all-of-the-babel-source-blocks says that there's no really good way to tell org babel to regenerate the diagrams only explicitly and not automatically on export :-(
@@ -661,6 +683,11 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
     background: #eee; 
     box-shadow: 0 1px 3px 1px rgb(0 0 0 / 0.3);
     width: calc(1.2 * var(--body-width)); 
+  }
+
+  main pre {
+    /* some of my code is slightly too wide for my default width */
+    width: calc(1.1 * var(--body-width));
   }
 
   details { padding: 0 1em; }
