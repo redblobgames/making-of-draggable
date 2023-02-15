@@ -481,11 +481,26 @@ What are my options?
 
 This is not implementation specific, but a design issue. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
 
-TODO: demo both ways (although it duplicates little-details page) ; could draw something showing the pick up point
-
 | Try this                 | Watch for    | Circle 1 | Circle 2 |
 |--------------------------+--------------+----------+----------|
 | drag from edge of circle | circle jumps | yes ⛌   | no ✓    |
+
+#+begin_export html
+<figure id="diagram-offset" class="w-full">
+  <svg viewBox="-250 -60 500 120">
+    <rect x="-250" y="-60" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <figcaption>Dragging feels better if relative to the initial pickup point</figcaption>
+</figure>
+#+end_export
+
+*Try* with the mouse: drag the circle from the edge. Watch Circle 1 jump whereas Circle 2 does not. The same effect happens on touch devices but your finger might hide the jump. The fix is to change the =dragging= state from =true= / =false= to the relative position where the object was picked up, and then use that offset when later setting the position:
+
+#+begin_export html
+<pre data-code="pointer" data-show="capture scroll text systemdrag left ctrl" data-highlight="offset" />
+#+end_export
+
+I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
 
 ** Feature: handle multitouch
 

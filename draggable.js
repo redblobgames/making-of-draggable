@@ -236,10 +236,15 @@ diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, sy
 diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 125});
 options = {...options, systemdrag: true};
 
-diagram_pointer_events("#diagram-contextmenu", {...options, line2: "1", x: -175});
-diagram_pointer_events("#diagram-contextmenu", {...options, left: true, line2: "2", x: 0});
+diagram_pointer_events("#diagram-contextmenu", {...options, left: false, ctrl: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-contextmenu", {...options, left: true, ctrl: false, line2: "2", x: 0});
 diagram_pointer_events("#diagram-contextmenu", {...options, left: true, ctrl: true, line2: "3", x: 175});
 options = {...options, left: true, ctrl: true};
+
+diagram_pointer_events("#diagram-offset", {...options, offset: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-offset", {...options, offset: true, line2: "2", x: 125});
+options = {...options, offset: true};
+
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
     // show="*" selects all; otherwise list the flag names space separated
