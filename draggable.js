@@ -56,6 +56,7 @@ function makePositionState(selector, options={changeText: true}) {
     draw();
 
     let state = {
+        eventToCoordinates: convertPixelToSvgCoord,
         get dragging() {
             return dragging;
         },
@@ -88,7 +89,7 @@ function makeDraggableMouseLocal(state, el) {
     }
     function mousemove(event) {
         if (!state.dragging) return;
-        state.pos = convertPixelToSvgCoord(event, el);
+        state.pos = state.eventToCoordinates(event);
     }
     
     el.addEventListener('mousedown', mousedown);
@@ -99,7 +100,7 @@ function makeDraggableMouseLocal(state, el) {
 
 function makeDraggableMouseGlobal(state, el) {
     function globalMousemove(event) {
-        state.pos = convertPixelToSvgCoord(event, el);
+        state.pos = state.eventToCoordinates(event);
         state.dragging = true;
     }
     function globalMouseup(_event) {
@@ -127,8 +128,7 @@ function makeDraggableTouch(state, el) {
     }
     function move(event) {
         if (!state.dragging) return;
-        let {x, y} = convertPixelToSvgCoord(event.changedTouches[0], el);
-        state.pos = {x, y};
+        state.pos = state.eventToCoordinates(event.changedTouches[0]);
     }
     
     el.addEventListener('touchstart', start);
@@ -159,7 +159,7 @@ function makeDraggable(state, el, options) {
     function start(event) {
         if (options.left) if (event.button !== 0) return; // left button only
         if (options.ctrl) if (event.ctrlKey) return; // ignore ctrl+click
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
         if (!options.offset) state.dragging = true;
         if (options.capture) el.setPointerCapture(event.pointerId);
@@ -175,7 +175,7 @@ function makeDraggable(state, el, options) {
     function move(event) {
         if (!state.dragging) return;
         if (options.chords) if (!(event.buttons & 1)) return end(event); // edge case: chords
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
         if (!options.offset) state.pos = {x, y};
     }
