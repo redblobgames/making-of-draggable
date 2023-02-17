@@ -1,9 +1,15 @@
 #+title: Draggable objects, 2022
 #+date: <2022-12-23 Fri>
-#+draft: t
+#+property: header-args:dot    :cache yes
 #+options: toc:nil
 
-Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's what I want to support:
+{{ TODO: need to check for I/we usage }}
+
+{{ TODO: maybe each Fix should start from a completely fixed state and compare to that one aspect broken, instead of being a linear progression on this page }}
+
+{{ TODO: probably want to move this into /making-of/draggable/ and have two pages, one for how to read events and one for what kinds of things to drag. but some of the fixes depend on what you're dragging, so is it really orthogonal? main page could have a complete example of svg drag }}
+
+Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's one of the things I want to support:
 
 #+begin_export html
 <figure id="diagram-introduction">
@@ -13,6 +19,10 @@ Many of my interactive pages have a /draggable object/. I want the reader to mov
   <figcaption>Drag the circle with mouse or touch</figcaption>
 </figure>
 #+end_export
+
+{{ TODO: maybe add demos for canvas drawing, slider, constrained slider, scrubbables }}
+
+{{ TODO: if I want the generic code to work for non-svg I need to move the x,y handling out }}
 
 #+toc: headlines 1
 
@@ -29,7 +39,7 @@ By 2012 MS IE had added support for <a href="https://developer.mozilla.org/en-US
 
 <p>
 Over the years browsers have changed the rules, including in 2017 when
-<a href="https://developer.chrome.com/blog/scrolling-intervention/">Chrome changed some events to default to passive mode</a> which causes the page to scroll while you're trying to drag the object. This <a href="https://github.com/WICG/interventions/issues/18#issuecomment-276531695">broke some pages</a>. Safari <a href="https://github.com/WICG/interventions/issues/18#issuecomment-368703063">made this change in 2018</a>. Firefox maintained backwards compatibility.
+<a href="https://developer.chrome.com/blog/scrolling-intervention/">Chrome changed some events to default to passive mode</a> which causes the page to scroll while you're trying to drag the object. This <a href="https://github.com/WICG/interventions/issues/18#issuecomment-276531695">broke some pages</a>. Safari <a href="https://github.com/WICG/interventions/issues/18#issuecomment-368703063">made this change in 2018</a>. Firefox also <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1449268">made this change in 2018</a>.
 </p>
 </details>
 #+end_export
@@ -50,7 +60,7 @@ digraph {
 }
 #+end_src
 
-#+results:
+#+results[991524cd9317998d0e198d7e8dc0bc24adf7e944]:
 [[file:build/state.svg]]
 
 However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations. Right click can trigger the context menu. Here's the code I ended up with:
@@ -61,7 +71,7 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 
 On the rest of the page I'll show the code that didn't work, and explain how to fix it.
 
-* Mouse events only
+* 🖱️ Mouse events only
 :PROPERTIES:
 :CUSTOM_ID: mouse-events
 :END:
@@ -80,6 +90,9 @@ digraph {
     dragging -> initial [label = "mouseup"];
 }
 #+end_src
+
+#+results[71df718c29f81b2b7fe3ed71be1e8660a77fe531]:
+[[file:build/mouse-local.svg]]
 
 #+begin_export html
 <pre data-code="mouseLocal" />
@@ -115,7 +128,7 @@ digraph {
 }
 #+end_src
 
-#+results:
+#+results[1da58aac6eae43ea397f1a1cea38b924ef09bc75]:
 [[file:build/mouse-document.svg]]
 
 #+begin_export html
@@ -132,19 +145,14 @@ Try it out. It works better.
 </figure>
 #+end_export
 
-There are still a few issues, which we'll solve one by one.
+This code doesn't handle touch events.
 
-- This code doesn't handle touch events.
-- The text can get selected while trying to drag the circle.
-- If you the text around the diagram, the drag can apply to the text instead of the circle.
-- Right clicking the circle will bring up a context menu, which leaves the circle stuck in drag mode.
-
-* Touch events
+* 👆 Touch events
 :PROPERTIES:
 :CUSTOM_ID: touch-events
 :END:
 
-Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example. If for any reason the browser needs to cancel the touch sequence, it sends =touchcancel=.
+Mouse events use =mousedown=, =mouseup=, =mousemove=. Touch events instead use =touchstart=, =touchend=, =touchmove=. They behave a little differently. Touch events automatically /capture/ on =touchstart= and direct all =touchmove= events to the original element. This means we /don't/ have to temporarily put an event handler on =document=. We can go back to the logic in the first mouse example. If for any reason the browser needs to cancel the touch sequence, it sends =touchcancel=.
 
 #+begin_src dot :file build/touch.svg :exports results
 digraph {
@@ -159,6 +167,9 @@ digraph {
     dragging -> initial [label = "touchcancel"];
 }
 #+end_src
+
+#+results[c21ec827fee2ef766513f11db71221e50642a3c8]:
+[[file:build/touch.svg]]
 
 #+begin_export html
 <pre data-code="touch" />
@@ -175,12 +186,9 @@ digraph {
 </figure>
 #+end_export
 
-There are a few problems to deal with:
+This code doesn't handle mouse events.
 
-- When dragging the circle around, the page will scroll. That's because /both/ our drag handler /and/ the browser's scroll handler are active.
-- Long pressing on the text will select it or bring up a context menu. This leaves us stuck in the dragging state.
-
-* Pointer events
+* 🖱️👆 Pointer events
 :PROPERTIES:
 :CUSTOM_ID: pointer-events
 :END:
@@ -204,7 +212,7 @@ digraph {
 }
 #+end_src
 
-#+results:
+#+results[ebfb20a7876c5caa28f66545f4c1bfb0fb026007]:
 [[file:build/mouse-and-touch.svg]]
 
 Pointer events attempt to unify mouse and touch events. The [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][pointer capture]] feature lets us use the simpler logic that doesn't require us to add/remove global event handlers to the document like we had to with mouse events.
@@ -223,7 +231,7 @@ digraph {
 }
 #+end_src
 
-#+results:
+#+results[b49c70a53e869d89d167a8d9d477b40c561de00e]:
 [[file:build/pointer.svg]]
 
 #+begin_export html
@@ -241,9 +249,9 @@ Much simpler! *Try* the demo with either a mouse or touch device:
 </figure>
 #+end_export
 
-Circle 1 uses the code above, but needs improvement. Circle 2 uses the code from the top of the page, and behaves much better. Let's go through each of the fixes—
+Circle 1 uses the naive code above, and has several issues. Circle 2 uses the complete code from the top of the page, and behaves much better.
 
-** Fix: scrolling with touch
+** 👆 Fix: scrolling with touch
 :PROPERTIES:
 :CUSTOM_ID: touch-action
 :END:
@@ -286,9 +294,9 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 <pre data-code="pointer" data-show="capture" data-highlight="scroll" />
 #+end_export
 
-Note that the ~.preventDefault()~ needs to be on =touchstart=, not on =pointerstart=. In Canvas and WebGL, check that the pointer is on the circle and conditionally prevent default.
+Note that the ~.preventDefault()~ needs to be on =touchstart=, not on =pointerstart=.
 
-** Fix: capture the mouse
+** 🖱️ Fix: capture the mouse
 :PROPERTIES:
 :CUSTOM_ID: fix-capture
 :END:
@@ -318,7 +326,21 @@ The pointer capture feature lets us track the pointer even when it's not on the 
 <pre data-code="pointer" data-show="scroll" data-highlight="capture" />
 #+end_export
 
-** Fix: text selection
+** 🖱️ TODO: move drag offset here?
+
+It would apply even if you don't have text
+
+** 🖱️ TODO: move contextmenu here?
+
+It seems like a "tier 1" feature
+
+maybe need lostpointercapture too
+
+* 🖱️ TODO: Text section?
+
+These fixes are only needed if you have text inside your draggable.
+
+** 🖱️ Fix: text selection
 :PROPERTIES:
 :CUSTOM_ID: fix-user-select
 :END:
@@ -345,7 +367,7 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 <pre data-code="pointer" data-show="capture scroll" data-highlight="text" />
 #+end_export
 
-** Fix: text and image drag
+** 🖱️ Fix: text and image drag
 :PROPERTIES:
 :CUSTOM_ID: fix-systemdrag
 :END:
@@ -375,7 +397,9 @@ around the diagram, then drag Circle 1. On most desktop systems I've tested, tex
 <pre data-code="pointer" data-show="capture scroll text" data-highlight="systemdrag" />
 #+end_export
 
-** Fix: context menu
+* More cases
+
+** 🖱️ Fix: context menu
 :PROPERTIES:
 :CUSTOM_ID: fix-contextmenu
 :END:
@@ -486,7 +510,7 @@ What are my options?
 This solution also handles middle button down/click, which is used for scrolling on some systems.
 Another option is to ~.preventDefault()~ on =contextmenu=, and allow dragging with the right button, but that doesn't handle the middle button.
 
-** Feature: handle drag offset
+** 🖱️ Feature: handle drag offset
 :PROPERTIES:
 :CUSTOM_ID: feature-offset
 :END:
@@ -514,7 +538,7 @@ This is not implementation specific, but a design issue. If you pick up the edge
 
 Go back to the earlier diagrams on the page. Did you notice the jump? You may not have noticed, but implementing the offset does make dragging feel better. I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
 
-** Feature: simultaneous dragging
+** 👆 Feature: simultaneous dragging
 :PROPERTIES:
 :CUSTOM_ID: feature-simultaneous-dragging
 :END:
@@ -531,7 +555,7 @@ Current operating systems and user agents don't usually have a concept of multip
 
 I think there isn't any way to drag different objects with different mice.
 
-** Fix: chorded button presses
+** 🖱️ Fix: chorded button presses
 :PROPERTIES:
 :CUSTOM_ID: fix-chords
 :END:
@@ -559,7 +583,7 @@ digraph {
 }
 #+end_src
 
-#+results:
+#+results[974b4e4064456c061ab84975906795dca1a33cc5]:
 [[file:build/multiple-buttons.svg]]
 
 | Try this                                 | Watch for | Circle 1 | Circle 2 |
@@ -585,11 +609,23 @@ This is where I draw the line. I don't care to handle this or many other edge ca
 
 Separately, the /pointer capture/ continues until you release /all/ the buttons, unless you explicitly release capture. I'm not handling this or many other edge cases.
 
-** Feature: nested dragging
+** 🖱️👆 Feature: nested dragging
 
 - need =stopPropagation()= to prevent inner draggable from passing events up to outer draggable
 
 Point to demo on tests page
+
+TODO: this should go into the "things you can drag" but it does affect the event handling, so I'm not sure what to do about that.
+
+** 🖱️👆 Feature: dragging on canvas
+:PROPERTIES:
+:CUSTOM_ID: feature-canvas
+:END:
+
+I normally work with SVG, but if working with a =<canvas>= (either 2D Canvas or WebGL), I can't set the event handlers or mouse pointer shape on the /draggable/ element only. So I set the event handler on the =<canvas>= and then:
+
+1. =pointerdown=, =touchstart=, =dragstart=: early ~return~ if not over a draggable object
+2. =pointermove=: set the cursor based on whether it's over a draggable object
 
 * Vue version
 
@@ -671,11 +707,6 @@ Testing a click:
 * Variations
 
 
-#+begin_comment
-https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-executing-all-of-the-babel-source-blocks says that there's no really good way to tell org babel to regenerate the diagrams only explicitly and not automatically on export :-(
-#+end_comment
-
-
 #+begin_export html
 <style>
   main svg { 
@@ -732,6 +763,6 @@ https://stackoverflow.com/questions/29952543/how-do-i-prevent-org-mode-from-exec
   Created 23 Dec 2022
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 14 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 16 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

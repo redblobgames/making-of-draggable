@@ -36,6 +36,7 @@ function makePositionState(selector, options={changeText: true}) {
         <text dy="1.0em">${options.line2 ?? 'me'}</text>
       </g>`;
     svg.appendChild(el);
+    el.style.userSelect = 'none'; // default to none for the demos where it doesn't matter
 
     let dragging = null; // either null or value set by handler
     let pos = {x: options.x ?? 0, y: options.y ?? 0};
@@ -117,7 +118,8 @@ function makeDraggableMouseGlobal(state, el) {
 
 
 function makeDraggableTouch(state, el) {
-    function start(_event) {
+    function start(event) {
+        event.preventDefault(); // prevent scrolling
         state.dragging = true;
     }
     function end(_event) {
@@ -144,6 +146,7 @@ function makeOptions() {
         capture: true,
         left: true,
         ctrl: true,
+        lostcapture: true,
         offset: true,
         text: true,
         scroll: true,
@@ -154,24 +157,24 @@ function makeOptions() {
 
 function makeDraggable(state, el, options) {
     function start(event) {
-        if (options.left) if (event.button !== 0) return;
-        if (options.ctrl) if (event.ctrlKey) return;
+        if (options.left) if (event.button !== 0) return; // left button only
+        if (options.ctrl) if (event.ctrlKey) return; // ignore ctrl+click
         let {x, y} = convertPixelToSvgCoord(event);
         if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
         if (!options.offset) state.dragging = true;
         if (options.capture) el.setPointerCapture(event.pointerId);
-        if (options.text) el.style.userSelect = 'none';
+        if (options.text) el.style.userSelect = 'none'; // if there's text
     }
 
     function end(event) {
         if (options.offset) state.dragging = null;
         if (!options.offset) state.dragging = false;
-        if (options.text) el.style.userSelect = '';
+        if (options.text) el.style.userSelect = ''; // if there's text
     }
 
     function move(event) {
         if (!state.dragging) return;
-        if (options.chords) if (!(event.buttons & 1)) return end(event);
+        if (options.chords) if (!(event.buttons & 1)) return end(event); // edge case: chords
         let {x, y} = convertPixelToSvgCoord(event);
         if (options.offset) state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
         if (!options.offset) state.pos = {x, y};
@@ -181,9 +184,9 @@ function makeDraggable(state, el, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-    if (options.capture) el.addEventListener('lostpointercapture', end); // optional
-    if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault());
-    if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault());
+    if (options.lostcapture) el.addEventListener('lostpointercapture', end); // TODO: is this for contextmenu?
+    if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault()); // prevent scrolling
+    if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault()); // prevent system drag
 }
 
 function diagram_mouse_events_local() {
@@ -214,7 +217,7 @@ diagram_pointer_events("#diagram-introduction", makeOptions());
 
 // These diagrams are presented in order, each one building upon the last
 let options = {changeText: true, capture: true};
-diagram_pointer_events("#diagram-pointer-events", {...options, x: -125, line1: "1"});
+diagram_pointer_events("#diagram-pointer-events", {...options, x: -125, line2: "1"});
 diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 125, line2: "2"});
 
 diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line2: "1"});
