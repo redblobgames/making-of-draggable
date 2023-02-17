@@ -62,9 +62,7 @@ https://github.com/WICG/auxclick/issues/1 - says contextmenu should be after mou
 
 https://w3c.github.io/uievents/#event-type-auxclick
 
-On Mac, ctrl+click triggers =contextmenu= without triggering up/down or click events.
-
-[[https://bugs.chromium.org/p/chromium/issues/detail?id=1264930]] → a =contextmenu= should produce a PointerEvent that has =.pointerId= the same as the id of the event that produced that menu. It is fixed on Chrome but it is undefined on Firefox, because [[https://wpt.fyi/results/pointerevents/pointerevent_contextmenu_is_a_pointerevent.html%3Fmouse?label=master&label=experimental&view=subtest][Firefox 110 and Safari 13 produce a MouseEvent not a PointerEvent]].
+https://bugs.chromium.org/p/chromium/issues/detail?id=1264930]] → a =contextmenu= should produce a PointerEvent that has =.pointerId= the same as the id of the event that produced that menu. It is fixed on Chrome but it is undefined on Firefox, because [[https://wpt.fyi/results/pointerevents/pointerevent_contextmenu_is_a_pointerevent.html%3Fmouse?label=master&label=experimental&view=subtest][Firefox 110 and Safari 13 produce a MouseEvent not a PointerEvent]].
 
 [[https://bugs.chromium.org/p/chromium/issues/detail?id=958776]] → asks for =contextmenu= to fire =pointercancel=. It can't fire =pointerup= because that looks like a =click=.
 
@@ -82,6 +80,7 @@ https://navidz.github.io/pointerrawupdate.html - experimental, in chrome/edge bu
 
 https://www.w3.org/TR/pointerevents3/#mapping-for-devices-that-support-hover
 
+- =lostpointercapture= might be useful to track
 
 [[https://wpt.fyi/results/pointerevents][List of pointer event tests and whether they pass in each browser and each device type]]
 

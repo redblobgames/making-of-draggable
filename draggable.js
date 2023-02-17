@@ -146,7 +146,6 @@ function makeOptions() {
         capture: true,
         left: true,
         ctrl: true,
-        lostcapture: true,
         offset: true,
         text: true,
         scroll: true,
@@ -184,7 +183,6 @@ function makeDraggable(state, el, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-    if (options.lostcapture) el.addEventListener('lostpointercapture', end); // TODO: is this for contextmenu?
     if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault()); // prevent scrolling
     if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault()); // prevent system drag
 }
