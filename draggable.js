@@ -150,7 +150,7 @@ function makeOptions() {
         text: true,
         scroll: true,
         systemdrag: true,
-        chords: true,
+        chords: false,
     };
 }
 
@@ -213,44 +213,43 @@ diagram_mouse_events_document();
 diagram_touch_events();
 diagram_pointer_events("#diagram-introduction", makeOptions());
 
-// These diagrams are presented in order, each one building upon the last
-let options = {changeText: true, capture: true};
-diagram_pointer_events("#diagram-pointer-events", {...options, x: -125, line2: "1"});
+// This diagram shows lots of broken things at once
+diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true, x: -125, line2: "1"});
 diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 125, line2: "2"});
 
-diagram_pointer_events("#diagram-touch-action-all", {...options, changeText: false, line2: "1"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "2", x: -175});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: false, line2: "3", x: 0, class: "touch-none"});
-diagram_pointer_events("#diagram-touch-action", {...options, scroll: true, line2: "4", x: 175});
-options = {...options, scroll: true};
+// Show how to fix scrolling
+diagram_pointer_events("#diagram-touch-action-all", {...makeOptions(), scroll: false, changeText: false, line2: "1"});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: false, line2: "2", x: -175});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: false, line2: "3", x: 0, class: "touch-none"});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: true, line2: "4", x: 175});
 
-diagram_pointer_events("#diagram-capture", {...options, capture: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-capture", {...options, capture: true, line2: "2", x: 125});
-options = {...options, capture: true};
+// Show how capture is important
+diagram_pointer_events("#diagram-capture", {...makeOptions(), capture: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-capture", {...makeOptions(), capture: true, line2: "2", x: 125});
 
-diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...options, changeText: false, text: true, line2: "3", x: 175});
-options = {...options, text: true};
+// Show how it's better to track the offset
+diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: true, line2: "2", x: 125});
 
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -125});
-diagram_pointer_events("#diagram-systemdrag", {...options, changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 125});
-options = {...options, systemdrag: true};
+// Show how to handle the context menu
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, ctrl: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, ctrl: false, line2: "2 (Mac)", x: 0});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, ctrl: true, line2: "3", x: 175});
 
-diagram_pointer_events("#diagram-contextmenu", {...options, left: false, ctrl: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-contextmenu", {...options, left: true, ctrl: false, line2: "2", x: 0});
-diagram_pointer_events("#diagram-contextmenu", {...options, left: true, ctrl: true, line2: "3", x: 175});
-options = {...options, left: true, ctrl: true};
+// Show how to fix text selection
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: false, line2: "2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: true, line2: "3", x: 175});
 
-diagram_pointer_events("#diagram-offset", {...options, offset: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-offset", {...options, offset: true, line2: "2", x: 125});
-options = {...options, offset: true};
+// Show how to fix system drag
+diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -125});
+diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 125});
 
-diagram_pointer_events("#diagram-chords", {...options, chords: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-chords", {...options, chords: true, line2: "2", x: 125});
-options = {...options, chords: true};
+// Show how to fix the edge case of chords
+diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2: "2", x: 125});
 
-// END of diagrams; options should have everything set
+// END of diagrams
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {

@@ -5,10 +5,6 @@
 
 {{ TODO: need to check for I/we usage }}
 
-{{ TODO: maybe each Fix should start from a completely fixed state and compare to that one aspect broken, instead of being a linear progression on this page }}
-
-{{ TODO: probably want to move this into /making-of/draggable/ and have two pages, one for how to read events and one for what kinds of things to drag. but some of the fixes depend on what you're dragging, so is it really orthogonal? main page could have a complete example of svg drag }}
-
 Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's one of the things I want to support:
 
 #+begin_export html
@@ -285,7 +281,7 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 
 *Try* these on a touch device. 
 
-- The earlier demo with Circle 1 (~touch-action: none~ on the diagram) stops scrolling on the circle and also on the diagram. 
+- Circle 1 (~touch-action: none~ on the diagram) stops scrolling on the circle and also on the diagram.
 - Circle 2 (default) doesn't stop scrolling on either. 
 - Circle 3 (~touch-action: none~ on the circle only) behaves badly. It looks like the CSS has to be on the diagram to have an effect; applying it only to the circle is not enough. 
 - Circle 4 (~.preventDefault()~ on =touchstart=) behaves the way I want, and this is the code for it:
@@ -320,84 +316,39 @@ The pointer capture feature lets us track the pointer even when it's not on the 
 </figure>
 #+end_export
 
-*Try* this demo with a mouse. Touch devices automatically capture so they won't show a difference here. Pointer capture requires one additional line of code for common cases, or a second to handle some edge cases:
+*Try* this demo with a mouse. Touch devices automatically capture so they won't show a difference here. Pointer capture requires one additional line of code:
 
 #+begin_export html
 <pre data-code="pointer" data-show="scroll" data-highlight="capture" />
 #+end_export
 
-** 🖱️ TODO: move drag offset here?
-
-It would apply even if you don't have text
-
-** 🖱️ TODO: move contextmenu here?
-
-It seems like a "tier 1" feature
-
-maybe need lostpointercapture too
-
-* 🖱️ TODO: Text section?
-
-These fixes are only needed if you have text inside your draggable.
-
-** 🖱️ Fix: text selection
+** 🖱️ Feature: handle drag offset
 :PROPERTIES:
-:CUSTOM_ID: fix-user-select
+:CUSTOM_ID: feature-offset
 :END:
 
-When dragging the circle, the text inside gets selected sometimes. To fix this, use CSS ~user-select: none~ on the circle. There are two choices: either we can apply it /all/ the time, or apply it /only/ while dragging. If I apply it all the time, then the text won't ever be selectable.
+This is not about the events we receive from the browser, but how to handle them. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
 
-| Try this        | Watch for        | Circle 1 | Circle 2 | Circle 3 |
-|-----------------+------------------+----------+----------+----------|
-| drag circle     | text is selected | yes ⛌   | no ✓    | no ✓    |
-| select all text | text is selected | yes     | no       | yes     |
+| Try this                 | Watch for    | Circle 1 | Circle 2 |
+|--------------------------+--------------+----------+----------|
+| drag from edge of circle | circle jumps | yes ⛌   | no ✓    |
 
 #+begin_export html
-<figure id="diagram-text-select" class="w-full">
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+<figure id="diagram-offset" class="w-full">
+  <svg viewBox="-250 -60 500 120">
+    <rect x="-250" y="-60" width="100%" height="100%" fill="url(#pattern-dots)" />
   </svg>
-  <figcaption>Dragging affects text selection</figcaption>
+  <figcaption>Dragging feels better if relative to the initial pickup point</figcaption>
 </figure>
 #+end_export
 
-*Try* dragging Circle 1 with the mouse a few times and you'll see sometimes the text gets selected. With touch devices, long press can select the text. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
+*Try* with the mouse: drag the circle from the edge. Watch Circle 1 jump whereas Circle 2 does not. The same effect happens on touch devices but your finger might hide the jump. The fix is to change the =dragging= state from =true= / =false= to the relative position where the object was picked up, and then use that offset when later setting the position:
 
 #+begin_export html
-<pre data-code="pointer" data-show="capture scroll" data-highlight="text" />
+<pre data-code="pointer" data-show="capture scroll text systemdrag left ctrl" data-highlight="offset" />
 #+end_export
 
-** 🖱️ Fix: text and image drag
-:PROPERTIES:
-:CUSTOM_ID: fix-systemdrag
-:END:
-
-Windows, Linux, and Mac support inter-application /drag and drop/ of text and images, and an alternative to copy/paste. This interferes with the object dragging on my pages. The fix is to ~preventDefault()~ on =dragstart=.
-
-| Try this                 | Watch for       | Circle 1 | Circle 2 |
-|--------------------------+-----------------+----------+----------|
-| select text, drag circle | page text drags | yes ⛌    | no ✓    |
-
-#+begin_export html
-<figure id="diagram-systemdrag" class="w-full">
-  <div><b>Select text</b> → <tt>[from here</tt></div>
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-  </svg>
-  <div><tt>to here]</tt> ←</div>
-  <figcaption>Selected text interferes with dragging</figcaption>
-</figure>
-#+end_export
-
-*Try* this demo with a mouse.
-@@html:<button onclick="diagramSystemDragSetSelection()">Select the text</button>@@
-around the diagram, then drag Circle 1. On most desktop systems I've tested, text or image dragging takes priority over the circle dragging by default. Circle 2 prioritizes the circle dragging. Behavior varies a little bit across browsers and operating systems. The fix is one extra line:
-
-#+begin_export html
-<pre data-code="pointer" data-show="capture scroll text" data-highlight="systemdrag" />
-#+end_export
-
-* More cases
+Tracking the offset does make dragging feel better. I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
 
 ** 🖱️ Fix: context menu
 :PROPERTIES:
@@ -510,33 +461,69 @@ What are my options?
 This solution also handles middle button down/click, which is used for scrolling on some systems.
 Another option is to ~.preventDefault()~ on =contextmenu=, and allow dragging with the right button, but that doesn't handle the middle button.
 
-** 🖱️ Feature: handle drag offset
+* 🖱️ TODO: Text section?
+
+These fixes are only needed if you have text inside your draggable.
+
+** 🖱️ Fix: text selection
 :PROPERTIES:
-:CUSTOM_ID: feature-offset
+:CUSTOM_ID: fix-user-select
 :END:
 
-This is not implementation specific, but a design issue. If you pick up the edge of the circle then you want to keep holding it at /that/ point, not from the center. The solution is to remember where the center is relative to where you started the drag. Then when you move the object, you add that offset back in.
+When dragging the circle, the text inside gets selected sometimes. To fix this, use CSS ~user-select: none~ on the circle. There are two choices: either we can apply it /all/ the time, or apply it /only/ while dragging. If I apply it all the time, then the text won't ever be selectable.
 
-| Try this                 | Watch for    | Circle 1 | Circle 2 |
-|--------------------------+--------------+----------+----------|
-| drag from edge of circle | circle jumps | yes ⛌   | no ✓    |
+| Try this        | Watch for        | Circle 1 | Circle 2 | Circle 3 |
+|-----------------+------------------+----------+----------+----------|
+| drag circle     | text is selected | yes ⛌   | no ✓    | no ✓    |
+| select all text | text is selected | yes     | no       | yes     |
 
 #+begin_export html
-<figure id="diagram-offset" class="w-full">
-  <svg viewBox="-250 -60 500 120">
-    <rect x="-250" y="-60" width="100%" height="100%" fill="url(#pattern-dots)" />
+<figure id="diagram-text-select" class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
   </svg>
-  <figcaption>Dragging feels better if relative to the initial pickup point</figcaption>
+  <figcaption>Dragging affects text selection</figcaption>
 </figure>
 #+end_export
 
-*Try* with the mouse: drag the circle from the edge. Watch Circle 1 jump whereas Circle 2 does not. The same effect happens on touch devices but your finger might hide the jump. The fix is to change the =dragging= state from =true= / =false= to the relative position where the object was picked up, and then use that offset when later setting the position:
+*Try* dragging Circle 1 with the mouse a few times and you'll see sometimes the text gets selected. With touch devices, long press can select the text. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
 
 #+begin_export html
-<pre data-code="pointer" data-show="capture scroll text systemdrag left ctrl" data-highlight="offset" />
+<pre data-code="pointer" data-show="capture scroll" data-highlight="text" />
 #+end_export
 
-Go back to the earlier diagrams on the page. Did you notice the jump? You may not have noticed, but implementing the offset does make dragging feel better. I've also written about this [[href:/making-of/little-things/#drag-point][on my page about little details]].
+** 🖱️ Fix: text and image drag
+:PROPERTIES:
+:CUSTOM_ID: fix-systemdrag
+:END:
+
+Windows, Linux, and Mac support inter-application /drag and drop/ of text and images, and an alternative to copy/paste. This interferes with the object dragging on my pages. The fix is to ~preventDefault()~ on =dragstart=.
+
+| Try this                 | Watch for       | Circle 1 | Circle 2 |
+|--------------------------+-----------------+----------+----------|
+| select text, drag circle | page text drags | yes ⛌    | no ✓    |
+
+#+begin_export html
+<figure id="diagram-systemdrag" class="w-full">
+  <div><b>Select text</b> → <tt>[from here</tt></div>
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+  </svg>
+  <div><tt>to here]</tt> ←</div>
+  <figcaption>Selected text interferes with dragging</figcaption>
+</figure>
+#+end_export
+
+*Try* this demo with a mouse.
+@@html:<button onclick="diagramSystemDragSetSelection()">Select the text</button>@@
+around the diagram, then drag Circle 1. On most desktop systems I've tested, text or image dragging takes priority over the circle dragging by default. Circle 2 prioritizes the circle dragging. Behavior varies a little bit across browsers and operating systems. The fix is one extra line:
+
+#+begin_export html
+<pre data-code="pointer" data-show="capture scroll text" data-highlight="systemdrag" />
+#+end_export
+
+* More cases
+
 
 ** 👆 Feature: simultaneous dragging
 :PROPERTIES:
@@ -763,6 +750,6 @@ Testing a click:
   Created 23 Dec 2022
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 16 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 17 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
