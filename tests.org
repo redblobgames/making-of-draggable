@@ -18,7 +18,7 @@ Things to try with a mouse:
 - Drag with the left button, then hold down right button, continue drag, then release left button, then move mouse, then release right button {should stop dragging when releasing left button; I want a different behavior from [[http://wpt.live/pointerevents/pointerevent_pointercapture-not-lost-in-chorded-buttons.html][this test]]}
 - Chords¹: drag with the left button, then hold down Ctrl, then release the left button {Mac/Firefox behaves differently, giving =pointerdown.left= and then =pointerup.right= whereas other browsers give =pointerdown.left= and =pointerup.left=}
 - While dragging, Alt+Tab (Cmd+Tab) to switch windows, then let go of the mouse button {should stop dragging}
-- While dragging, use keyboard to scroll {should still be dragging²}
+- While dragging, use keyboard to scroll {should still be dragging² ⁵}
 - While dragging, use scrollwheel to scroll {should still be dragging²}
 - While dragging, use middle button to scroll {should still be dragging²}
 - While dragging, resize the window {should still be dragging²}
@@ -47,7 +47,7 @@ Notes:
 - ²it won't update until you nudge the mouse pointer
 - ³this is a limitation of the OS level mouse handling
 - ⁴I have a solution but rarely use it
-
+- ⁵Firefox will fire =mouseover=, =mouseenter= whereas Chrome will fire =pointerover=, =pointerenter=, =mouseover=, =mouseenter=. There are a lot of differences in over/enter events but I haven't investigated them yet.
 
 * Test: SVG single element
 :PROPERTIES:

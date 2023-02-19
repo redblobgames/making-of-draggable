@@ -36,7 +36,6 @@ function makePositionState(selector, options={changeText: true}) {
         <text dy="1.0em">${options.line2 ?? 'me'}</text>
       </g>`;
     svg.appendChild(el);
-    el.style.userSelect = 'none'; // default to none for the demos where it doesn't matter
 
     let dragging = null; // either null or value set by handler
     let pos = {x: options.x ?? 0, y: options.y ?? 0};
@@ -56,7 +55,9 @@ function makePositionState(selector, options={changeText: true}) {
     draw();
 
     let state = {
-        eventToCoordinates: convertPixelToSvgCoord,
+        eventToCoordinates(event) {
+            return convertPixelToSvgCoord(event, el);
+        },
         get dragging() {
             return dragging;
         },
@@ -144,12 +145,12 @@ function makeOptions() {
         y: 0,
         changeText: true,
         capture: true,
-        left: true,
-        ctrl: true,
         offset: true,
-        text: true,
-        scroll: true,
-        systemdrag: true,
+        left: true,
+        noctrl: true,
+        noselect: true,
+        noscroll: true,
+        nosystemdrag: true,
         chords: false,
     };
 }
@@ -157,18 +158,18 @@ function makeOptions() {
 function makeDraggable(state, el, options) {
     function start(event) {
         if (options.left) if (event.button !== 0) return; // left button only
-        if (options.ctrl) if (event.ctrlKey) return; // ignore ctrl+click
+        if (options.noctrl) if (event.ctrlKey) return; // ignore ctrl+click
         let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
         if (!options.offset) state.dragging = true;
         if (options.capture) el.setPointerCapture(event.pointerId);
-        if (options.text) el.style.userSelect = 'none'; // if there's text
+        if (options.noselect) el.style.userSelect = 'none'; // if there's text
     }
 
     function end(event) {
         if (options.offset) state.dragging = null;
         if (!options.offset) state.dragging = false;
-        if (options.text) el.style.userSelect = ''; // if there's text
+        if (options.noselect) el.style.userSelect = ''; // if there's text
     }
 
     function move(event) {
@@ -183,8 +184,8 @@ function makeDraggable(state, el, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-    if (options.scroll) el.addEventListener('touchstart', (e) => e.preventDefault()); // prevent scrolling
-    if (options.systemdrag) el.addEventListener('dragstart', (e) => e.preventDefault()); // prevent system drag
+    if (options.noscroll) el.addEventListener('touchstart', (e) => e.preventDefault()); // prevent scrolling
+    if (options.nosystemdrag) el.addEventListener('dragstart', (e) => e.preventDefault()); // prevent system drag
 }
 
 function diagram_mouse_events_local() {
@@ -213,15 +214,14 @@ diagram_mouse_events_document();
 diagram_touch_events();
 diagram_pointer_events("#diagram-introduction", makeOptions());
 
-// This diagram shows lots of broken things at once
-diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true, x: -125, line2: "1"});
-diagram_pointer_events("#diagram-pointer-events", {...makeOptions(), x: 125, line2: "2"});
+// This demo has the minimal fixes (capture, noscroll)
+diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true, noscroll: true, noselect: true});
 
 // Show how to fix scrolling
-diagram_pointer_events("#diagram-touch-action-all", {...makeOptions(), scroll: false, changeText: false, line2: "1"});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: false, line2: "2", x: -175});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: false, line2: "3", x: 0, class: "touch-none"});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), scroll: true, line2: "4", x: 175});
+diagram_pointer_events("#diagram-touch-action-all", {...makeOptions(), noscroll: false, changeText: false, line2: "1"});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: false, line2: "2", x: -175});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: false, line2: "3", x: 0, class: "touch-none"});
+diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: true, line2: "4", x: 175});
 
 // Show how capture is important
 diagram_pointer_events("#diagram-capture", {...makeOptions(), capture: false, line2: "1", x: -125});
@@ -232,18 +232,18 @@ diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: false, line
 diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: true, line2: "2", x: 125});
 
 // Show how to handle the context menu
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, ctrl: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, ctrl: false, line2: "2 (Mac)", x: 0});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, ctrl: true, line2: "3", x: 175});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: false, line2: "2 (Mac)", x: 0});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: true, line2: "3", x: 175});
 
 // Show how to fix text selection
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, text: true, line2: "3", x: 175});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "1", x: -175});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: true, line2: "3", x: 175});
 
 // Show how to fix system drag
-diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, systemdrag: false, text: false, line1: "", line2: "1", x: -125});
-diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, systemdrag: true, text: true, line1: "", line2: "2", x: 125});
+diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, nosystemdrag: false, text: false, line1: "", line2: "1", x: -125});
+diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, nosystemdrag: true, text: true, line1: "", line2: "2", x: 125});
 
 // Show how to fix the edge case of chords
 diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: false, line2: "1", x: -125});
@@ -253,9 +253,9 @@ diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2
 
 // Generate and syntax highlight sample code
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
-    // show="*" selects all; otherwise list the flag names space separated
+    // show= should be a list of flag names to show
     let show = codeOutput.dataset.show ?? "";
-    let options = show === '*'? makeOptions() : {};
+    let options = {};
     for (let option of show.split(" ")) {
         options[option] = true;
     }
