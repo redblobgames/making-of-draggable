@@ -145,12 +145,15 @@ function makeOptions() {
         y: 0,
         changeText: true,
         capture: true,
+        nopropagate: false,
         offset: true,
         left: true,
         noctrl: true,
         noselect: true,
         noscroll: true,
         nosystemdrag: true,
+        nocontextmenu: false,
+        pointerid: false,
         chords: false,
     };
 }
@@ -159,9 +162,11 @@ function makeDraggable(state, el, options) {
     function start(event) {
         if (options.left) if (event.button !== 0) return; // left button only
         if (options.noctrl) if (event.ctrlKey) return; // ignore ctrl+click
+        if (options.nopropagate) event.stopPropagation(); // for nested draggables
         let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
         if (!options.offset) state.dragging = true;
+        if (options.pointerid) state.pointerId = event.pointerId; // keep track of finger
         if (options.capture) el.setPointerCapture(event.pointerId);
         if (options.noselect) el.style.userSelect = 'none'; // if there's text
     }
@@ -174,6 +179,8 @@ function makeDraggable(state, el, options) {
 
     function move(event) {
         if (!state.dragging) return;
+        if (options.pointerid) if (state.pointerId !== event.pointerId) return; // check finger id
+        if (options.nopropagate) event.stopPropagation(); // for nested draggables
         if (options.chords) if (!(event.buttons & 1)) return end(event); // edge case: chords
         let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
@@ -184,8 +191,9 @@ function makeDraggable(state, el, options) {
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
     el.addEventListener('pointermove', move)
-    if (options.noscroll) el.addEventListener('touchstart', (e) => e.preventDefault()); // prevent scrolling
-    if (options.nosystemdrag) el.addEventListener('dragstart', (e) => e.preventDefault()); // prevent system drag
+    if (options.noscroll) el.addEventListener('touchstart', (e) => e.preventDefault());
+    if (options.nosystemdrag) el.addEventListener('dragstart', (e) => e.preventDefault());
+    if (options.nocontextmenu) el.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 function diagram_mouse_events_local() {
