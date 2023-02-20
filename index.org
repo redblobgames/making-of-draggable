@@ -446,11 +446,17 @@ What are my options?
 #+end_export
 
 
-| Try this                   | Watch for      | Circle 1 | Circle 2 | Circle 3 |
-|----------------------------+----------------+----------+----------+----------|
-| right click on circle      | circle is blue | yes ⛌    | no ✓    | no ✓    |
-| ctrl+click on circle (mac) | circle is blue | yes ⛌    | yes ⛌    | no ✓    |
-| right drag on circle       | circle is blue | yes ⛌    | no ✓    | no ✓    |
+| Try this                   | Watch for         | Circle 1 | Circle 2 | Circle 3 | Circle 4 |
+|----------------------------+-------------------+----------+----------+----------+----------|
+| right click      | circle turns blue | yes ⛌   | yes      | no ✓    | no ✓    |
+| right click      | context menu      | yes ⛌   | no       | no ✓    | no ✓    |
+| middle click     | circle turns blue | yes ⛌   | yes ⛌   | no ✓    | no ✓    |
+| right drag       | circle is blue    | yes ⛌   | yes      | no ✓    | no ✓    |
+| middle drag      | circle is blue    | yes ⛌   | yes      | no ✓    | no ✓    |
+| ctrl+click (mac) | circle turns blue¹ | yes ⛌   | no ✓    | yes ⛌   | no ✓    |
+| ctrl+click (mac) | context menu      | yes ⛌   | no ✓    | yes ⛌   | no ✓    |
+
+¹ it will turn blue in Chrome and Safari but not in Firefox, which treats ~Ctrl~ + click differently
 
 #+begin_export html
 <figure id="diagram-contextmenu" class="w-full">
@@ -461,16 +467,16 @@ What are my options?
 </figure>
 #+end_export
 
-*Try* with the mouse: right click or drag on the circles. Try dismissing the menu with a click elsewhere, or by pressing ~Esc~. Sometimes Circle 1 will get stuck in a dragging state. Behavior varies across browsers and operating systems. The main fix is to only drag on left button, but you might also want to exclude events with ~Ctrl~ pressed:
+*Try* with the mouse: right click or drag on the circles. Try dismissing the menu with a click elsewhere, or by pressing ~Esc~.  Behavior varies across browsers and operating systems.
+
+- Circle 1 sometimes get stuck in a dragging state. 
+- Circle 2 uses ~.preventDefault()~ on =contextmenu=. This allows the right button to be used for dragging. However, it interferes with the default operation of middle click or drag, which is used for scrolling on some systems.
+- Circle 3 drags only with the left button, but on Mac ~Ctrl~ + click on Chrome/Safari will trigger drag.
+- Circle 4 drags only with the left button, if ~Ctrl~ isn't pressed.
 
 #+begin_export html
-<pre data-code="pointer" data-show="capture" data-highlight="left noctrl" />
+<pre data-code="pointer" data-show="capture noscroll" data-highlight="left noctrl" />
 #+end_export
-
-This solution also handles middle button down/click, which is used for scrolling on some systems.
-Another option is to ~.preventDefault()~ on =contextmenu=, and allow dragging with the right button, but that doesn't handle the middle button.
-
-{ TODO: add a demo for contextmenu.preventDefault() }
 
 * 🖱️ Variant: draggable text/images
 :PROPERTIES:

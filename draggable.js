@@ -240,9 +240,10 @@ diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: false, line
 diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: true, line2: "2", x: 125});
 
 // Show how to handle the context menu
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: false, line2: "2 (Mac)", x: 0});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: true, line2: "3", x: 175});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, line2: "1", x: -225});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, nocontextmenu: true, line2: "2", x: -75});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: false, line2: "3 (Mac)", x: 75});
+diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: true, line2: "4", x: 225});
 
 // Show how to fix text selection
 diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "1", x: -175});
