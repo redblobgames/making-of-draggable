@@ -1,5 +1,5 @@
-#+title: Draggable objects, 2022
-#+date: <2022-12-23 Fri>
+#+title: Draggable objects
+#+date: <2023-01-04>
 #+property: header-args:dot    :cache yes
 #+options: toc:nil
 
@@ -511,7 +511,18 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 </figure>
 #+end_export
 
-*Try* dragging Circle 1 with the mouse a few times and you'll see sometimes the text gets selected. With touch devices, long press can select the text. Both Circle 2 and Circle 3 do not have that problem. *Try* selecting all text on the page to see the difference between Circle 2 and Circle 3; either behavior is a reasonable choice. The code I show here applies only while dragging (Circle 3's behavior):
+*Try* dragging with the mouse. 
+*Try* selecting all text on the page to see whether the text inside the circle is selectable when not dragging.
+
+- Circle 1 never uses ~user-select: none~
+- Circle 2 always uses ~user-select: none~
+- Circle 3 uses ~user-select: none~ only when dragging
+
+I think either Circle 2 or Circle 3's behavior is a reasonable choice.
+
+#+begin_comment
+Programatically setting the selection in Firefox selects the text that is supposed to be unselectable with user-select:none! So I didn't implement that button.
+#+end_comment
 
 ** 🖱️ Fix: text and image drag
 :PROPERTIES:
@@ -552,7 +563,7 @@ around the diagram, then drag Circle 1. On most desktop systems I've tested, tex
 
 I think this is an edge case, but I was curious what it would take to support. Can we drag multiple objects at once, using different fingers or different mice?
 
-For touch, the code I presented should already work! Go back to one of the previous demos and try it. However the code doesn't handle using two fingers to drag the /same/ object. The fix is when handling =pointerdown=, save ~event.pointerId~ to =state.dragging=. Then when handling =pointermove=, ignore the even if it's not the same =pointerId=. I don't have that implemented here, but try it out [[href:tests.html#test-2d-canvas-drag-a-handle][on my canvas dragging test]].
+For touch, the code I presented should already work! Go back to one of the previous demos and try it. However the code doesn't handle using two fingers to drag the /same/ object. The fix is when handling =pointerdown=, save ~event.pointerId~ to =state.dragging=. Then when handling =pointermove=, ignore the even if it's not the same =pointerId=. I don't have that implemented here, but try it out [[href:targets.html#test-2d-canvas-drag-a-handle][on my canvas dragging test]].
 
 #+begin_export html
 <pre data-code="pointer" data-show="capture noscroll left offset" data-highlight="pointerid" />
@@ -652,7 +663,11 @@ Sometimes I want to act on /hover/ with the mouse (no buttons pressed) but that 
 
 { DEMO? }
 
-Do I need to release the capture?
+Do I need to release the capture? *Yes* releasing capture turns out to be important on many of my pages, like responsive-design
+
+** Variant: toggle paint
+
+{ idea is that in addition to =dragging= I also want to capture the state of the first grid space I'm on, and then use that for all the move events; maybe this should go on a different page }
 
 * Vue version
 :PROPERTIES:
@@ -706,12 +721,18 @@ function move(event) {
 #+end_src
 
 * Notes - event log
+:PROPERTIES:
+:CUSTOM_ID: notes-event-log
+:END:
 
-[[href:eventlog.html][eventlog.html]]
+[[href:/x/2251-draggable/][eventlog.html]]
 
 * Dragging different types of objects
+:PROPERTIES:
+:CUSTOM_ID: dragging-different-types-of-objects
+:END:
 
-[[href:tests.html][tests.html]]
+[[href:./targets.html][targets.html]]
 
 
 #+begin_export html
@@ -770,9 +791,9 @@ function move(event) {
   <script src="build/prism.js"></script>
   <script type="module" src="draggable.js"></script>
 
-  Created 23 Dec 2022
+  Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 19 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 21 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

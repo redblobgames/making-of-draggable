@@ -207,6 +207,9 @@ I don't have a test here but try [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUx
 - use =stopPropagation()= to prevent the pointer event from going up to the parent element
 
 * TODO: scrubbable number
+:PROPERTIES:
+:CUSTOM_ID: todo-scrubbable-number
+:END:
 
 * Notes
 :PROPERTIES:
