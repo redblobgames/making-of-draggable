@@ -261,16 +261,16 @@ diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2
 // END of diagrams
 
 // Generate and syntax highlight sample code
-for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
+function generateSampleCode(pre) {
     // show= should be a list of flag names to show
-    let show = codeOutput.dataset.show ?? "";
+    let show = pre.dataset.show ?? "";
     let options = {};
     for (let option of show.split(" ")) {
         options[option] = true;
     }
     // highlight= should be a list of flag names to highlight
     let highlight = {};
-    for (let option of (codeOutput.dataset.highlight ?? "").split(" ")) {
+    for (let option of (pre.dataset.highlight ?? "").split(" ")) {
         options[option] = true;
         highlight[option] = true;
     }
@@ -282,7 +282,7 @@ for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
         mouseGlobal: makeDraggableMouseGlobal,
         touch: makeDraggableTouch,
         pointer: makeDraggable,
-    }[codeOutput.dataset.code];
+    }[pre.dataset.code];
 
     let lines = [];
     let highlightedLines = new Set();
@@ -309,7 +309,25 @@ for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
         return line;
     }).join("\n");
     
-    codeOutput.innerHTML = html;
+    pre.innerHTML = html;
+}
+
+for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
+    generateSampleCode(codeOutput);
+}
+
+function regenerateFinalCode() {
+    let pre = document.querySelector("pre#final-code");
+    let show = "capture noscroll left offset";
+    for (let checkbox of document.querySelectorAll("#final-code-options input")) {
+        if (checkbox.checked) show += " " + checkbox.dataset.show;
+    }
+    pre.dataset.show = show;
+    generateSampleCode(pre);
+}
+
+for (let checkbox of document.querySelectorAll("#final-code-options input")) {
+    checkbox.addEventListener('click', regenerateFinalCode);
 }
 
 window.diagramSystemDragSetSelection = function() {

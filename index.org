@@ -3,9 +3,7 @@
 #+property: header-args:dot    :cache yes
 #+options: toc:nil
 
-{{ TODO: need to check for I/we usage }}
-
-Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's one of the things I want to support:
+Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's a common case I want to support:
 
 #+begin_export html
 <figure id="diagram-introduction">
@@ -15,8 +13,6 @@ Many of my interactive pages have a /draggable object/. I want the reader to mov
   <figcaption>Drag the circle with mouse or touch</figcaption>
 </figure>
 #+end_export
-
-#+toc: headlines 1
 
 This is the simple model in my head:
 
@@ -38,12 +34,17 @@ digraph {
 However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations. Right click can trigger the context menu. I ended up with this basic recipe:
 
 #+begin_export html
-<pre data-code="pointer" data-show="capture noscroll left offset"/>
+<pre id="final-code" data-code="pointer" data-show="capture noscroll left offset"/>
+<div id="final-code-options">
+<label><input data-show="noselect systemdrag" type="checkbox" /> Text inside draggable</label>
+<label><input data-show="pointerid" type="checkbox" /> Multiple fingers on same draggable</label>
+<label><input data-show="nopropagate" type="checkbox" /> Nested draggable elements</label>
+</div>
 #+end_export
 
-{{ TODO: checkboxes toggling handling of text, nested, edges, canvas, etc. }}
+#+toc: headlines 1
 
-Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]].
+Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around.
 
 {{ TODO: maybe add demos for canvas drawing, slider, constrained slider, scrubbables }}
 
@@ -329,7 +330,7 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 <pre data-code="pointer" data-show="capture left offset" data-highlight="noscroll" />
 #+end_export
 
-I use the ~.preventDefault()~ solution. Note that it needs to be on =touchstart=, not on =pointerstart=.
+I use the ~.preventDefault()~ solution. Note that it needs to be on =touchstart=, not on =pointerstart=. It works in most situations but I've run into situations where it did not stop scrolling on certain systems.
 
 ** 🖱️ Feature: handle drag offset
 :PROPERTIES:
@@ -757,6 +758,8 @@ function move(event) {
     border-right-width: 0; 
   }
 
+  #final-code-options label { display: block; }
+
   /* don't want to get bogged down in details for some diagrams */
   :is(#diagram-mouse-events-local,#diagram-mouse-events-document,#diagram-touch-events) text { user-select: none; }
 
@@ -794,6 +797,6 @@ function move(event) {
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 21 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 23 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
