@@ -301,6 +301,37 @@ const diagrams = [
             this.el.style.top = this.pos.y + 'px';
         },
     },
+    // Scrubbable number
+    {
+        el: "#input-scrubbable-number",
+        draw() {
+            this.el.value = Math.round(this.pos.x);
+        },
+        onpointerdown(event) {
+            if (event.button !== 0 || event.ctrlKey) return;
+            this.dragging = {dx: this.pos.x - event.clientX};
+            event.currentTarget.setPointerCapture(event.pointerId);
+        },
+        onpointerup(event) {
+            this.dragging = null;
+        },
+        onpointercancel(event) {
+            this.onpointerup(event);
+        },
+        onpointermove(event) {
+            if (!this.dragging) return;
+            let x = event.clientX;
+            this.pos.x = clamp(x + this.dragging.dx, 0, 1000);
+            this.draw();
+        },
+        ondragstart(event) {
+            event.preventDefault();
+        },
+        ontouchstart(event) {
+            event.preventDefault();
+        },
+        
+    },
 ];
 
 diagrams.forEach((diagram, index) => {

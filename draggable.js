@@ -213,15 +213,29 @@ function diagram_touch_events() {
     makeDraggableTouch(state, el);
 }
 
+function diagram_scrubbable_number() {
+    let el = document.querySelector("#scrubbable-number");
+    el.value = "123";
+    let dragging = false;
+    let state = {
+        eventToCoordinates(event) { return {x: event.clientX, y: event.clientY}; },
+        get dragging() { return dragging; },
+        set dragging(d) { dragging = d; },
+        get pos() { return { x: parseFloat(el.value), y: 0 }; },
+        set pos(p) { el.value = clamp(Math.round(p.x), 0, 1000); },
+    };
+    return makeDraggable(state, el, makeOptions());
+}
+
 function diagram_pointer_events(selector, options) {
     let {state, el} = makePositionState(selector, options);
     return makeDraggable(state, el, options);
 }
 
-
 diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
+diagram_scrubbable_number();
 diagram_pointer_events("#diagram-introduction", makeOptions());
 
 // This demo has the minimal fixes (capture, noscroll)

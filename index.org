@@ -28,7 +28,7 @@ digraph {
 }
 #+end_src
 
-#+results[991524cd9317998d0e198d7e8dc0bc24adf7e944]:
+#+results[ed91ff1542b1b6a147051f3530e955b0e1020940]:
 [[file:build/state.svg]]
 
 However it's not so simple! Mouses have multiple buttons. Touch events can include multiple fingers. Events can go to multiple destinations. Right click can trigger the context menu. I ended up with this basic recipe:
@@ -44,11 +44,17 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 
 #+toc: headlines 1
 
-Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around.
-
-{{ TODO: maybe add demos for canvas drawing, slider, constrained slider, scrubbables }}
+Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around, like dragging this number left/right:
+@@html:<input id="scrubbable-number" pattern="[0-9]+" />@@,
+or [[href:targets.html#canvas-drag-to-draw][painting on a canvas]].
 
 I've tested this code on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad). I have /not/ tested on hoverable stylus, hybrid touch+mouse devices, or voice input.
+
+Also see my other pages:
+
+1. [[href:./targets.html][List of edge cases and list of dragging tests]]
+1. [[href:/x/2251-draggable/][Test page to log the events, and unorganized notes]]
+1. [[href:/x/1845-draggable/][How I handled dragging events 2015–2018]]
 
 * 🖱️ Mouse events only
 :PROPERTIES:
@@ -70,7 +76,7 @@ digraph {
 }
 #+end_src
 
-#+results[71df718c29f81b2b7fe3ed71be1e8660a77fe531]:
+#+results[3ae559af3a5b93dfa534a4a0bc7bb009f8a5ddcd]:
 [[file:build/mouse-local.svg]]
 
 #+begin_export html
@@ -107,7 +113,7 @@ digraph {
 }
 #+end_src
 
-#+results[1da58aac6eae43ea397f1a1cea38b924ef09bc75]:
+#+results[0b2028ca9374d050d7561e76610f628578a71da0]:
 [[file:build/mouse-document.svg]]
 
 #+begin_export html
@@ -147,7 +153,7 @@ digraph {
 }
 #+end_src
 
-#+results[c21ec827fee2ef766513f11db71221e50642a3c8]:
+#+results[28e17f8b1a41b54a0019a6e1db9c4ade0f028068]:
 [[file:build/touch.svg]]
 
 #+begin_export html
@@ -207,7 +213,7 @@ digraph {
 }
 #+end_src
 
-#+results[ebfb20a7876c5caa28f66545f4c1bfb0fb026007]:
+#+results[5de7e4f1b5907af5dd9ae40815f99316b7a04ead]:
 [[file:build/mouse-and-touch.svg]]
 
 Pointer events attempt to unify mouse and touch events. The [[https://developer.mozilla.org/en-US/docs/Web/API/Element/setPointerCapture][pointer capture]] feature lets us use the simpler logic that doesn't require us to add/remove global event handlers to the document like we had to with mouse events.
@@ -226,7 +232,7 @@ digraph {
 }
 #+end_src
 
-#+results[b49c70a53e869d89d167a8d9d477b40c561de00e]:
+#+results[09b2cb93f1459a9e2971e35ca1643e60a26432a1]:
 [[file:build/pointer.svg]]
 
 This recipe is the starting point:
@@ -607,7 +613,7 @@ digraph {
 }
 #+end_src
 
-#+results[974b4e4064456c061ab84975906795dca1a33cc5]:
+#+results[322071b4e259e358d6e86dff35b5c98945102983]:
 [[file:build/multiple-buttons.svg]]
 
 | Try this                                 | Watch for | Circle 1 | Circle 2 |
@@ -721,20 +727,6 @@ function move(event) {
 </script>
 #+end_src
 
-* Notes - event log
-:PROPERTIES:
-:CUSTOM_ID: notes-event-log
-:END:
-
-[[href:/x/2251-draggable/][eventlog.html]]
-
-* Dragging different types of objects
-:PROPERTIES:
-:CUSTOM_ID: dragging-different-types-of-objects
-:END:
-
-[[href:./targets.html][targets.html]]
-
 
 #+begin_export html
 <style>
@@ -756,6 +748,24 @@ function move(event) {
     background: linear-gradient(to right, hsl(200 10% 95%), white);
     border: 2px solid hsl(200 10% 70%); 
     border-right-width: 0; 
+  }
+
+  #scrubbable-number {
+     font-size: 100%;
+     width: 3em;
+     border: none;
+     border-bottom: 1px dashed hsl(0 50% 45%);
+     background: hsl(60 10% 95%);
+     text-align: center;
+     cursor: ew-resize;
+     user-select: none;
+  }
+  #scrubbable-number:hover {
+     background: hsl(30 50% 90%);
+  }
+  #scrubbable-number:focus-visible {
+     background: hsl(0 50% 90%);
+     outline: none;
   }
 
   #final-code-options label { display: block; }
@@ -797,6 +807,6 @@ function move(event) {
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 27 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 01 Mar 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
