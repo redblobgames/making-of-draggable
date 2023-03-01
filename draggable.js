@@ -169,12 +169,14 @@ function makeDraggable(state, el, options) {
         if (options.pointerid) state.pointerId = event.pointerId; // keep track of finger
         if (options.capture) el.setPointerCapture(event.pointerId);
         if (options.noselect) el.style.userSelect = 'none'; // if there's text
+        if (options.noselect) el.style.webkitUserSelect = 'none'; // safari
     }
 
     function end(event) {
         if (options.offset) state.dragging = null;
         if (!options.offset) state.dragging = false;
         if (options.noselect) el.style.userSelect = ''; // if there's text
+        if (options.noselect) el.style.webkitUserSelect = ''; // safari
     }
 
     function move(event) {

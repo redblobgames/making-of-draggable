@@ -512,14 +512,14 @@ When dragging the circle, the text inside gets selected sometimes. To fix this, 
 </figure>
 #+end_export
 
-*Try* dragging with the mouse. 
+*Try* dragging quickly with the mouse. 
 *Try* selecting all text on the page to see whether the text inside the circle is selectable when not dragging.
 
 - Circle 1 never uses ~user-select: none~
 - Circle 2 always uses ~user-select: none~
 - Circle 3 uses ~user-select: none~ only when dragging
 
-I think either Circle 2 or Circle 3's behavior is a reasonable choice.
+I think either Circle 2 or Circle 3's behavior is a reasonable choice. Note that as of early 2023, Safari /still/  [[https://caniuse.com/?search=user-select][doesn't support the unprefixed version]] ([[https://bugs.webkit.org/show_bug.cgi?id=208677][tracking bug]]), so we have to also set the prefixed version.
 
 #+begin_comment
 Programatically setting the selection in Firefox selects the text that is supposed to be unselectable with user-select:none! So I didn't implement that button.
