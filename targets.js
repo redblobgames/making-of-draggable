@@ -163,7 +163,9 @@ const diagrams = [
             if (!this.dragging) return;
             let ctx = this.el.getContext('2d');
             ctx.fillStyle = "hsl(0 50% 50%)";
-            ctx.fillRect(this.pos.x-1, this.pos.y-1, 3, 3);
+            ctx.beginPath();
+            ctx.arc(this.pos.x, this.pos.y, 5, 0, 2*Math.PI);
+            ctx.fill();
         },
         onpointerdown(event) {
             if (event.button !== 0 || event.ctrlKey) return;

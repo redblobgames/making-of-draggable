@@ -94,17 +94,17 @@ Notes:
 - While dragging, I set CSS ~user-select: none~. This prevents selecting the text by dragging or double clicking (desktop) or long press (mobile). But I don't want this /all/ the time. When not dragging, I want the text to be selectable.
 - On desktop, if you select the text of the page and then try to drag it, it will let you drag that text outside the browser. But if you also try to drag this circle the two drag handlers will intefere. Use ~preventDefault()~ on the =dragstart= event to fix this.
 
-* Canvas drawing
+* Canvas painting
 :PROPERTIES:
-:CUSTOM_ID: canvas-drag-to-draw
+:CUSTOM_ID: canvas-drag-to-paint
 :END:
 
-The same drag event handlers can be used for drawing instead of moving an object:
+The same drag event handlers can be used for painting instead of moving an object:
 
 #+begin_export html
 <figure class="w-full">
   <canvas width="660" height="100" style="cursor:crosshair"/>
-  <figcaption>Drag to draw on the canvas</figcaption>
+  <figcaption>Drag to paint on the canvas</figcaption>
 </figure>
 #+end_export
 

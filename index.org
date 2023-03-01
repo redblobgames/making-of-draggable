@@ -46,7 +46,7 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 
 Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around, like dragging this number left/right:
 @@html:<input id="scrubbable-number" pattern="[0-9]+" />@@,
-or [[href:targets.html#canvas-drag-to-draw][painting on a canvas]].
+or [[href:targets.html#canvas-drag-to-paint][painting on a canvas]].
 
 I've tested this code on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad). I have /not/ tested on hoverable stylus, hybrid touch+mouse devices, or voice input.
 
