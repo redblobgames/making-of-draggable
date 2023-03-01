@@ -248,9 +248,9 @@ diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, no
 diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: true, line2: "4", x: 225});
 
 // Show how to fix text selection
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "1", x: -175});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: true, line2: "3", x: 175});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "text 1", x: -175});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "text 2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: true, line2: "text 3", x: 175});
 
 // Show how to fix system drag
 diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, nosystemdrag: false, text: false, line1: "", line2: "1", x: -125});
@@ -325,6 +325,7 @@ function regenerateFinalCode() {
         if (checkbox.checked) show += " " + checkbox.dataset.show;
     }
     pre.dataset.show = show;
+    pre.dataset.highlight = (this?.checked && this?.dataset?.show) ?? "";
     generateSampleCode(pre);
 }
 

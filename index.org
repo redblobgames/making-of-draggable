@@ -22,9 +22,9 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> dragging [label = "pointerdown"];
+    "not\ndragging" -> dragging [label = "pointerdown"];
     dragging -> dragging [label = "pointermove"];
-    dragging -> initial [label = "pointerup"];
+    dragging -> "not\ndragging" [label = "pointerup"];
 }
 #+end_src
 
@@ -36,7 +36,7 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 #+begin_export html
 <pre id="final-code" data-code="pointer" data-show="capture noscroll left offset"/>
 <div id="final-code-options">
-<label><input data-show="noselect systemdrag" type="checkbox" /> Text inside draggable</label>
+<label><input data-show="noselect nosystemdrag" type="checkbox" /> Text inside draggable</label>
 <label><input data-show="pointerid" type="checkbox" /> Multiple fingers on same draggable</label>
 <label><input data-show="nopropagate" type="checkbox" /> Nested draggable elements</label>
 </div>
@@ -63,10 +63,10 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> initial [label = "mousemove"];
-    initial -> dragging [label = "mousedown"];
+    "not\ndragging" -> "not\ndragging" [label = "mousemove"];
+    "not\ndragging" -> dragging [label = "mousedown"];
     dragging -> dragging [label = "mousemove"];
-    dragging -> initial [label = "mouseup"];
+    dragging -> "not\ndragging" [label = "mouseup"];
 }
 #+end_src
 
@@ -101,9 +101,9 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> dragging [label = "mousedown"];
+    "not\ndragging" -> dragging [label = "mousedown"];
     dragging -> dragging [label = "document\nmousemove"];
-    dragging -> initial [label = "document\nmouseup"];
+    dragging -> "not\ndragging" [label = "document\nmouseup"];
 }
 #+end_src
 
@@ -139,11 +139,11 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> initial [label = "touchmove"];
-    initial -> dragging [label = "touchstart"];
+    "not\ndragging" -> "not\ndragging" [label = "touchmove"];
+    "not\ndragging" -> dragging [label = "touchstart"];
     dragging -> dragging [label = "touchmove"];
-    dragging -> initial [label = "touchend"];
-    dragging -> initial [label = "touchcancel"];
+    dragging -> "not\ndragging" [label = "touchend"];
+    dragging -> "not\ndragging" [label = "touchcancel"];
 }
 #+end_src
 
@@ -196,14 +196,14 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> dragging [label = "mousedown"];
+    "not\ndragging" -> dragging [label = "mousedown"];
     dragging -> dragging [label = "document\nmousemove"];
-    dragging -> initial [label = "document\nmouseup"];
-    initial -> initial [label = "touchmove"];
-    initial -> dragging [label = "touchstart"];
+    dragging -> "not\ndragging" [label = "document\nmouseup"];
+    "not\ndragging" -> "not\ndragging" [label = "touchmove"];
+    "not\ndragging" -> dragging [label = "touchstart"];
     dragging -> dragging [label = "touchmove"];
-    dragging -> initial [label = "touchend"];
-    dragging -> initial [label = "touchcancel"];
+    dragging -> "not\ndragging" [label = "touchend"];
+    dragging -> "not\ndragging" [label = "touchcancel"];
 }
 #+end_src
 
@@ -218,11 +218,11 @@ digraph {
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
     
     rankdir=LR;
-    initial -> initial [label = "pointermove"];
-    initial -> dragging [label = "pointerdown"];
+    "not\ndragging" -> "not\ndragging" [label = "pointermove"];
+    "not\ndragging" -> dragging [label = "pointerdown"];
     dragging -> dragging [label = "pointermove"];
-    dragging -> initial [label = "pointerup"];
-    dragging -> initial [label = "pointercancel"];
+    dragging -> "not\ndragging" [label = "pointerup"];
+    dragging -> "not\ndragging" [label = "pointercancel"];
 }
 #+end_src
 
@@ -591,16 +591,16 @@ digraph {
     node [fontname=Helvetica, fontsize=12, shape=circle, style=filled, color="#aaaaaa", fillcolor="#eeeeee"];
     edge [fontname=Courier, fontsize=10, fontcolor="#444422", color="#999999", fillcolor="#ffffff"];
 
-    neither;
+    "neither\nbutton";
     leftbutton [label = "left\nbutton"];
     rightbutton [label = "right\nbutton"];
     bothbuttons [label = "both\nbuttons"];
 
-    neither -> leftbutton [label = "pointerdown\nleft"];
-    neither -> rightbutton [label = "pointerdown\nright"];
-    leftbutton -> neither [label = "pointerup\nleft"];
+    "neither\nbutton" -> leftbutton [label = "pointerdown\nleft"];
+    "neither\nbutton" -> rightbutton [label = "pointerdown\nright"];
+    leftbutton -> "neither\nbutton" [label = "pointerup\nleft"];
     leftbutton -> bothbuttons [label = "pointermove"];
-    rightbutton -> neither [label = "pointerup\nright"];
+    rightbutton -> "neither\nbutton" [label = "pointerup\nright"];
     rightbutton -> bothbuttons [label = "pointermove"];
     bothbuttons -> leftbutton [label = "pointermove"];
     bothbuttons -> rightbutton [label = "pointermove"];
@@ -797,6 +797,6 @@ function move(event) {
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 23 Feb 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 27 Feb 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

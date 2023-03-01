@@ -243,6 +243,6 @@ I don't have a test here but try [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUx
       </pattern>
     </defs>
   </svg>
-  <script src="tests.js"></script>
+  <script src="targets.js"></script>
 </x:footer>
 #+end_export
