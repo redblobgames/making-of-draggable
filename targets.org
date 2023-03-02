@@ -68,6 +68,22 @@ Notes:
 - Basic tests work
 - On desktop, scrolling while dragging doesn't drag until you move your mouse a tiny amount. This could be solved either with a timer or by catching the scroll event. Low priority for me.
 
+I use this helper function quite a bit when working with SVG:
+
+#+begin_src js
+/** Convert from event coordinate space (on the page) to SVG coordinate
+ * space (within the svg, honoring responsive resizing, width/height,
+ * and viewBox) */
+function convertPixelToSvgCoord(event) {
+    let p = event.currentTarget.ownerSVGElement.createSVGPoint();
+    p.x = event.clientX;
+    p.y = event.clientY;
+    return p.matrixTransform(event.currentTarget.getScreenCTM().inverse());
+}
+#+end_src
+
+This function doesn't handle other SVG transforms, but see [[#parent-transform][the parent transform section]] for a version that does.
+
 * SVG nested element with text
 :PROPERTIES:
 :CUSTOM_ID: svg-nested-element-with-text
@@ -206,6 +222,53 @@ I don't have a test here but I wrote [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJj
 
 - use =stopPropagation()= to prevent the pointer event from going up to the parent element
 
+* Coordinate transform on parent
+:PROPERTIES:
+:CUSTOM_ID: parent-transform
+:END:
+
+The draggable element might be inside another element that has a =transform= applied to it.
+
+The problem is that the =convertPixelToSvgCoord= function I use calculates coordinates relative
+to the =<svg>= element. This is fine if your draggable object is positioned relative to the
+=<svg>='s coordinate system, but in this test there's =<svg>= then =<g>= with a =rotate()= on it.
+The pointer coordinates are in /screen/ coordinates, and we need to unrotate them if we want
+the draggable to be placed within the rotated =<g>=.
+
+#+begin_export html
+<figure class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <g transform="rotate(20)">
+      <rect x="-1000" y="-1000" width="2000" height="2000" fill="url(#pattern-dots)" />
+      <rect class="draggable" 
+         x="-15" y="-15" width="30" height="30" 
+         stroke="black" stroke-width="0.5" />
+    </g>
+  </svg>
+  <figcaption>Draggable inside a transformed SVG element</figcaption>
+  <button>Reset</button>
+</figure>
+#+end_export
+
+To handle this, extend the =convertPixelToSvgCoord= function to take an element the coordinate should be relative to, instead of assuming the coordinates should be in the =<svg>='s coordinate space.
+
+#+begin_src js
+/** Convert from event coordinate space (on the page) to SVG coordinate
+ * space (within the svg, honoring responsive resizing, width/height,
+ * and viewBox) */
+function convertPixelToSvgCoord(event, relativeTo=event.currentTarget.ownerSVGElement) {
+    // if relativeTo is the <svg> then its ownerSVGElement is null, so
+    // we want to point back to the <svg> but otherwise we assume it's
+    // a child of <svg> and we want to find the <svg>
+    let p = (relativeTo.ownerSVGElement ?? relativeTo).createSVGPoint();
+    p.x = event.clientX;
+    p.y = event.clientY;
+    return p.matrixTransform(relativeTo.getScreenCTM().inverse());
+}
+#+end_src
+
+However, this function only handles transforms on the SVG elements. For transforms on non-SVG elements, /I don't know what to do/. This is an unsolved issue, not only for me, but also other libraries like d3.js. See [[https://github.com/d3/d3-selection/issues/67][d3-selection issue #67]]  and [[https://bugzilla.mozilla.org/show_bug.cgi?id=1610093][firefox bug #1610093]] . There's probably /something/ we can do using =window.getComputedStyle(element)= but I haven't tried.
+
 * Scrubbable number
 :PROPERTIES:
 :CUSTOM_ID: scrubbable-number
@@ -229,22 +292,21 @@ It's a constrained drag. I ignore the =y= value from the drag. But the object do
 
 I don't have a demo here but look at [[href:/x/1825-rounded-cell-painter/][Painting on a map]], where the /initial/ =pointerdown= event remembers what color we're painting, and then all subsequent =pointermove= events paint in that color. If you first painted in blue, then you continue painting in blue until the =pointerup=.
 
-* Notes
-:PROPERTIES:
-:CUSTOM_ID: notes
-:END:
 
-/None/ of these handle CSS transforms on the parent elements. This is an unsolved issue, not only for me, but also other libraries like d3.js. See https://github.com/d3/d3-selection/issues/67  and https://bugzilla.mozilla.org/show_bug.cgi?id=1610093 . There's probably /something/ we can do using =window.getComputedStyle(element)= but this is a low priority for me, as I almost never use css transforms above a draggable element.
 
 #+begin_export html
 <style>
-  svg, canvas, div.diagram { background: #eee; box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); width: 100%; }
+  main svg, main canvas, main div.diagram { 
+      background: #eee; 
+      box-shadow: 0 1px 3px 1px rgba(0,0,0,0.3); 
+      width: 100%; 
+  }
 
   .draggable { cursor: grab; }
   .dragging { cursor: grabbing; user-select: none; }
 
-  circle.draggable, .draggable circle { fill: hsl(0 50% 50%); }
-  circle.draggable.dragging, .dragging circle { fill: hsl(200 50% 50%); }
+  main svg .draggable, .draggable circle { fill: hsl(0 50% 50%); }
+  main svg .draggable.dragging, .dragging circle { fill: hsl(200 50% 50%); }
   div.draggable { background: hsl(0 50% 50%); color: white; }
   div.draggable.dragging { background: hsl(200 50% 50%); }
 
@@ -252,7 +314,7 @@ I don't have a demo here but look at [[href:/x/1825-rounded-cell-painter/][Paint
   div.captured { border: 2px solid hsl(200 100% 70%); }
 
   #input-scrubbable-number {
-     font-size: 100%;
+     font-size: 125%;
      width: 3em;
      border: none;
      border-bottom: 1px dashed hsl(0 50% 45%);

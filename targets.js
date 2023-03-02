@@ -13,13 +13,13 @@ function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
-function convertPixelToSvgCoord(event) {
-    const svg = event.currentTarget.ownerSVGElement;
-    let p = svg.createSVGPoint();
+function convertPixelToSvgCoord(event, relativeTo=event.currentTarget.ownerSVGElement) {
+    // if relativeTo is the <svg> then its ownerSVGElement is null, so we want to point back to the <svg>
+    // but otherwise we assume it's a child of <svg> and we want to find the <svg>
+    let p = (relativeTo.ownerSVGElement ?? relativeTo).createSVGPoint();
     p.x = event.clientX;
     p.y = event.clientY;
-    p = p.matrixTransform(svg.getScreenCTM().inverse());
-    return p;
+    return p.matrixTransform(relativeTo.getScreenCTM().inverse());
 }
 
 /** Convert from event coordinate space (on the page) to Canvas coordinate
@@ -72,9 +72,12 @@ function Diagram(figure, config) {
 
 const svgDragHandlersCommon = {
     left: -300, right: 300, top: -20, bottom: 20,
+    convertPixelToSvgCoord(event) {
+        return convertPixelToSvgCoord(event);
+    },
     onpointerdown(event) {
         if (event.button !== 0 || event.ctrlKey) return;
-        let initialPos = convertPixelToSvgCoord(event);
+        let initialPos = this.convertPixelToSvgCoord(event);
         this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y};
         this.el.classList.add("dragging");
         // if you use event.target, the text will get the event and it
@@ -93,7 +96,7 @@ const svgDragHandlersCommon = {
     onpointermove(event) {
         if (!this.dragging) return;
         if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = this.convertPixelToSvgCoord(event);
         this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
     },
     ondragstart(event) {
@@ -301,6 +304,20 @@ const diagrams = [
         draw() {
             this.el.style.left = this.pos.x + 'px';
             this.el.style.top = this.pos.y + 'px';
+        },
+    },
+    // Transform on the parent element; do we get the right coordinates?
+    // by default we don't, but we can pass in the parent <g> element to
+    // convertPixelToSvgCoord
+    {
+        ...svgDragHandlersCommon,
+        left: -10000, right: 10000, top: -10000, bottom: 10000,
+        el: "svg g rect.draggable",
+        convertPixelToSvgCoord(event) {
+            return convertPixelToSvgCoord(event, this.el.parentElement);
+        },
+        draw() {
+            this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);
         },
     },
     // Scrubbable number
