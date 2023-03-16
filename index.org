@@ -56,6 +56,8 @@ Also see my other pages:
 1. [[href:/x/2251-draggable/][Test page to log the events, and unorganized notes]]
 1. [[href:/x/1845-draggable/][How I handled dragging events 2015–2018]]
 
+Note that this is /not/ the HTML [[href:/x/2310-drag-drop-api/][Drag and Drop API]], which involves dragging an element /onto/ another element. For my diagrams, I'm dragging but /not/ dropping, and the scrubbable number example shows how I'm not necessarily even moving something around. So I need to read the mouse/touch events directly.
+
 * 🖱️ Mouse events only
 :PROPERTIES:
 :CUSTOM_ID: mouse-events
@@ -807,6 +809,6 @@ function move(event) {
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 01 Mar 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 16 Mar 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
