@@ -75,14 +75,15 @@ I use this helper function quite a bit when working with SVG:
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
 function convertPixelToSvgCoord(event) {
-    let p = event.currentTarget.ownerSVGElement.createSVGPoint();
+    const svg = event.currentTarget.ownerSVGElement;
+    let p = svg.createSVGPoint();
     p.x = event.clientX;
     p.y = event.clientY;
-    return p.matrixTransform(event.currentTarget.getScreenCTM().inverse());
+    return p.matrixTransform(svg.getScreenCTM().inverse());
 }
 #+end_src
 
-This function doesn't handle other SVG transforms, but see [[#parent-transform][the parent transform section]] for a version that does.
+This function gives coordinates for the =<svg>= doesn't handle other SVG transforms; see [[#parent-transform][the parent transform section]] for a version that does.
 
 * SVG nested element with text
 :PROPERTIES:
