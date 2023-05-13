@@ -223,6 +223,30 @@ I don't have a test here but I wrote [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJj
 
 - use =stopPropagation()= to prevent the pointer event from going up to the parent element
 
+* Click events
+:PROPERTIES:
+:CUSTOM_ID: click-events
+:END:
+
+[[https://stackoverflow.com/questions/76074036/using-w3c-pointerevent-api-and-be-able-to-detect-a-double-click][This stackoverflow question]] made me wonder what happens when we have both click and drag event handlers on the same object. The idea here is to listen to both types of events. If we detect a =pointermove=, then don't process the =click=. Maybe it needs to have some threshold of how many pixels we moved before we suppress the click. I also wrote up a full demo on the stackoverflow page.
+
+#+begin_export html
+<figure class="w-full">
+  <svg viewBox="-330 -50 660 100">
+    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
+    <g class="draggable">
+      <circle stroke="black" stroke-width="0.5" r="30" />
+      <g font-size="16" text-anchor="middle" fill="white">
+        <text dy="0.0em">Click or</text>
+        <text dy="1.0em">drag me</text>
+      </g>
+    </g>
+  </svg>
+  <figcaption>Draggable + clickable</figcaption>
+  <button>Reset</button>
+</figure>
+#+end_export
+
 * Coordinate transform on parent
 :PROPERTIES:
 :CUSTOM_ID: parent-transform

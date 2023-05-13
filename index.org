@@ -572,7 +572,7 @@ around the diagram, then drag Circle 1. On most desktop systems I've tested, tex
 
 I think this is an edge case, but I was curious what it would take to support. Can we drag multiple objects at once, using different fingers or different mice?
 
-For touch, the code I presented should already work! Go back to one of the previous demos and try it. However the code doesn't handle using two fingers to drag the /same/ object. The fix is when handling =pointerdown=, save ~event.pointerId~ to =state.dragging=. Then when handling =pointermove=, ignore the even if it's not the same =pointerId=. I don't have that implemented here, but try it out [[href:targets.html#test-2d-canvas-drag-a-handle][on my canvas dragging test]].
+For touch, the code I presented should already work! Go back to one of the previous demos and try it. However the code doesn't handle using two fingers to drag the /same/ object. The fix is when handling =pointerdown=, save ~event.pointerId~ to =state.dragging=. Then when handling =pointermove=, ignore the even if it's not the same =pointerId=. I don't have that implemented here, but try it out [[href:targets.html#canvas-drag-a-handle][on my canvas dragging test]].
 
 #+begin_export html
 <pre data-code="pointer" data-show="capture noscroll left offset" data-highlight="pointerid" />

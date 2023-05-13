@@ -306,6 +306,39 @@ const diagrams = [
             this.el.style.top = this.pos.y + 'px';
         },
     },
+    // Click events
+    {
+        ...svgDragHandlersCommon,
+        el: "svg g",
+        draw() {
+            this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);
+        },
+        setStatus(msg) {
+            this.figure.querySelector("figcaption").innerText = msg;
+        },
+        onpointerdown(event) {
+            svgDragHandlersCommon.onpointerdown.call(this, event);
+            this.moved = false;
+            this.setStatus("Click or drag?");
+        },
+        onpointermove(event) {
+            this.moved = true;
+            this.setStatus("Dragging");
+            svgDragHandlersCommon.onpointermove.call(this, event);
+        },
+        onclick(event) {
+            // If we've moved the mouse then it's a drag and don't
+            // let the click go through.
+            if (this.moved) {
+                this.setStatus("Click ignored because we were dragging");
+                return;
+            }
+            this.setStatus("Click processed because we weren't dragging");
+        },
+        ondblclick(event) {
+            this.setStatus("dblclick received");
+        },
+    },
     // Transform on the parent element; do we get the right coordinates?
     // by default we don't, but we can pass in the parent <g> element to
     // convertPixelToSvgCoord
