@@ -3,6 +3,13 @@
 #+property: header-args:dot    :cache yes
 #+options: toc:nil
 
+#+begin_comment
+Topics to be added:
+1. accessibility - make the underlying data editable in some other way
+2. canceling - can you press Esc or in some other way cancel the drag?
+3. constraints - where should they be applied? explain that it can be done outside this code
+#+end_comment
+
 Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's a common case I want to support:
 
 #+begin_export html
@@ -46,7 +53,7 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 
 Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around, like dragging this number left/right:
 @@html:<input id="scrubbable-number" pattern="[0-9]+" />@@,
-or [[href:targets.html#canvas-drag-to-paint][painting on a canvas]].
+or [[href:targets.html#canvas-drag-to-paint][painting on a canvas]], or [[href:/articles/curved-paths/making-of.html][constrained dragging]].
 
 I've tested this code on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad). I have /not/ tested on hoverable stylus, hybrid touch+mouse devices, or voice input.
 
@@ -663,20 +670,22 @@ I normally work with SVG, but if working with a =<canvas>= (either 2D Canvas or 
 1. =pointerdown=, =touchstart=, =dragstart=: early ~return~ if not over a draggable object
 2. =pointermove=: set the cursor based on whether it's over a draggable object
 
+I have a [[href:targets.html#canvas-drag-to-paint][demo]] but haven't written up the code yet.
+
 ** Variant: hover with mouse
 :PROPERTIES:
 :CUSTOM_ID: variant-hover
 :END:
 
-Sometimes I want to act on /hover/ with the mouse (no buttons pressed) but that doesn't work with touch devices, so I use /drag/ with touch. I modify the recipe by removing the ~if (!state.dragging)~ line from =pointermove=.
+Sometimes I want to act on /hover/ with the mouse (no buttons pressed) but that doesn't work with touch devices, so I use /drag/ with touch. The standard recipe at the top of the page expects drag for both mouse and touch. To make it hover with mouse and drag for touch, I modify the recipe by removing the ~if (!state.dragging)~ line from =pointermove=.
 
-{ DEMO? }
+For a demo, see my [[https://www.redblobgames.com/making-of/responsive-design/#visualizations][Responsive Design page]]. With a mouse, you can hover over the rows to change the layout. With touch, you can drag to change the layout. I also do this on the [[href:/grids/hexagons/][Hexagons Guide]]. Many diagrams work with mouse hover, but on touch devices they work with touch drag.
 
-Do I need to release the capture? *Yes* releasing capture turns out to be important on many of my pages, like responsive-design
+Do I need to release the capture? *Yes*, sometimes. When moving the mouse from item A to item B, if I want to highlight A and then highlight B, hover works as expected. But with touch, dragging from A to B sends the move event to A. By releasing the capture, the move event will go to B.
 
 ** Variant: toggle paint
 
-{ idea is that in addition to =dragging= I also want to capture the state of the first grid space I'm on, and then use that for all the move events; maybe this should go on a different page }
+For the [[https://www.redblobgames.com/x/1825-rounded-cell-painter/][Rounded Cell Painter]], the =pointerdown= captures the initial paint color, and then all =pointermove= events will use that same paint color, until =pointerup=. To do this, the =state.dragging= variable should contain not only the initial =x=, =y= but also the initial paint color.
 
 ** TODO: lostpointercapture
 
@@ -805,7 +814,6 @@ To use this component, create position variables (=data= in Options API or =ref=
 
 I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lAfbFSfbyimEYhgZIUGyYh1WWrmQ2kqiRlB8z/N93SD0sO26WtRj2pQZsi+S5l/d5RG4H35alv6x4MBkE58TrMC8zJplQrMKUwiLGgywpkYr0MiXOOOfC6KtZQURRWNCcKZexSATHZCStpHqglTALWpg86/BYkrWMZsaSKfUkCFarla84nmdynoY5az+SeZCHD6JIxzIJrAlpOM84oPNgVsyKax0pURroMFX5lVUn8lIqQ1vFyY4SJXM6gzNnbqsgaJe/bxU1ED/oZl6XRshC2xDUUv8sMpWAaGHl9mL2G0GRITg0FSqC5A2eE2+7ntCXFyPaTGh8ebEbOngNnWcV3/1ZhaqPHTfgBnsd1E7DXQwMIz+hYef8tc3IUvDqO7m+mQ3GLy8urDQkLwjPswFps8kYS/MwekiVrIp4Qp8x82zgFEDF3s/lGHnkDOjOgw4GYFT7pLD+0qpORGaxC515F/Dvc/sdYj5oNe8D9tRe+xD0N1McGWp8gs5N97QSsVlgdGkHCxbpwrSjnkGXl88yCaFdpni6DnphHYwG78s0euQoAWmteGJUWGj0SA4D3rqBxXgvts7NNyGc9Ne70cF4sxu+nQ1qBd+UUhSGVSxXhZ9xYp3SJlTmGFCVWOEihlftFJowcqF004fwXC5t+l0joanoa/TqEnbxEk05pAkVVZZ1QkZW0cJt65fKQSBrd7Lyj+cb36Ms1BoT23aX3b66dCZNE/7r4FGojxu67qKnWrpdQ/ssWZlbsebsXt4t06mUKm7hvs1rZGe0/04f92cJPtPot5gTUfCtHXnb2t59dib0ev7OFiFIRC9klcWW6LZrdObOYps23mvlXJhO6SsMtPfbWVXG8HSyV3v2+9C63Qp1eam7PwkzzVaxRSRVEdnCQw8j8F6TscZQkVA940dGZT/xZggFplJFzbGUMYLkjIXq08FqNDYCrSX+0poJoW0MKnKh8vs1TGOC2hj09Ghtg7XNrtHXGFcphf/7UKVsfCT5ti7LaVjCWG5caGr1x7g2BvE98B9lfeT9I2NtFZ+UddV+KPyvQ2Mz651I5ajVSIRQremLI7v8eD1qAYjX5gRg0wCaaoL1h2zv6Jt0JEuOXROltCUEVUs1oVSF8ysrg2m/q6QtVZrVWOPFGxn0tyz46kBkDpQTw1ZW/RHl9d6Hn+juP6K7g5PLh1EZr5006CasMmhx88b15IR6YW95bDd6H5OhnUITeuiPhkLw0Lo2IUdJtEPBoFRnBhTJZiFju0lb26f46Tkc9UHNaD9mIfS+4BuqcpOnmep46YCoPpKsXPd2bW6p6o/HkTg2uKOrQ+kTZPVxMXrxDOrq0deBmX326jHYEaYlsB6J9X3a2Z//mdn6/eMuOec0rYNYt5gLHeIKiCgQJ9JlGDF5eHuYBVMZpjy0F5u7Nz/0ULDtvEXa246o0dhsRAtZSGUtVqxLcKlY4tjMWvyFuVF9gg3qo6sN07m7ZDWn+KG76DTN3b3Fnkr6CFesmxMF3JVQfdKwN4UbQH0wLiv48qq+mPXOCyUAgPmRYjgIiKt/r81qiZaChnqnTODvl25lc7Tya7uC+dLPQ6PE+r59Z3h2E1h4h424mN7/7A19YR3U7A3b3RoqKjFEQge7vwFtIua8][on the Vue Playground]], with both Options API and Composition API components.
  
-
 #+begin_export html
 <style>
   main svg { 
@@ -884,6 +892,6 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 24 Jul 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 27 Oct 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
