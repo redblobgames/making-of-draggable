@@ -303,7 +303,14 @@ function generateSampleCode(pre) {
     let lines = [];
     let highlightedLines = new Set();
     for (let line of code.toString().split("\n")) {
-        let m = line.match(/(.*?)if \((!?)options\.(\w+?)\) (.*)/);
+        let m;
+        m = line.match(/(.*?), options(\).*)/);
+        if (m) {
+            // The 'options' parameter is part of the implementation, but removed
+            // for the sample code.
+            line = `${m[1]}${m[2]}`;
+        }
+        m = line.match(/(.*?)if \((!?)options\.(\w+?)\) (.*)/);
         if (m) {
             let [_, indent, invert, option, restOfLine] = m;
             let keepLine = (!!options[option] === (invert === ""));
