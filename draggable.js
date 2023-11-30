@@ -277,28 +277,28 @@ diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2
 // END of diagrams
 
 // Generate and syntax highlight sample code
-function generateSampleCode(pre) {
+function generateSampleCode(flags) {
     // show= should be a list of flag names to show
-    let show = pre.dataset.show ?? "";
+    const show = flags.show ?? "";
     let options = {};
     for (let option of show.split(" ")) {
         options[option] = true;
     }
     // highlight= should be a list of flag names to highlight
     let highlight = {};
-    for (let option of (pre.dataset.highlight ?? "").split(" ")) {
+    for (let option of (flags.highlight ?? "").split(" ")) {
         options[option] = true;
         highlight[option] = true;
     }
 
     // code="mouseLocal|mouseGlobal|touch|pointer" to select which source code to show
     // note that only pointer has any options
-    let code = {
+    const code = {
         mouseLocal: makeDraggableMouseLocal,
         mouseGlobal: makeDraggableMouseGlobal,
         touch: makeDraggableTouch,
         pointer: makeDraggable,
-    }[pre.dataset.code];
+    }[flags.code];
 
     let lines = [];
     let highlightedLines = new Set();
@@ -321,6 +321,11 @@ function generateSampleCode(pre) {
         lines.push(line);
     }
 
+    return {lines, highlightedLines}
+}
+
+function formatCodeInPre(el) {
+    const {lines, highlightedLines} = generateSampleCode(el.dataset);
     let html = Prism.highlight(lines.join("\n"),
                                Prism.languages.javascript,
                                'javascript');
@@ -332,11 +337,11 @@ function generateSampleCode(pre) {
         return line;
     }).join("\n");
     
-    pre.innerHTML = html;
+    el.innerHTML = html;
 }
 
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
-    generateSampleCode(codeOutput);
+    formatCodeInPre(codeOutput);
 }
 
 function regenerateFinalCode() {
@@ -347,7 +352,7 @@ function regenerateFinalCode() {
     }
     pre.dataset.show = show;
     pre.dataset.highlight = (this?.checked && this?.dataset?.show) ?? "";
-    generateSampleCode(pre);
+    formatCodeInPre(pre);
 }
 
 for (let checkbox of document.querySelectorAll("#final-code-options input")) {
