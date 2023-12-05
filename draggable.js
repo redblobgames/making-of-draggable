@@ -4,22 +4,12 @@
  * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
+import {convertPixelToSvgCoord, makeDraggable, modifySampleCode} from "./event-handling.js";
+
 console.info("I'm happy to answer questions about the code; email me at redblobgames@gmail.com");
 
 function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
 
-
-/** Convert from event coordinate space (on the page) to SVG coordinate
- * space (within the svg, honoring responsive resizing, width/height,
- * and viewBox) */
-function convertPixelToSvgCoord(event, el=event.currentTarget) {
-    const svg = el.ownerSVGElement;
-    let p = svg.createSVGPoint();
-    p.x = event.clientX;
-    p.y = event.clientY;
-    p = p.matrixTransform(svg.getScreenCTM().inverse());
-    return p;
-}
 
 
 /** Make a draggable circle in the svg and keep some state for it */
@@ -158,45 +148,6 @@ function makeOptions() {
     };
 }
 
-function makeDraggable(state, el, options) {
-    function start(event) {
-        if (options.left) if (event.button !== 0) return; // left button only
-        if (options.noctrl) if (event.ctrlKey) return; // ignore ctrl+click
-        if (options.nopropagate) event.stopPropagation(); // for nested draggables
-        let {x, y} = state.eventToCoordinates(event);
-        if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
-        if (!options.offset) state.dragging = true;
-        if (options.pointerid) state.pointerId = event.pointerId; // keep track of finger
-        if (options.capture) el.setPointerCapture(event.pointerId);
-        if (options.noselect) el.style.userSelect = 'none'; // if there's text
-        if (options.noselect) el.style.webkitUserSelect = 'none'; // safari
-    }
-
-    function end(event) {
-        if (options.offset) state.dragging = null;
-        if (!options.offset) state.dragging = false;
-        if (options.noselect) el.style.userSelect = ''; // if there's text
-        if (options.noselect) el.style.webkitUserSelect = ''; // safari
-    }
-
-    function move(event) {
-        if (!state.dragging) return;
-        if (options.pointerid) if (state.pointerId !== event.pointerId) return; // check finger id
-        if (options.nopropagate) event.stopPropagation(); // for nested draggables
-        if (options.chords) if (!(event.buttons & 1)) return end(event); // edge case: chords
-        let {x, y} = state.eventToCoordinates(event);
-        if (options.offset) state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
-        if (!options.offset) state.pos = {x, y};
-    }
-        
-    el.addEventListener('pointerdown', start);
-    el.addEventListener('pointerup', end);
-    el.addEventListener('pointercancel', end);
-    el.addEventListener('pointermove', move)
-    if (options.noscroll) el.addEventListener('touchstart', (e) => e.preventDefault());
-    if (options.nosystemdrag) el.addEventListener('dragstart', (e) => e.preventDefault());
-    if (options.nocontextmenu) el.addEventListener('contextmenu', (e) => e.preventDefault());
-}
 
 function diagram_mouse_events_local() {
     let {state, el} = makePositionState("#diagram-mouse-events-local");
@@ -276,21 +227,7 @@ diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2
 
 // END of diagrams
 
-// Generate and syntax highlight sample code
-function generateSampleCode(flags) {
-    // show= should be a list of flag names to show
-    const show = flags.show ?? "";
-    let options = {};
-    for (let option of show.split(" ")) {
-        options[option] = true;
-    }
-    // highlight= should be a list of flag names to highlight
-    let highlight = {};
-    for (let option of (flags.highlight ?? "").split(" ")) {
-        options[option] = true;
-        highlight[option] = true;
-    }
-
+function formatCodeInPre(el) {
     // code="mouseLocal|mouseGlobal|touch|pointer" to select which source code to show
     // note that only pointer has any options
     const code = {
@@ -298,34 +235,9 @@ function generateSampleCode(flags) {
         mouseGlobal: makeDraggableMouseGlobal,
         touch: makeDraggableTouch,
         pointer: makeDraggable,
-    }[flags.code];
+    }[el.dataset.code];
 
-    let lines = [];
-    let highlightedLines = new Set();
-    for (let line of code.toString().split("\n")) {
-        let m;
-        m = line.match(/(.*?), options(\).*)/);
-        if (m) {
-            // The 'options' parameter is part of the implementation, but removed
-            // for the sample code.
-            line = `${m[1]}${m[2]}`;
-        }
-        m = line.match(/(.*?)if \((!?)options\.(\w+?)\) (.*)/);
-        if (m) {
-            let [_, indent, invert, option, restOfLine] = m;
-            let keepLine = (!!options[option] === (invert === ""));
-            if (!keepLine) continue;
-            if (highlight[option]) highlightedLines.add(lines.length);
-            line = `${indent}${restOfLine}`;
-        }
-        lines.push(line);
-    }
-
-    return {lines, highlightedLines}
-}
-
-function formatCodeInPre(el) {
-    const {lines, highlightedLines} = generateSampleCode(el.dataset);
+    const {lines, highlightedLines} = modifySampleCode(code, el.dataset);
     let html = Prism.highlight(lines.join("\n"),
                                Prism.languages.javascript,
                                'javascript');
@@ -358,6 +270,7 @@ function regenerateFinalCode() {
 for (let checkbox of document.querySelectorAll("#final-code-options input")) {
     checkbox.addEventListener('click', regenerateFinalCode);
 }
+regenerateFinalCode(); // in case the page was reloaded, and has some checkboxes set
 
 window.diagramSystemDragSetSelection = function() {
     const figure = document.querySelector("#diagram-systemdrag");
