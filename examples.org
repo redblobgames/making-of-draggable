@@ -1,0 +1,37 @@
+#+title: Draggable objects
+#+date: <2023-12-01 Fri>
+#+property: header-args:dot    :cache yes
+
+On the [[href:./][main page]] I show the /event handler recipe/ I use for dragging objects around in my interactive diagrams. That's only handles the /input/. It doesn't draw anything. On this page I'll show some examples of /outputs/, and how they connect to the input handlers.
+
+#+begin_export html
+<show-example name="svg-circle" />
+<show-example name="svg-circle-transform" />
+<show-example name="svg-circle-constrained" />
+#+end_export
+
+#+begin_export html
+<style>
+  show-example { 
+    display: block; 
+  }
+  iframe { 
+    display: block; 
+    width: 100%; 
+    border: 0; 
+    box-shadow: 0 1px 2px rgba(0 0 0 / 0.5); 
+  }
+</style>
+
+<x:footer>
+  <!-- https://prismjs.com/download.html#themes=prism&languages=clike+javascript -->
+  <script src="build/prism.js"></script>
+  <script type="module" src="examples.js"></script>
+
+  Created Dec 2023
+  with the help of
+  <a href="https://prismjs.com/">Prism.js</a>; &#160;
+  <!-- hhmts start -->Last modified: 07 Dec 2023<!-- hhmts end -->
+</x:footer>
+#+end_export
+

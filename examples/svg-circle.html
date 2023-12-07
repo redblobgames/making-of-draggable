@@ -1,0 +1,34 @@
+<body>
+  <svg viewBox="-330 -50 660 200">
+    <circle class="draggable" r="30" />
+  </svg>
+</body>
+
+<script>
+  // event handlers: class capture offset
+  
+  let el = document.querySelector("svg circle")
+  let dragging
+  let pos
+  let state = {
+      eventToCoordinates: convertPixelToSvgCoord,
+      dragging: null,
+      get pos() {
+          return pos
+      },
+      set pos(p) { 
+          pos = {x: p.x, y: p.y};
+          el.setAttribute('cx', pos.x);
+          el.setAttribute('cy', pos.y);
+      },
+  }
+  state.pos = {x: 0, y: 0}
+  makeDraggable(state, el)
+</script>
+
+<style>
+    svg { background: #eee; }
+    circle { stroke: black; stroke-width: 0.5px; }
+    .draggable { cursor: grab; fill: hsl(0 50% 50%); }
+    .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
+</style>

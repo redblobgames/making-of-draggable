@@ -1,0 +1,37 @@
+<body>
+  <svg viewBox="-330 -130 660 260">
+    <circle class="draggable" r="30" />
+  </svg>
+</body>
+
+<script>
+  // event handlers: class capture offset
+  
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
+
+  let el = document.querySelector("svg circle")
+  let dragging
+  let pos
+  let state = {
+      eventToCoordinates: convertPixelToSvgCoord,
+      dragging: null,
+      get pos() {
+          return pos
+      },
+      set pos(p) { 
+          pos = {x: clamp(p.x, -300, +300), y: clamp(p.y, -100, +100)};
+          el.setAttribute('cx', pos.x);
+          el.setAttribute('cy', pos.y);
+      },
+  }
+  state.pos = {x: 0, y: 0}
+  makeDraggable(state, el)
+</script>
+
+<style>
+    svg { background: #eee; }
+    circle { stroke: black; stroke-width: 0.5px; }
+    .draggable { cursor: grab; fill: hsl(0 50% 50%); }
+    .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
+</style>
+
