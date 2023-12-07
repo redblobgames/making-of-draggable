@@ -33,6 +33,7 @@ export function makeDraggable(state, el, options) {
         let {x, y} = state.eventToCoordinates(event);
         if (options.offset) state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
         if (!options.offset) state.dragging = true;
+        if (options.class) el.classList.add('dragging');
         if (options.pointerid) state.pointerId = event.pointerId; // keep track of finger
         if (options.capture) el.setPointerCapture(event.pointerId);
         if (options.noselect) el.style.userSelect = 'none'; // if there's text
@@ -42,6 +43,7 @@ export function makeDraggable(state, el, options) {
     function end(_event) {
         if (options.offset) state.dragging = null;
         if (!options.offset) state.dragging = false;
+        if (options.class) el.classList.remove('dragging');
         if (options.noselect) el.style.userSelect = ''; // if there's text
         if (options.noselect) el.style.webkitUserSelect = ''; // safari
     }

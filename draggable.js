@@ -133,6 +133,7 @@ function makeOptions() {
     return {
         x: 0,
         y: 0,
+        class: false,
         changeText: true,
         capture: true,
         nopropagate: false,

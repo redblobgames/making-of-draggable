@@ -46,6 +46,7 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 <label><input data-show="noselect nosystemdrag" type="checkbox" /> Text inside draggable</label>
 <label><input data-show="pointerid" type="checkbox" /> Multiple fingers on same draggable</label>
 <label><input data-show="nopropagate" type="checkbox" /> Nested draggable elements</label>
+<label><input data-show="class" type="checkbox" /> Set class for styling</label>
 </div>
 #+end_export
 
@@ -894,6 +895,6 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 28 Oct 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 05 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
