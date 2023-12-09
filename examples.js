@@ -41,22 +41,36 @@ function parsePage(page) {
     let style = fragment.querySelector("style")?.innerText ?? "";
     */
 
-    function extract(pattern) {
-        let match = pattern.exec(page);
-        if (!match) return "";
-        return htmlUnEscape(page.slice(match.indices[1][0], match.indices[1][1]));
+    function removeIndentation(text, indent) {
+        let lines = text.split("\n");
+        lines = lines.map((line) => {
+            if (!line) return line;
+            let prefix = line.slice(0, indent);
+            let suffix = line.slice(indent);
+            if (!/^ +$/.test(prefix)) throw `Non-indented line found ${JSON.stringify(line)}`;
+            return suffix;
+        });
+        return lines.join("\n").trim();
     }
 
-    let body = extract(/<body>(.*)<\/body>/sd);
-    let script = extract(/<script>(.*)<\/script>/sd);
-    let style = extract(/<style>(.*)<\/style>/sd);
-    
+    function extract(indent, pattern) {
+        let match = pattern.exec(page);
+        if (!match) return "";
+        let text = htmlUnEscape(page.slice(match.indices[1][0], match.indices[1][1]));
+        text = removeIndentation(text, indent);
+        return text;
+    }
+
+    let body = extract(2, /<body>(.*)<\/body>/sd);
+    let script = extract(2, /<script>(.*)<\/script>/sd);
+    let style = extract(4, /<style>(.*)<\/style>/sd);
+
     return {body, script, style}
 }
 
 
 function modifyScript(script) {
-    script = script.replace(/(?<=\n)(\s*)\/\/ event handlers: (.*)/,
+    script = script.replace(/(\s*)\/\/ event handlers: (.*)/m,
                             (_match, indent, flags) => {
                                 let {lines} = modifySampleCode(makeDraggable.toString(),
                                                                {show: flags, highlight: ""});
@@ -66,7 +80,7 @@ function modifyScript(script) {
 
     if (script.indexOf("convertPixelToSvgCoord") >= 0) {
         // We'll need this helper function
-        script = convertPixelToSvgCoord.toString() + "\n" + script;
+        script = `${convertPixelToSvgCoord.toString()}\n\n${script}`;
     }
     
     return script;
@@ -99,16 +113,20 @@ class ShowExampleElement extends HTMLElement {
         title.textContent = name;
         this.append(title);
         
-        // NOTE: not sure why the script contents shouldn't be html-escaped
+        // NOTE: HTML5 says the <script> contents are *not* html-escaped
+        // and that you can't use <!-- or <script or </script . I'm not
+        // handling these, but I test for them
+        if (/<!--|<\/?script/.test(script)) throw "script cannot contain certain tags";
+        // <style> contents are not to be html-escaped either
         let iframeContents = `<!DOCTYPE html>
            <html>
            <body>
-             ${body.trim()}
+           ${body}
            
            <script>
              ${script}
            </script>
-           ${!style ? "" : '<style>\n' + htmlEscape(style) + '\n</style>'}
+           ${!style ? "" : '<style>\n' + style + '\n</style>'}
            <style>
              /* for embedding the iframe properly onto the parent page */
              html, body { margin: 0; padding: 0; }
