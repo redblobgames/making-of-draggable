@@ -1,0 +1,20 @@
+/* Prism.js theme, want to use mostly subdued blue colors */
+.language-javascript .token.operator { font-weight: bold; }
+.language-javascript .token.parameter { font-weight: bold; }
+.language-javascript .token.keyword { color: hsl(200 20% 50%); font-weight: bold; }
+.language-javascript .token.keyword + .token.function { color: hsl(200 50% 50%); font-weight: bold; }
+.language-javascript .token.number { color: #000; }
+.language-javascript .token.string { color: #888; }
+
+/* Prism.js html, want to use purples */
+.language-html .token.tag { color: hsl(300 30% 40%); font-weight: bold; }
+.language-html .token.attr-name { color: hsl(300 30% 50%); font-weight: normal; }
+.language-html .token.attr-value { color: hsl(300 10% 50%); }
+
+/* Prism.js css, want to use greens */
+.language-css .token.selector { color: hsl(150 30% 40%); }
+.language-css .token.property { color: hsl(150 15% 50%); }
+.language-css .inline-color-wrapper { width: 1em; }
+
+/* I also want to highlight certain lines */
+.highlight { background: hsl(180 75% 90%); }

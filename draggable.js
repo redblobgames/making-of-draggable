@@ -254,6 +254,7 @@ function formatCodeInPre(el) {
 }
 
 for (let codeOutput of document.querySelectorAll("pre[data-code]")) {
+    codeOutput.classList.add('language-javascript');
     formatCodeInPre(codeOutput);
 }
 

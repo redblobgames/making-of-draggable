@@ -1,5 +1,12 @@
 <body>
+  <div>
+    Constrain the position to a rectangle:
+  </div>
   <svg viewBox="-330 -130 660 260">
+    <rect x="-330" y="-130" width="660" height="260"
+          fill="hsl(20 20% 80%)" />
+    <rect x="-115" y="-115" width="430" height="230"
+          fill="hsl(180 5% 90%)" stroke="hsl(180 50% 50%)" stroke-width="1.5" stroke-dasharray="3,3" />
     <circle class="draggable" r="30" />
   </svg>
 </body>
@@ -19,7 +26,7 @@
           return pos
       },
       set pos(p) { 
-          pos = {x: clamp(p.x, -300, +300), y: clamp(p.y, -100, +100)};
+          pos = {x: clamp(p.x, -85, +285), y: clamp(p.y, -85, +85)};
           el.setAttribute('cx', pos.x);
           el.setAttribute('cy', pos.y);
       },

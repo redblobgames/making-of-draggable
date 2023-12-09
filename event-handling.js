@@ -26,6 +26,7 @@ export function convertPixelToSvgCoord(event, el=event.currentTarget) {
  * can be added/removed ; these should be a single line
  */
 export function makeDraggable(state, el, options) {
+    // from https://www.redblobgames.com/making-of/draggable/
     function start(event) {
         if (options.left) if (event.button !== 0) return; // left button only
         if (options.noctrl) if (event.ctrlKey) return; // ignore ctrl+click

@@ -97,7 +97,7 @@ class ShowExampleElement extends HTMLElement {
 
         const title = document.createElement('h3');
         title.textContent = name;
-        this.appendChild(title);
+        this.append(title);
         
         // NOTE: not sure why the script contents shouldn't be html-escaped
         let iframeContents = `<!DOCTYPE html>
@@ -119,7 +119,7 @@ class ShowExampleElement extends HTMLElement {
            `;
 
         const iframe = document.createElement("iframe");
-        this.appendChild(iframe);
+        this.append(iframe);
         iframe.setAttribute('scrolling', "no");
         iframe.addEventListener('load', () => {
             iframe.contentDocument.body.style.margin = "0";
@@ -130,8 +130,23 @@ class ShowExampleElement extends HTMLElement {
         iframe.contentWindow.document.write(iframeContents);
         iframe.contentWindow.document.close();
 
+        const preBody = document.createElement('pre');
+        preBody.className = "body language-html";
+        preBody.innerHTML = Prism.highlight(body, Prism.languages.html, 'html');
+        
+        const preScript = document.createElement('pre');
+        preScript.className = "script language-javascript";
+        preScript.innerHTML = Prism.highlight(script, Prism.languages.javascript, 'javascript');
+        
+        const preStyle = document.createElement('pre');
+        preStyle.className = "style language-css";
+        preStyle.innerHTML = Prism.highlight(style, Prism.languages.css, 'css');
+        
+        this.append(preBody, preScript, preStyle);
+        
         // See https://docs.jsfiddle.net/api/display-a-fiddle-from-post
         const jsfiddle = document.createElement("div");
+        jsfiddle.className = "jsfiddle";
         jsfiddle.innerHTML = `
            <form method="post" action="https://jsfiddle.net/api/post/library/pure/" target="_blank">
              <button type="submit">Open in jsfiddle</button>
@@ -139,7 +154,7 @@ class ShowExampleElement extends HTMLElement {
              <textarea name="js" style="display:none">  ${htmlEscape(script)}</textarea>
              <textarea name="css" style="display:none">${htmlEscape(style)}</textarea>
            </form>`;
-        this.appendChild(jsfiddle);
+        this.append(jsfiddle);
     }
 }
 customElements.define('show-example', ShowExampleElement);

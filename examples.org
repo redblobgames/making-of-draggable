@@ -17,11 +17,34 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   }
   iframe { 
     display: block; 
-    width: 100%; 
+    width: 100%;
     border: 0; 
     box-shadow: 0 1px 2px rgba(0 0 0 / 0.5); 
   }
+
+  show-example {
+    display: grid;
+    width: unset;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto 10em 10em;
+    grid-template-areas:
+        '-  title'
+        'demo demo'
+        'jsfiddle jsfiddle'
+        'script body'
+        'script style';
+  }
+  show-example > h3 { grid-area: title; margin: 0; justify-self: end; }
+  show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
+  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.25vw, 1rem); }
+  show-example > .script { grid-area: script; }
+  show-example > .body { grid-area: body; }
+  show-example > .style { grid-area: style; }
+  show-example > .jsfiddle { grid-area: jsfiddle; justify-self: center; }
+
 </style>
+
+<style src="prism.css" />
 
 <x:footer>
   <!-- https://prismjs.com/download.html#themes=prism&languages=clike+javascript -->
@@ -31,7 +54,7 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 07 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 08 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
 
