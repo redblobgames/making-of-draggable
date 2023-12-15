@@ -13,11 +13,22 @@ const htmlEscape = (unescaped) => {
         .replaceAll('>', '&gt;')
 }
 
+const htmlEscapeAttribute = (unescaped) => {
+    return unescaped
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;')
+}
+
 function htmlUnEscape(escaped) {
     return escaped
-        .replaceAll('&amp;', '&')
+        .replaceAll('&apos;', "'")
+        .replaceAll('&quot;', '"')
         .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>');
+        .replaceAll('&gt;', '>')
+        .replaceAll('&amp;', '&');
 }
 
 
@@ -106,11 +117,13 @@ class ShowExampleElement extends HTMLElement {
         // Three parts to this component:
         // 0. title
         // 1. an iframe that shows the *running* version
-        // TODO: 2. syntax-highlighted source code
+        // 2. syntax-highlighted source code
         // 3. a jsfiddle button that lets you run it on jsfiddle
+        // 4. a codepen button that lets you run it on codepen
 
         const title = document.createElement('h3');
-        title.textContent = name;
+        title.innerHTML = `<a href="#${name}">${name}</a>`;
+        title.setAttribute('id', name);
         this.append(title);
         
         // NOTE: HTML5 says the <script> contents are *not* html-escaped
@@ -130,7 +143,7 @@ class ShowExampleElement extends HTMLElement {
            <style>
              /* for embedding the iframe properly onto the parent page */
              html, body { margin: 0; padding: 0; }
-             svg { display: block; }
+             svg, canvas { display: block; }
            </style>
            </body>
            </html>
@@ -162,17 +175,23 @@ class ShowExampleElement extends HTMLElement {
         
         this.append(preBody, preScript, preStyle);
         
-        // See https://docs.jsfiddle.net/api/display-a-fiddle-from-post
-        const jsfiddle = document.createElement("div");
-        jsfiddle.className = "jsfiddle";
-        jsfiddle.innerHTML = `
+        // jsfiddle: https://docs.jsfiddle.net/api/display-a-fiddle-from-post
+        // codepen: https://blog.codepen.io/documentation/prefill
+        const editors = document.createElement('div');
+        const codepen = {html: body, css: style, js: script, tags: ['redblobgames', 'draggable'], layout: 'left'};
+        editors.className = "editors";
+        editors.innerHTML = `
            <form method="post" action="https://jsfiddle.net/api/post/library/pure/" target="_blank">
              <button type="submit">Open in jsfiddle</button>
              <textarea name="html" style="display:none">${htmlEscape(body)}</textarea>
              <textarea name="js" style="display:none">  ${htmlEscape(script)}</textarea>
              <textarea name="css" style="display:none">${htmlEscape(style)}</textarea>
+           </form>
+           <form method="post" action="https://codepen.io/pen/define" target="_blank">
+             <button type="submit">Open in codepen</button>
+             <input type="hidden" name="data" value="${htmlEscapeAttribute(JSON.stringify(codepen))}">
            </form>`;
-        this.append(jsfiddle);
+        this.append(editors);
     }
 }
 customElements.define('show-example', ShowExampleElement);

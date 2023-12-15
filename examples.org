@@ -26,21 +26,22 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
     display: grid;
     width: unset;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto 10em 10em;
+    grid-template-rows: auto auto 10em 10em;
     grid-template-areas:
-        '-  title'
+        'title editors'
         'demo demo'
-        'jsfiddle jsfiddle'
         'script body'
         'script style';
+    border-top: 1em solid hsl(var(--hue), 50%, 45%);
   }
-  show-example > h3 { grid-area: title; margin: 0; justify-self: end; }
+  show-example > h3 { grid-area: title; margin: 1em 1em 1em 0; justify-self: end; }
   show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
-  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.25vw, 1rem); }
-  show-example > .script { grid-area: script; }
-  show-example > .body { grid-area: body; }
-  show-example > .style { grid-area: style; }
-  show-example > .jsfiddle { grid-area: jsfiddle; justify-self: center; }
+  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.25vw, 1rem); border: none; }
+  show-example > .script { grid-area: script; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); }
+  show-example > .body { grid-area: body; background: radial-gradient(circle at left 25% top 75%, oklch(95% 0.0 310), oklch(95% 0.01 310)); }
+  show-example > .style { grid-area: style; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 150), oklch(95% 0.01 150)); }
+  show-example > .editors { grid-area: editors; margin-left: 1em; align-self: center; }
+  show-example > .editors form { display: inline-block; }
 
 </style>
 
@@ -54,7 +55,7 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 08 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 15 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
 
