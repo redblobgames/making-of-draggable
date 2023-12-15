@@ -3,10 +3,18 @@
     Constrain the position to a rectangle:
   </div>
   <svg viewBox="-330 -130 660 260">
+    <defs>
+      <pattern id="pattern-slashes" width="7" height="7"
+               patternUnits="userSpaceOnUse"
+               patternTransform="rotate(40 0 0)">
+        <line y2="7" fill="#ddd" stroke="#aaa" stroke-width="1" />
+      </pattern>
+    </defs>
+
     <rect x="-330" y="-130" width="660" height="260"
-          fill="hsl(20 20% 80%)" />
+          fill="url(#pattern-slashes)" stroke="#ccc" />
     <rect x="-115" y="-115" width="430" height="230"
-          fill="hsl(180 5% 90%)" stroke="hsl(180 50% 50%)" stroke-width="1.5" stroke-dasharray="3,3" />
+          fill="#eee" stroke="#ccc" />
     <circle class="draggable" r="30" />
   </svg>
 </body>
@@ -14,7 +22,7 @@
 <script>
   // event handlers: class capture offset
   
-  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x }
 
   let el = document.querySelector("svg circle")
   let dragging
@@ -26,9 +34,9 @@
           return pos
       },
       set pos(p) { 
-          pos = {x: clamp(p.x, -85, +285), y: clamp(p.y, -85, +85)};
-          el.setAttribute('cx', pos.x);
-          el.setAttribute('cy', pos.y);
+          pos = {x: clamp(p.x, -85, +285), y: clamp(p.y, -85, +85)}
+          el.setAttribute('cx', pos.x)
+          el.setAttribute('cy', pos.y)
       },
   }
   state.pos = {x: 0, y: 0}

@@ -1,0 +1,51 @@
+<body>
+  <div>
+    Drag the number left or right:
+    <input id="input-scrubbable-number"
+           type="number" value="150" pattern="[0-9]+" />
+  </div>
+</body>
+
+<script>
+  // event handlers: left capture offset
+  
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x }
+
+  let el = document.querySelector("#input-scrubbable-number")
+  let dragging
+  let state = {
+      eventToCoordinates(event) { return {x: event.clientX, y: event.clientY} },
+      dragging: null,
+      get pos() {
+          console.log('get', el.valueAsNumber)
+          return {x: el.valueAsNumber || 0, y: 0}
+      },
+      set pos(p) { 
+          console.log('set', p.x)
+          x = clamp(p.x, 0, 1000)
+          el.value = Math.round(x)
+      },
+  }
+  makeDraggable(state, el)
+</script>
+
+<style>
+    #input-scrubbable-number {
+        font-size: 125%;
+        width: 3em;
+        border: none;
+        border-bottom: 1px dashed hsl(0 50% 45%);
+        background: hsl(60 10% 95%);
+        text-align: center;
+        cursor: ew-resize;
+        user-select: none;
+    }
+    #input-scrubbable-number:hover {
+        background: hsl(30 50% 90%);
+    }
+    #input-scrubbable-number:focus-visible {
+        background: hsl(0 50% 90%);
+        outline: none;
+    }
+</style>
+

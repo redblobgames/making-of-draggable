@@ -1,0 +1,71 @@
+<body>
+  <svg viewBox="-130 -125 660 250">
+    <g fill="none" stroke="#ddd" stroke-width="5">
+      <!-- guides -->
+      <circle r="100" />
+      <line x1="100" x2="450" />
+    </g>
+    <g id="snap-to" fill="#ddd" stroke="#eee">
+      <!-- snap points, filled in by js code -->
+    </g>
+    <circle class="draggable" r="15" />
+  </svg>
+</body>
+
+<script>
+  // event handlers: class capture offset
+  
+  // In this example I make snap points along a circle
+  // and also along a line
+  const snap = [];
+  for (let i = 0; i < 9; i++) {
+      let angle = i / 9 * (2 * Math.PI);
+      snap.push([100 * Math.cos(angle), 100 * Math.sin(angle)]);
+  }
+  for (let i = 0; i < 6; i++) {
+      snap.push([100 + i * 70, 0]);
+  }
+  for (let pos of snap) {
+      let circle = document.createElementNS(
+          'http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', pos[0]);
+      circle.setAttribute('cy', pos[1]);
+      circle.setAttribute('r', 10);
+      document.querySelector("#snap-to").appendChild(circle);
+  }
+  
+  // Make the circle draggable only to the snap points
+  let el = document.querySelector("svg circle.draggable");
+  let state = {
+      eventToCoordinates: convertPixelToSvgCoord,
+      dragging: null,
+      _pos: [0, 0],
+      get pos() {
+          return {x: this._pos[0], y: this._pos[1]};
+      },
+      set pos(p) {
+          // This example shows how the internal representation
+          // is [x,y] but the external type exported by the
+          // getter/setter is {x,y}
+          let closest = snap[0];
+          for (let pos of snap) {
+              if (Math.hypot(p.x - pos[0],     p.y - pos[1]) <
+                  Math.hypot(p.x - closest[0], p.y - closest[1])) {
+                  closest = pos;
+              }
+          }
+          this._pos = closest;
+          el.setAttribute('cx', this._pos[0]);
+          el.setAttribute('cy', this._pos[1]);
+      },
+  }
+  state.pos = {x: 0, y: 0};
+  makeDraggable(state, el);
+</script>
+
+<style>
+    svg { background: #eee; }
+    circle.draggable { stroke: black; stroke-width: 0.5px; }
+    .draggable { cursor: grab; fill: hsl(0 50% 50%); }
+    .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
+</style>

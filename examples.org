@@ -4,11 +4,19 @@
 
 On the [[href:./][main page]] I show the /event handler recipe/ I use for dragging objects around in my interactive diagrams. That's only handles the /input/. It doesn't draw anything. On this page I'll show some examples of /outputs/, and how they connect to the input handlers.
 
+*These are starting points* using global variables. You'll have to adapt the code to fit into your own project.
+
 #+begin_export html
+<show-example name="svg-circle-snapping" />
 <show-example name="svg-circle" />
 <show-example name="svg-circle-transform" />
 <show-example name="svg-circle-constrained" />
+<show-example name="canvas-drag-circle" />
+<show-example name="number-scrubbing" />
 #+end_export
+
+
+
 
 #+begin_export html
 <style>

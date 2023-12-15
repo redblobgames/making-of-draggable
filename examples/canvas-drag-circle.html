@@ -1,0 +1,89 @@
+<body>
+  <div>
+    Dragging on a canvas uses a slightly different
+    recipe than dragging svg objects.
+  </div>
+  <canvas width="660" height="300" />
+</body>
+
+<script>
+  /** Convert from event coordinate space (on the page) to Canvas coordinate
+   * space (assuming there are no transforms on the canvas) */
+  function convertPixelToCanvasCoord(event) {
+      const canvas = event.currentTarget;
+      const bounds = canvas.getBoundingClientRect();
+      return {
+          x: (event.x - bounds.left) / bounds.width * canvas.width,
+          y: (event.y - bounds.top) / bounds.height * canvas.height,
+      };
+  }
+  
+  function setCursor(event) {
+      let {x, y} = state.eventToCoordinates(event);
+      el.style.cursor = !isOverDragHandle({x, y})
+                      ? '' : state.dragging? 'grabbing' : 'grab';
+  }
+
+  function makeDraggable(state, el) {
+      // from https://www.redblobgames.com/making-of/draggable/
+      function start(event) {
+          let {x, y} = state.eventToCoordinates(event);
+          state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
+          el.setPointerCapture(event.pointerId);
+          redraw();
+      }
+
+      function end(_event) {
+          state.dragging = null;
+          redraw();
+      }
+
+      function move(event) {
+          setCursor(event);
+          if (!state.dragging) return;
+          let {x, y} = state.eventToCoordinates(event);
+          state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
+          redraw();
+      }
+
+      el.addEventListener('pointerdown', start);
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+      el.addEventListener('pointermove', move)
+      el.addEventListener('touchstart', (e) => e.preventDefault());
+      el.addEventListener('dragstart', (e) => e.preventDefault());
+  }
+
+
+
+  const radius = 45;
+  let el = document.querySelector("canvas");
+
+  function redraw() {
+      let ctx = el.getContext('2d');
+      ctx.fillStyle = "#eee";
+      ctx.fillRect(0, 0, el.width, el.height);
+      ctx.fillStyle = state.dragging? "hsl(200 50% 50%)" : "hsl(0 50% 50%)";
+      ctx.strokeStyle = "black";
+      ctx.beginPath();
+      ctx.arc(state.pos.x, state.pos.y, radius, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "white";
+      ctx.textAlign = "center";
+      ctx.font = "24px serif";
+      ctx.fillText("Drag me", state.pos.x, state.pos.y + 5);
+  }
+  
+  function isOverDragHandle(p) {
+      return Math.hypot(state.pos.x - p.x, state.pos.y - p.y) <= radius;
+  }
+
+  let state = {
+      eventToCoordinates: convertPixelToCanvasCoord,
+      dragging: null,
+      pos: {x: 100, y: 100},
+  };
+  redraw();
+  makeDraggable(state, el);
+</script>
