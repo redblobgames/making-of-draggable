@@ -6,15 +6,20 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
 
 *These are starting points* using global variables. You'll have to adapt the code to fit into your own project.
 
+{ TODO: describe how the event handler and state handler relate }
+
 #+begin_export html
-<show-example name="svg-circle-snapping" />
 <show-example name="svg-circle" />
-<show-example name="svg-circle-transform" />
-<show-example name="svg-circle-constrained" />
-<show-example name="canvas-drag-circle" />
-<show-example name="number-scrubbing" />
 #+end_export
 
+{ TODO: consider splitting the script code into the state handler and the event handler code }
+
+
+
+<show-example name="svg-circle-constrained" />
+<show-example name="svg-circle-snapping" />
+<show-example name="canvas-drag-circle" />
+<show-example name="number-scrubbing" />
 
 
 
@@ -33,7 +38,9 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   show-example {
     display: grid;
     width: unset;
-    grid-template-columns: 1fr 1fr;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    grid-template-columns: 5fr 4fr;
     grid-template-rows: auto auto 10em 10em;
     grid-template-areas:
         'title editors'
@@ -44,7 +51,7 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   }
   show-example > h3 { grid-area: title; margin: 1em 1em 1em 0; justify-self: end; }
   show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
-  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.25vw, 1rem); border: none; }
+  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.2vw, 1rem); border: none; }
   show-example > .script { grid-area: script; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); }
   show-example > .body { grid-area: body; background: radial-gradient(circle at left 25% top 75%, oklch(95% 0.0 310), oklch(95% 0.01 310)); }
   show-example > .style { grid-area: style; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 150), oklch(95% 0.01 150)); }
@@ -63,7 +70,7 @@ On the [[href:./][main page]] I show the /event handler recipe/ I use for draggi
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 15 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 20 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
 

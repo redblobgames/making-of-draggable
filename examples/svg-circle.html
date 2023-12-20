@@ -5,25 +5,24 @@
 </body>
 
 <script>
-  // event handlers: class capture offset
-  
-  let el = document.querySelector("svg circle")
-  let dragging
-  let pos
+  let el = document.querySelector("svg circle");
   let state = {
       eventToCoordinates: convertPixelToSvgCoord,
       dragging: null,
+      _pos: undefined,
       get pos() {
-          return pos
+          return this._pos;
       },
       set pos(p) { 
-          pos = {x: p.x, y: p.y}
-          el.setAttribute('cx', pos.x)
-          el.setAttribute('cy', pos.y)
+          this._pos = {x: p.x, y: p.y};
+          el.setAttribute('cx', this._pos.x);
+          el.setAttribute('cy', this._pos.y);
       },
   }
-  state.pos = {x: 0, y: 0}
-  makeDraggable(state, el)
+  state.pos = {x: 0, y: 0};
+  makeDraggable(state, el);
+
+  // event handlers: class capture offset
 </script>
 
 <style>

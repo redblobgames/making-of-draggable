@@ -81,17 +81,17 @@ function parsePage(page) {
 
 
 function modifyScript(script) {
-    script = script.replace(/(\s*)\/\/ event handlers: (.*)/m,
-                            (_match, indent, flags) => {
+    script = script.replace(/^\/\/ event handlers: (.*)$/m,
+                            (_match, flags) => {
                                 let {lines} = modifySampleCode(makeDraggable.toString(),
                                                                {show: flags, highlight: ""});
-                                lines = lines.map((line) => indent + line);
+                                // lines = lines.map((line) => indent + line);
                                 return lines.join("\n");
                             });
 
     if (script.indexOf("convertPixelToSvgCoord") >= 0) {
         // We'll need this helper function
-        script = `${convertPixelToSvgCoord.toString()}\n\n${script}`;
+        script = `${script}\n\n${convertPixelToSvgCoord.toString()}`;
     }
     
     return script;
