@@ -22,36 +22,15 @@ const htmlEscapeAttribute = (unescaped) => {
         .replaceAll("'", '&apos;')
 }
 
-function htmlUnEscape(escaped) {
-    return escaped
-        .replaceAll('&apos;', "'")
-        .replaceAll('&quot;', '"')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&amp;', '&');
-}
-
-
 
 /** Parse the example page into html+js+css sections,
+ * surrounded by <template> <script> <style>,
  * like a Svelte/VueSFC file but slightly different syntax
  *
  * @param {string} page - the full example
  * @returns {{body, script, style}} - the three sections of the page
  */
 function parsePage(page) {
-    /*
-      TODO: can we use the browser to parse the html properly?
-      
-    let fragment = new DocumentFragment();
-    let template = document.createElement("template");
-    template.innerHTML = page;
-    fragment.append(template);
-    let body = fragment.querySelector("body")?.innerHTML ?? "";
-    let script = fragment.querySelector("script")?.innerText ?? "";
-    let style = fragment.querySelector("style")?.innerText ?? "";
-    */
-
     function removeIndentation(text, indent) {
         let lines = text.split("\n");
         lines = lines.map((line) => {
@@ -64,17 +43,19 @@ function parsePage(page) {
         return lines.join("\n").trim();
     }
 
-    function extract(indent, pattern) {
-        let match = pattern.exec(page);
-        if (!match) return "";
-        let text = htmlUnEscape(page.slice(match.indices[1][0], match.indices[1][1]));
+    function extract(indent, tag) {
+        let node = document.querySelector(tag);
+        if (!node) return "";
+
+        let text = node.innerHTML;
         text = removeIndentation(text, indent);
         return text;
     }
 
-    let body = extract(2, /<body>(.*)<\/body>/sd);
-    let script = extract(2, /<script>(.*)<\/script>/sd);
-    let style = extract(4, /<style>(.*)<\/style>/sd);
+    let document = new DOMParser().parseFromString(page, 'text/html');
+    let body = extract(2, 'template');
+    let script = extract(2, 'script');
+    let style = extract(4, 'style');
 
     return {body, script, style}
 }
