@@ -24,11 +24,11 @@ const htmlEscapeAttribute = (unescaped) => {
 
 
 /** Parse the example page into html+js+css sections,
- * surrounded by <template> <script> <style>,
+ * surrounded by <template> <script> <script class=events> <style>,
  * like a Svelte/VueSFC file but slightly different syntax
  *
  * @param {string} page - the full example
- * @returns {{body, script, style}} - the three sections of the page
+ * @returns {{body, stateHandler, eventHandler, style}} - the four sections of the page
  */
 function parsePage(page) {
     function removeIndentation(text, indent) {
@@ -54,28 +54,30 @@ function parsePage(page) {
 
     let document = new DOMParser().parseFromString(page, 'text/html');
     let body = extract(2, 'template');
-    let script = extract(2, 'script');
+    let stateHandler = extract(2, 'script:not([class])');
+    let eventHandler = extract(2, 'script[class="events"]');
     let style = extract(4, 'style');
 
-    return {body, script, style}
+    return {body, stateHandler, eventHandler, style}
 }
 
 
-function modifyScript(script) {
-    script = script.replace(/^\/\/ event handlers: (.*)$/m,
-                            (_match, flags) => {
-                                let {lines} = modifySampleCode(makeDraggable.toString(),
-                                                               {show: flags, highlight: ""});
-                                // lines = lines.map((line) => indent + line);
-                                return lines.join("\n");
-                            });
+function modifyScripts({stateHandler, eventHandler}) {
+    stateHandler = stateHandler.replace(
+        /^\/\/ event handlers: (.*)$/m,
+        (_match, flags) => {
+            let {lines} = modifySampleCode(makeDraggable.toString(),
+                                           {show: flags, highlight: ""});
+            eventHandler += lines.join("\n");
+            return "";
+        });
 
-    if (script.indexOf("convertPixelToSvgCoord") >= 0) {
+    if (stateHandler.indexOf("convertPixelToSvgCoord") >= 0) {
         // We'll need this helper function
-        script = `${script}\n\n${convertPixelToSvgCoord.toString()}`;
+        eventHandler += "\n\n" + convertPixelToSvgCoord.toString();
     }
-    
-    return script;
+
+    return {stateHandler, eventHandler};
 }
 
 
@@ -87,13 +89,14 @@ class ShowExampleElement extends HTMLElement {
     connectedCallback() {
         this.setup();
     }
-    
+
     async setup() {
         const name = this.getAttribute('name');
         let response = await fetch(`examples/${name}.html`);
         let page = await response.text();
-        let {body, script, style} = parsePage(page);
-        script = modifyScript(script);
+        let {body, stateHandler, eventHandler, style} = parsePage(page);
+        ({stateHandler, eventHandler} = modifyScripts({stateHandler, eventHandler}));
+        const script = stateHandler + eventHandler;
 
         // Three parts to this component:
         // 0. title
@@ -106,7 +109,7 @@ class ShowExampleElement extends HTMLElement {
         title.innerHTML = `<a href="#${name}">${name}</a>`;
         title.setAttribute('id', name);
         this.append(title);
-        
+
         // NOTE: HTML5 says the <script> contents are *not* html-escaped
         // and that you can't use <!-- or <script or </script . I'm not
         // handling these, but I test for them
@@ -116,7 +119,7 @@ class ShowExampleElement extends HTMLElement {
            <html>
            <body>
            ${body}
-           
+
            <script>
              ${script}
            </script>
@@ -145,17 +148,17 @@ class ShowExampleElement extends HTMLElement {
         const preBody = document.createElement('pre');
         preBody.className = "body language-html";
         preBody.innerHTML = Prism.highlight(body, Prism.languages.html, 'html');
-        
+
         const preScript = document.createElement('pre');
         preScript.className = "script language-javascript";
         preScript.innerHTML = Prism.highlight(script, Prism.languages.javascript, 'javascript');
-        
+
         const preStyle = document.createElement('pre');
         preStyle.className = "style language-css";
         preStyle.innerHTML = Prism.highlight(style, Prism.languages.css, 'css');
-        
+
         this.append(preBody, preScript, preStyle);
-        
+
         // jsfiddle: https://docs.jsfiddle.net/api/display-a-fiddle-from-post
         // codepen: https://blog.codepen.io/documentation/prefill
         const editors = document.createElement('div');
@@ -165,7 +168,7 @@ class ShowExampleElement extends HTMLElement {
            <form method="post" action="https://jsfiddle.net/api/post/library/pure/" target="_blank">
              <button type="submit">Open in jsfiddle</button>
              <textarea name="html" style="display:none">${htmlEscape(body)}</textarea>
-             <textarea name="js" style="display:none">  ${htmlEscape(script)}</textarea>
+             <textarea name="js" style="display:none">${htmlEscape(script)}</textarea>
              <textarea name="css" style="display:none">${htmlEscape(style)}</textarea>
            </form>
            <form method="post" action="https://codepen.io/pen/define" target="_blank">
