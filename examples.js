@@ -149,15 +149,19 @@ class ShowExampleElement extends HTMLElement {
         preBody.className = "body language-html";
         preBody.innerHTML = Prism.highlight(body, Prism.languages.html, 'html');
 
-        const preScript = document.createElement('pre');
-        preScript.className = "script language-javascript";
-        preScript.innerHTML = Prism.highlight(script, Prism.languages.javascript, 'javascript');
+        const stateScript = document.createElement('pre');
+        stateScript.className = "state language-javascript";
+        stateScript.innerHTML = Prism.highlight(stateHandler, Prism.languages.javascript, 'javascript');
+
+        const eventScript = document.createElement('pre');
+        eventScript.className = "event language-javascript";
+        eventScript.innerHTML = Prism.highlight(eventHandler, Prism.languages.javascript, 'javascript');
 
         const preStyle = document.createElement('pre');
         preStyle.className = "style language-css";
         preStyle.innerHTML = Prism.highlight(style, Prism.languages.css, 'css');
 
-        this.append(preBody, preScript, preStyle);
+        this.append(stateScript, preBody, preStyle, eventScript);
 
         // jsfiddle: https://docs.jsfiddle.net/api/display-a-fiddle-from-post
         // codepen: https://blog.codepen.io/documentation/prefill

@@ -79,18 +79,20 @@ This structure gives me the flexibility I want for my projects. The state handle
     margin-left: 0.5em;
     margin-right: 0.5em;
     grid-template-columns: 5fr 4fr;
-    grid-template-rows: auto auto 10em 10em;
+    grid-template-rows: auto auto 7em 7em 7em;
     grid-template-areas:
         'title editors'
         'demo demo'
-        'script body'
-        'script style';
+        'state body'
+        'state style'
+        'state event';
     border-top: 1em solid hsl(var(--hue), 50%, 45%);
   }
   show-example > h3 { grid-area: title; margin: 1em 1em 1em 0; justify-self: end; }
   show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
-  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.2vw, 1rem); border: none; }
-  show-example > .script { grid-area: script; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); }
+  show-example > pre { width: unset; font-size: clamp(0.5rem, 1.2vw, 1rem); border: none; margin: 0.25em; padding: 0.25em; }
+  show-example > .state { grid-area: state; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); }
+  show-example > .event { grid-area: event; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 30), oklch(90% 0.01 30)); }
   show-example > .body { grid-area: body; background: radial-gradient(circle at left 25% top 75%, oklch(95% 0.0 310), oklch(95% 0.01 310)); }
   show-example > .style { grid-area: style; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 150), oklch(95% 0.01 150)); }
   show-example > .editors { grid-area: editors; margin-left: 1em; align-self: center; }
