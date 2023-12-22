@@ -1,4 +1,4 @@
-<body>
+<template>
   <div>
     Constrain the position to a rectangle:
   </div>
@@ -17,30 +17,34 @@
           fill="#eee" stroke="#ccc" />
     <circle class="draggable" r="30" />
   </svg>
-</body>
+</template>
 
 <script>
-  // event handlers: class capture offset
-  
-  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x }
-
-  let el = document.querySelector("svg circle")
-  let dragging
-  let pos
+  let el = document.querySelector("svg circle");
   let state = {
       eventToCoordinates: convertPixelToSvgCoord,
       dragging: null,
+      _pos: undefined,
       get pos() {
-          return pos
+          return this._pos;
       },
       set pos(p) { 
-          pos = {x: clamp(p.x, -85, +285), y: clamp(p.y, -85, +85)}
-          el.setAttribute('cx', pos.x)
-          el.setAttribute('cy', pos.y)
+          this._pos = {
+              x: clamp(p.x, -85, +285), //*
+              y: clamp(p.y, -85, +85) //*
+          };
+          el.setAttribute('cx', this._pos.x);
+          el.setAttribute('cy', this._pos.y);
       },
   }
-  state.pos = {x: 0, y: 0}
-  makeDraggable(state, el)
+  state.pos = {x: 0, y: 0};
+  makeDraggable(state, el);
+
+  // event handlers: class capture offset
+</script>
+
+<script class="events">
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x }
 </script>
 
 <style>
@@ -49,4 +53,3 @@
     .draggable { cursor: grab; fill: hsl(0 50% 50%); }
     .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
 </style>
-

@@ -68,7 +68,7 @@ function modifyScripts({stateHandler, eventHandler}) {
         (_match, flags) => {
             let {lines} = modifySampleCode(makeDraggable.toString(),
                                            {show: flags, highlight: ""});
-            eventHandler += lines.join("\n");
+            eventHandler = (eventHandler + "\n\n" + lines.join("\n")).trim();
             return "";
         });
 
@@ -80,6 +80,43 @@ function modifyScripts({stateHandler, eventHandler}) {
     return {stateHandler, eventHandler};
 }
 
+
+/**
+ * syntax and line highlight code
+ *
+ * @param {string} text - original plain text
+ * @param {'html' | 'javascript' | 'css'} language
+ * @param {string | undefined} highlightPattern - pattern at end of line
+ */
+function highlightCode(text, language, highlightPattern=undefined) {
+    // Figure out which *lines* to highlight *before* syntax
+    // highlighting is applied. Remove the marker so it doesn't
+    // get syntax highlighted
+    let linesToHighlight = new Set();
+    if (highlightPattern) {
+        text = text.split("\n").map((line, lineNumber) => {
+            if (line.endsWith(highlightPattern)) {
+                line = line.slice(0, line.length - highlightPattern.length);
+                linesToHighlight.add(lineNumber);
+            }
+            return line;
+        }).join("\n");
+    }
+
+    // Apply *syntax* highlighting
+    let html = Prism.highlight(text, Prism.languages[language], language);
+
+    // Apply *line* highlighting
+    html = html.split("\n").map((line, lineNumber) => {
+        if (linesToHighlight.has(lineNumber)) {
+            let m = line.match(/^(\s*)(\S.*)$/);
+            line = `${m[1]}<span class="highlight">${m[2]}</span>`;
+        }
+        return line;
+    }).join("\n");
+
+    return html;
+}
 
 class ShowExampleElement extends HTMLElement {
     constructor() {
@@ -147,19 +184,19 @@ class ShowExampleElement extends HTMLElement {
 
         const preBody = document.createElement('pre');
         preBody.className = "body language-html";
-        preBody.innerHTML = Prism.highlight(body, Prism.languages.html, 'html');
+        preBody.innerHTML = highlightCode(body, 'html');
 
         const stateScript = document.createElement('pre');
         stateScript.className = "state language-javascript";
-        stateScript.innerHTML = Prism.highlight(stateHandler, Prism.languages.javascript, 'javascript');
+        stateScript.innerHTML = highlightCode(stateHandler, 'javascript', "//*");
 
         const eventScript = document.createElement('pre');
         eventScript.className = "event language-javascript";
-        eventScript.innerHTML = Prism.highlight(eventHandler, Prism.languages.javascript, 'javascript');
+        eventScript.innerHTML = highlightCode(eventHandler, 'javascript', "//*");
 
         const preStyle = document.createElement('pre');
         preStyle.className = "style language-css";
-        preStyle.innerHTML = Prism.highlight(style, Prism.languages.css, 'css');
+        preStyle.innerHTML = highlightCode(style, 'css');
 
         this.append(stateScript, preBody, preStyle, eventScript);
 
