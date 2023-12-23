@@ -52,11 +52,17 @@ However it's not so simple! Mouses have multiple buttons. Touch events can inclu
 
 #+toc: headlines 1
 
-Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. I also use this same recipe to handle situations where I'm /not/ dragging an object around, like dragging this number left/right:
+Like other recipes, it's something that works for many cases, but is *meant to be modified*. On the rest of the page I'll show how I got here and then variants of this recipe, including [[#variant-text][how to handle text selection]]. 
+
+This recipe is for the /input/ 
+@@html:<em style="background:#e6d4c3"> event handler </em>@@,
+and it needs to be connected to a 
+@@html:<em style="background:#cfd6e6"> state handler </em>@@ to handle /output/.
+*See the [[href:examples.html][examples page]]* for complete code you can use, including when I'm /not/ dragging an object around, like dragging this number left/right:
 @@html:<input id="scrubbable-number" pattern="[0-9]+" />@@,
 or [[href:targets.html#canvas-drag-to-paint][painting on a canvas]], or [[href:/articles/curved-paths/making-of.html][constrained dragging]].
 
-This recipe is for the /event handling/ but there's a second half which is /connecting/ it to some diagram state. I have a [[https://jsfiddle.net/6ghmatps/][basic example]] showing the connecting code, and will add more examples in the future.
+[[./build/diagram-state-and-event-handlers.svg]]
 
 I've tested this code on Gecko/Firefox (Mac, Windows, Linux, Android), Blink/Chrome (Mac, Windows, Linux, Android), and WebKit/Safari (Mac, iPhone, iPad). I have /not/ tested on hoverable stylus, hybrid touch+mouse devices, or voice input.
 
@@ -886,6 +892,6 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 08 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 23 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export

@@ -128,6 +128,9 @@ class ShowExampleElement extends HTMLElement {
     }
 
     async setup() {
+        const childContent = this.innerHTML;
+        this.innerHTML = "";
+
         const name = this.getAttribute('name');
         let response = await fetch(`examples/${name}.html`);
         let page = await response.text();
@@ -135,12 +138,7 @@ class ShowExampleElement extends HTMLElement {
         ({stateHandler, eventHandler} = modifyScripts({stateHandler, eventHandler}));
         const script = stateHandler + eventHandler;
 
-        // Three parts to this component:
-        // 0. title
-        // 1. an iframe that shows the *running* version
-        // 2. syntax-highlighted source code
-        // 3. a jsfiddle button that lets you run it on jsfiddle
-        // 4. a codepen button that lets you run it on codepen
+        // Assemble the component output
 
         const title = document.createElement('h3');
         title.innerHTML = `<a href="#${name}">${name}</a>`;
@@ -199,6 +197,12 @@ class ShowExampleElement extends HTMLElement {
         preStyle.innerHTML = highlightCode(style, 'css');
 
         this.append(stateScript, preBody, preStyle, eventScript);
+
+        // Original content inside the <show-example> tag
+        const childDiv = document.createElement('div');
+        childDiv.setAttribute('class', "explanation");
+        childDiv.innerHTML = childContent;
+        this.append(childDiv);
 
         // jsfiddle: https://docs.jsfiddle.net/api/display-a-fiddle-from-post
         // codepen: https://blog.codepen.io/documentation/prefill

@@ -1,4 +1,4 @@
-#+title: Draggable objects
+#+title: Draggable objects: examples
 #+date: <2023-12-01 Fri>
 #+property: header-args:dot    :cache yes
 
@@ -19,28 +19,39 @@ digraph Handlers {
   edge [color="0.15 0.05 0.75"]
   rankdir = "LR"
 
-  event [
-    shape = record
-    fillcolor="#e6d4c3"
-    label = "<down> pointerdown | <up> pointerup | <move> pointermove";
-  ];
+  subgraph cluster_0 {
+    style="filled"
+    color="#f8f4f0"
+    event [
+      shape = record
+      fillcolor="#e6d4c3"
+      label = "<down> pointerdown | <up> pointerup | <move> pointermove";
+    ];
+    event;
+    browser -> event;
+    label="main page";
+  }
 
-  state [
-    shape = record
-    fillcolor="#cfd6e6"
-    label = "event to coords | <dragging> dragging | <pos> pos";
-  ];
+  subgraph cluster_1 {
+    style="filled"
+    color="#f0f4f8"
+    state [
+      shape = record
+      fillcolor="#cfd6e6"
+      label = "event to coords | <dragging> dragging | <pos> pos";
+    ];
+    state -> "application state";
+    state -> dom;
+    label="examples page";
+  }
 
-  browser -> event;
   event:down -> state:dragging;
   event:up -> state:dragging;
   event:move -> state:pos;
-  state -> "application state";
-  state -> dom;
 }
 #+end_src
 
-#+results[47956808b4a7b75ce54f8b80750093eb145bc0c2]:
+#+results[1448242050c1bc0770103c323e50452fdc75dbc4]:
 [[file:build/diagram-state-and-event-handlers.svg]]
 
 This structure gives me the flexibility I want for my projects. The state handler isn't limited to /dragging/. It can take the drag /events/ and turn them into a numeric display, or a painting program. On this page I'll give examples of these.
@@ -48,12 +59,26 @@ This structure gives me the flexibility I want for my projects. The state handle
 *These examples are starting points* using global variables. You'll have to adapt the code to fit into your own project.
 
 #+begin_export html
-<show-example name="svg-circle" />
-<show-example name="svg-constrained" />
+<show-example name="svg-circle">
+  Here's a basic state handler that works with the event handler. The position 
+  <code>pos</code> has a <em>setter</em> on it that also updates the circle's
+  position whenever the position variable is changed. The event handler sets
+  the <code>dragging</code> CSS class, which changes the color of the circle
+  while it's being dragged.
+</show-example>
+
+<show-example name="svg-constrained">
+  In this state handler the setter for <code>pos</code> clamps the x and y positions to
+  stay within a rectangular area.
+</show-example>
+
+<show-example name="svg-snapping">
+  In this state handler the setter for <code>pos</code> moves the x,y position to 
+  the nearest gray dot. This example also shows how the internal representation
+  <code>[x,y]</code> can be different from the external type <code>{x,y}</code>.
+</show-example>
 #+end_export
 
-
-<show-example name="svg-circle-snapping" />
 
 <show-example name="canvas-drag-circle" />
 
@@ -79,9 +104,10 @@ This structure gives me the flexibility I want for my projects. The state handle
     margin-left: 0.5em;
     margin-right: 0.5em;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto 7em 7em 7em;
+    grid-template-rows: auto auto auto 7em 7em 7em;
     grid-template-areas:
         'title editors'
+        'explanation explanation'
         'demo demo'
         'state body'
         'state style'
@@ -89,6 +115,7 @@ This structure gives me the flexibility I want for my projects. The state handle
     border-top: 1em solid hsl(var(--hue), 50%, 45%);
   }
   show-example > h3 { grid-area: title; margin: 1em 1em 1em 0; justify-self: end; }
+  show-example > .explanation { grid-area: explanation; width: var(--body-width); justify-self: center; }
   show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
   show-example > pre { width: unset; font-size: clamp(0.5rem, 1.2vw, 0.9rem); border: none; margin: 0.25em; padding: 0.25em; }
   show-example > .state { grid-area: state; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); font-size: clamp(0.5rem, 1.5vw, 1.1rem); }

@@ -1,4 +1,4 @@
-<body>
+<template>
   <svg viewBox="-130 -125 660 250">
     <g fill="none" stroke="#ddd" stroke-width="5">
       <!-- guides -->
@@ -10,28 +10,39 @@
     </g>
     <circle class="draggable" r="15" />
   </svg>
-</body>
+</template>
 
 <script>
-  // event handlers: class capture offset
-  
-  // In this example I make snap points along a circle
-  // and also along a line
+  // Make a list of the snap points
   const snap = [];
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 9; i++) { // circle
       let angle = i / 9 * (2 * Math.PI);
       snap.push([100 * Math.cos(angle), 100 * Math.sin(angle)]);
   }
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 6; i++) { // line
       snap.push([100 + i * 70, 0]);
   }
+  
+  // Make a gray dot at each snap point
   for (let pos of snap) {
       let circle = document.createElementNS(
           'http://www.w3.org/2000/svg', 'circle');
       circle.setAttribute('cx', pos[0]);
       circle.setAttribute('cy', pos[1]);
-      circle.setAttribute('r', 10);
+      circle.setAttribute('r', 8);
       document.querySelector("#snap-to").appendChild(circle);
+  }
+
+  // Find the closest snap point
+  function findClosestSnapPoint(pos) {
+      let closest = snap[0];
+      for (let p of snap) {
+          if (Math.hypot(p.x - pos[0],        p.y - pos[1]) <
+              Math.hypot(closest[0] - pos[0], closest[1] - pos[1])) {
+              closest = pos;
+          }
+      }
+      return closest;
   }
   
   // Make the circle draggable only to the snap points
@@ -44,28 +55,19 @@
           return {x: this._pos[0], y: this._pos[1]};
       },
       set pos(p) {
-          // This example shows how the internal representation
-          // is [x,y] but the external type exported by the
-          // getter/setter is {x,y}
-          let closest = snap[0];
-          for (let pos of snap) {
-              if (Math.hypot(p.x - pos[0],     p.y - pos[1]) <
-                  Math.hypot(p.x - closest[0], p.y - closest[1])) {
-                  closest = pos;
-              }
-          }
-          this._pos = closest;
+          this._pos = findClosestSnapPoint(p); //*
           el.setAttribute('cx', this._pos[0]);
           el.setAttribute('cy', this._pos[1]);
       },
   }
   state.pos = {x: 0, y: 0};
   makeDraggable(state, el);
+  // event handlers: class capture offset
 </script>
 
 <style>
     svg { background: #eee; }
     circle.draggable { stroke: black; stroke-width: 0.5px; }
     .draggable { cursor: grab; fill: hsl(0 50% 50%); }
-    .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
+    .dragging { cursor: grabbing; }
 </style>
