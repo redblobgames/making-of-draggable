@@ -1,0 +1,62 @@
+<template>
+  <div class="container">
+    <div class="movable">
+      <div class="draggable">Drag me</div>
+      The rest of the box isn't draggable.
+    </div>
+  </div>
+</template>
+<script>
+  const el = document.querySelector(".draggable");
+  const movableEl = el.parentNode;
+  let state = {
+      eventToCoordinates(event) { return {x: event.clientX, y: event.clientY}; },
+      dragging: false,
+      _pos: {x: 0, y: 0},
+      get pos() { return this._pos },
+      set pos(p) {
+          this._pos = p;
+          movableEl.style.transform = //*
+              `translate(${this._pos.x}px,${this._pos.y}px)`;
+      },
+  }
+  state.pos = {x: 30, y: 10};
+  makeDraggable(state, el);
+  // event handlers: class left noselect capture offset nosystemdrag
+</script>
+<script class="events">
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
+</script>
+<style>
+    .container {
+        background: #eee;
+        height: 12em;
+        width: 100%;
+    }
+    .movable {
+        font-family: sans-serif;
+        width: 8em;
+        height: 6em;
+        padding: 10px;
+
+        border: 1px solid #999;
+        border-radius: 3px;
+        background: #fff;
+        box-shadow: 0 1px 2px 1px rgb(0 0 0 / 0.2);
+    }
+    .draggable {
+        background: hsl(0 50% 50%);
+        color: white;
+        border-radius: 3px;
+        margin-bottom: 10px;
+        padding: 3px 5px;
+        text-align: center;
+        cursor: grab;
+    }
+    .draggable:hover {
+        font-weight: bold;
+    }
+    .dragging {
+        cursor: grabbing;
+    }
+</style>

@@ -77,6 +77,17 @@ This structure gives me the flexibility I want for my projects. The state handle
   the nearest gray dot. This example also shows how the internal representation
   <code>[x,y]</code> can be different from the external type <code>{x,y}</code>.
 </show-example>
+
+<show-example name="div">
+  Here's the classic dragging of a <code>&lt;div&gt;</code> by setting its <code>transform</code> CSS property. In this example <code>eventToCoordinates</code> doesn't need to transform the coordinate system. The position is constrained
+  to the container <code>&lt;div&gt;</code>.
+</show-example>
+
+<show-example name="div-handle">
+  There's a lot of flexibility in changing what's draggable separately from how the position is updated. 
+  Here's a recreation of one example from <a href="https://react-grid-layout.github.io/react-draggable/example/">React-Draggable</a>. The event handlers connect to the <em>red</em>
+  handle, but the state handler updates the position of the <em>white</em> containing box.
+</show-example>
 #+end_export
 
 
@@ -137,7 +148,7 @@ This structure gives me the flexibility I want for my projects. The state handle
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 22 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 23 Dec 2023<!-- hhmts end -->
 </x:footer>
 #+end_export
 

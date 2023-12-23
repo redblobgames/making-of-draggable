@@ -46,7 +46,7 @@
   }
   
   // Make the circle draggable only to the snap points
-  let el = document.querySelector("svg circle.draggable");
+  const el = document.querySelector("svg circle.draggable");
   let state = {
       eventToCoordinates: convertPixelToSvgCoord,
       dragging: null,

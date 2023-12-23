@@ -1,0 +1,53 @@
+<template>
+  <div class="container">
+    <div class="draggable">Drag me</div>
+  </div>
+</template>
+<script>
+  const el = document.querySelector(".draggable");
+  let state = {
+      eventToCoordinates(event) { return {x: event.clientX, y: event.clientY}; },
+      dragging: false,
+      _pos: {x: 0, y: 0},
+      get pos() { return this._pos },
+      set pos(p) {
+          const container = el.parentNode.getBoundingClientRect();
+          const bounds = el.getBoundingClientRect();
+          this._pos = {
+              x: clamp(p.x, 0, container.width - bounds.width),
+              y: clamp(p.y, 0, container.height - bounds.height)
+          };
+          el.style.transform = //*
+              `translate(${this._pos.x}px,${this._pos.y}px)`; //*
+      },
+  }
+  // no need to cal setter if initial pos is 0,0
+  makeDraggable(state, el);
+  // event handlers: class left noselect capture offset
+</script>
+<script class="events">
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
+</script>
+<style>
+    .container {
+        background: #eee;
+        height: 10em;
+        width: 100%;
+    }
+    .draggable {
+        display: grid;
+        font: 1.25rem sans-serif;
+        height: 4em;
+        width: 10em;
+        place-content: center;
+        border-radius: 4px;
+
+        cursor: grab;
+        background: hsl(0 50% 50%);
+        color: white;
+        box-shadow: 0 1px 2px 1px rgb(0 0 0 / 0.2);
+    }
+    .dragging {
+        cursor: grabbing;
+    }
+</style>
