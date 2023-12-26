@@ -37,9 +37,9 @@
   function findClosestSnapPoint(pos) {
       let closest = snap[0];
       for (let p of snap) {
-          if (Math.hypot(p.x - pos[0],        p.y - pos[1]) <
-              Math.hypot(closest[0] - pos[0], closest[1] - pos[1])) {
-              closest = pos;
+          if (Math.hypot(p[0] - pos.x,       p[1] - pos.y) <
+              Math.hypot(closest[0] - pos.x, closest[1] - pos.y)) {
+              closest = p;
           }
       }
       return closest;
