@@ -1,11 +1,14 @@
 #+title: Draggable objects: examples
 #+date: <2023-12-01 Fri>
 #+property: header-args:dot    :cache yes
+#+draft: t
 
 On the [[href:./][main page]] I show the /event handler recipe/ I use for dragging objects around in my interactive diagrams. That's only handles the /input/. It doesn't draw or move anything. The
 @@html:<em style="background:#e6d4c3"> event handler </em>@@
 needs to be connected to a 
 @@html:<em style="background:#cfd6e6"> state handler </em>@@.  The state handler handles the /output/.
+
+{ TODO: should I hide the code by default, so that it's easy to browse the page and find the example you're most interested in? }
 
 #+begin_src dot :file build/diagram-state-and-event-handlers.svg
 digraph Handlers {

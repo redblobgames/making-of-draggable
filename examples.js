@@ -4,7 +4,7 @@
  * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
-import {convertPixelToSvgCoord, makeDraggable, modifySampleCode} from "./event-handling.js";
+import {convertPixelToSvgCoord, makeDraggableOptions, makeDraggable, modifySampleCode} from "./event-handling.js";
 
 const htmlEscape = (unescaped) => {
     return unescaped
@@ -64,10 +64,19 @@ function parsePage(page) {
 
 function modifyScripts({stateHandler, eventHandler}) {
     stateHandler = stateHandler.replace(
-        /^\/\/ event handlers: (.*)$/m,
+        /^\/\/ event handlers:\s*(.*)$/m,
         (_match, flags) => {
+            const defaultOptions = makeDraggableOptions();
+            defaultOptions.noselect = false;
+            defaultOptions.noctrl = false;
+            defaultOptions.nosystemdrag = false;
+            const defaultFlags = Object.entries(defaultOptions)
+                                       .filter(([_key, value]) => value)
+                                       .map(([key, _value]) => key)
+                                       .join(" ");
+            console.log(defaultFlags);
             let {lines} = modifySampleCode(makeDraggable.toString(),
-                                           {show: flags, highlight: ""});
+                                           {show: defaultFlags + " " + flags, highlight: ""});
             eventHandler = (eventHandler + "\n\n" + lines.join("\n")).trim();
             return "";
         });

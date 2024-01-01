@@ -4,7 +4,7 @@
  * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
-import {convertPixelToSvgCoord, makeDraggable, modifySampleCode} from "./event-handling.js";
+import {makeDraggableOptions, convertPixelToSvgCoord, makeDraggable, modifySampleCode} from "./event-handling.js";
 
 console.info("I'm happy to answer questions about the code; email me at redblobgames@gmail.com");
 
@@ -129,26 +129,14 @@ function makeDraggableTouch(state, el) {
 }
 
 
-function makeOptions() {
+function makeDiagramOptions() {
     return {
+        ...makeDraggableOptions(),
         x: 0,
         y: 0,
-        class: false,
         changeText: true,
-        capture: true,
-        nopropagate: false,
-        offset: true,
-        left: true,
-        noctrl: true,
-        noselect: true,
-        noscroll: true,
-        nosystemdrag: true,
-        nocontextmenu: false,
-        pointerid: false,
-        chords: false,
     };
 }
-
 
 function diagram_mouse_events_local() {
     let {state, el} = makePositionState("#diagram-mouse-events-local");
@@ -176,7 +164,7 @@ function diagram_scrubbable_number() {
         get pos() { return { x: parseFloat(el.value), y: 0 }; },
         set pos(p) { el.value = clamp(Math.round(p.x), 0, 1000); },
     };
-    return makeDraggable(state, el, makeOptions());
+    return makeDraggable(state, el, makeDiagramOptions());
 }
 
 function diagram_pointer_events(selector, options) {
@@ -188,43 +176,43 @@ diagram_mouse_events_local();
 diagram_mouse_events_document();
 diagram_touch_events();
 diagram_scrubbable_number();
-diagram_pointer_events("#diagram-introduction", makeOptions());
+diagram_pointer_events("#diagram-introduction", makeDiagramOptions());
 
 // This demo has the minimal fixes (capture, noscroll)
 diagram_pointer_events("#diagram-pointer-events", {changeText: true, capture: true, noscroll: true, noselect: true});
 
 // Show how to fix scrolling
-diagram_pointer_events("#diagram-touch-action-all", {...makeOptions(), noscroll: false, changeText: false, line2: "1"});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: false, line2: "2", x: -175});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: false, line2: "3", x: 0, class: "touch-none"});
-diagram_pointer_events("#diagram-touch-action", {...makeOptions(), noscroll: true, line2: "4", x: 175});
+diagram_pointer_events("#diagram-touch-action-all", {...makeDiagramOptions(), noscroll: false, changeText: false, line2: "1"});
+diagram_pointer_events("#diagram-touch-action", {...makeDiagramOptions(), noscroll: false, line2: "2", x: -175});
+diagram_pointer_events("#diagram-touch-action", {...makeDiagramOptions(), noscroll: false, line2: "3", x: 0, class: "touch-none"});
+diagram_pointer_events("#diagram-touch-action", {...makeDiagramOptions(), noscroll: true, line2: "4", x: 175});
 
 // Show how capture is important
-diagram_pointer_events("#diagram-capture", {...makeOptions(), capture: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-capture", {...makeOptions(), capture: true, line2: "2", x: 125});
+diagram_pointer_events("#diagram-capture", {...makeDiagramOptions(), capture: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-capture", {...makeDiagramOptions(), capture: true, line2: "2", x: 125});
 
 // Show how it's better to track the offset
-diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-offset", {...makeOptions(), offset: true, line2: "2", x: 125});
+diagram_pointer_events("#diagram-offset", {...makeDiagramOptions(), offset: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-offset", {...makeDiagramOptions(), offset: true, line2: "2", x: 125});
 
 // Show how to handle the context menu
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, line2: "1", x: -225});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: false, noctrl: false, nocontextmenu: true, line2: "2", x: -75});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: false, line2: "3 (Mac)", x: 75});
-diagram_pointer_events("#diagram-contextmenu", {...makeOptions(), left: true, noctrl: true, line2: "4", x: 225});
+diagram_pointer_events("#diagram-contextmenu", {...makeDiagramOptions(), left: false, noctrl: false, line2: "1", x: -225});
+diagram_pointer_events("#diagram-contextmenu", {...makeDiagramOptions(), left: false, noctrl: false, nocontextmenu: true, line2: "2", x: -75});
+diagram_pointer_events("#diagram-contextmenu", {...makeDiagramOptions(), left: true, noctrl: false, line2: "3 (Mac)", x: 75});
+diagram_pointer_events("#diagram-contextmenu", {...makeDiagramOptions(), left: true, noctrl: true, line2: "4", x: 225});
 
 // Show how to fix text selection
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "text 1", x: -175});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: false, line2: "text 2", x: 0, class: "select-none"});
-diagram_pointer_events("#diagram-text-select", {...makeOptions(), changeText: false, noselect: true, line2: "text 3", x: 175});
+diagram_pointer_events("#diagram-text-select", {...makeDiagramOptions(), changeText: false, noselect: false, line2: "text 1", x: -175});
+diagram_pointer_events("#diagram-text-select", {...makeDiagramOptions(), changeText: false, noselect: false, line2: "text 2", x: 0, class: "select-none"});
+diagram_pointer_events("#diagram-text-select", {...makeDiagramOptions(), changeText: false, noselect: true, line2: "text 3", x: 175});
 
 // Show how to fix system drag
-diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, nosystemdrag: false, text: false, line1: "", line2: "1", x: -125});
-diagram_pointer_events("#diagram-systemdrag", {...makeOptions(), changeText: false, nosystemdrag: true, text: true, line1: "", line2: "2", x: 125});
+diagram_pointer_events("#diagram-systemdrag", {...makeDiagramOptions(), changeText: false, nosystemdrag: false, text: false, line1: "", line2: "1", x: -125});
+diagram_pointer_events("#diagram-systemdrag", {...makeDiagramOptions(), changeText: false, nosystemdrag: true, text: true, line1: "", line2: "2", x: 125});
 
 // Show how to fix the edge case of chords
-diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: false, line2: "1", x: -125});
-diagram_pointer_events("#diagram-chords", {...makeOptions(), chords: true, line2: "2", x: 125});
+diagram_pointer_events("#diagram-chords", {...makeDiagramOptions(), chords: false, line2: "1", x: -125});
+diagram_pointer_events("#diagram-chords", {...makeDiagramOptions(), chords: true, line2: "2", x: 125});
 
 // END of diagrams
 

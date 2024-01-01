@@ -18,6 +18,27 @@ export function convertPixelToSvgCoord(event, el=event.currentTarget) {
 }
 
 
+/** Default options for makeDraggable() */
+export function makeDraggableOptions() {
+    return {
+        class: false,
+        capture: true,
+        nopropagate: false,
+        offset: true,
+        left: true,
+        noctrl: true,
+        noselect: true,
+        noscroll: true,
+        nosystemdrag: true,
+        nocontextmenu: false,
+        pointerid: false,
+        chords: false,
+        // TODO: change noctrl, noselect, nosystemdrag to false
+    };
+}
+
+
+
 /** This is the core event handling code, with many options
  *
  * The code generator assumes any line starting with
