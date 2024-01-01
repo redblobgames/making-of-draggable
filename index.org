@@ -3,13 +3,6 @@
 #+property: header-args:dot    :cache yes
 #+options: toc:nil
 
-#+begin_comment
-Topics to be added:
-1. accessibility - make the underlying data editable in some other way
-2. canceling - can you press Esc or in some other way cancel the drag?
-3. constraints - where should they be applied? explain that it can be done outside this code
-#+end_comment
-
 Many of my interactive pages have a /draggable object/. I want the reader to move the object around, and I want the diagram to respond in some way. Here I'll document the code I use to make this work with both mouse and touch input, using browser features that are widely supported since 2020.  Here's a common case I want to support:
 
 #+begin_export html
@@ -327,7 +320,7 @@ On touch devices, single-finger drag will scroll the page. But single-finger dra
 </figure>
 #+end_export
 
-*Try* dragging the circle on a touch device. It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either, but I want it to. I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram.
+*Try* dragging the circle on a touch device.  @@html:<em class="on-mouse-device">(The issue won't show with mouse dragging.)</em>@@ It shouldn't scroll. But then try scrolling by dragging the diagram. It doesn't scroll either, but I want it to. I want to stop scrolling /only/ if dragging the circle, not when dragging the diagram.
 
 | Try this     | Watch for    | Circle 1 | Circle 2 | Circle 3 | Circle 4 |
 |--------------+--------------+------------+----------+----------+----------|
@@ -843,6 +836,13 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
     border: 2px solid hsl(200 10% 70%); 
     border-right-width: 0; 
   }
+
+  .draggable { cursor: grab; font-family: var(--sans-serif); }
+  .draggable.dragging { cursor: grabbing; }
+  .draggable circle { fill: hsl(0 50% 50%); stroke: hsl(0 100% 30%); }
+  .draggable.bad circle { fill: hsl(30 50% 50%); stroke: hsl(30 100% 30%); }
+  .draggable.good circle { fill: hsl(150 50% 45%); stroke: hsl(150 100% 30%); }
+  .draggable.dragging circle { fill: hsl(200 50% 50%); stroke: hsl(200 100% 30%); }
 
   #scrubbable-number {
      font-size: 100%;
