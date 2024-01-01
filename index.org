@@ -101,7 +101,7 @@ digraph {
 <pre data-code="mouseLocal" />
 #+end_export
 
-*Try* the demo with a mouse:
+*Try* the demo with a mouse: @@html:<strong class="on-touch-device">(won't work well on touch devices)</strong>@@
 
 #+begin_export html
 <figure id="diagram-mouse-events-local" class="w-full">
@@ -137,7 +137,7 @@ digraph {
 #+begin_export html
 <pre data-code="mouseGlobal" />
 #+end_export
-Try it out. It works better.
+Try it out. It works better. @@html:<strong class="on-touch-device">(only with mouse, not touch)</strong>@@
 
 #+begin_export html
 <figure id="diagram-mouse-events-document" class="w-full">
@@ -178,7 +178,7 @@ digraph {
 <pre data-code="touch" />
 #+end_export
 
-*Try* the demo with a touch device:
+*Try* the demo with a touch device: @@html:<strong class="on-mouse-device">(won't work with a mouse)</strong>@@
 
 #+begin_export html
 <figure id="diagram-touch-events" class="w-full">
@@ -870,6 +870,10 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   /* tailwind inspired */
   .select-none { user-select: none; }
   .touch-none { touch-action: none; }
+
+  /* attempt to detect touch vs mouse, for highlighting which examples will work */
+  @media (hover: hover) { .on-touch-device { display: none; } }
+  @media (hover: none)  { .on-mouse-device { display: none; } }
 </style>
 
 <style src="prism.css" />
@@ -892,6 +896,6 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 23 Dec 2023<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 01 Jan 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
