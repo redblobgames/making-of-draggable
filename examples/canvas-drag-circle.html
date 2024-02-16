@@ -9,7 +9,7 @@
 <script>
   /** Convert from event coordinate space (on the page) to Canvas coordinate
    * space (assuming there are no transforms on the canvas) */
-  function convertPixelToCanvasCoord(event) {
+  function eventToCanvasCoordinates(event) {
       const canvas = event.currentTarget;
       const bounds = canvas.getBoundingClientRect();
       return {
@@ -80,7 +80,7 @@
   }
 
   let state = {
-      eventToCoordinates: convertPixelToCanvasCoord,
+      eventToCoordinates: canvasToCanvasCoordinates,
       dragging: null,
       pos: {x: 100, y: 100},
   };

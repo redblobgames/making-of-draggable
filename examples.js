@@ -4,7 +4,7 @@
  * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
-import {convertPixelToSvgCoord, makeDraggableOptions, makeDraggable, modifySampleCode} from "./event-handling.js";
+import {eventToSvgCoordinates, makeDraggableOptions, makeDraggable, modifySampleCode} from "./event-handling.js";
 
 const htmlEscape = (unescaped) => {
     return unescaped
@@ -81,9 +81,9 @@ function modifyScripts({stateHandler, eventHandler}) {
             return "";
         });
 
-    if (stateHandler.indexOf("convertPixelToSvgCoord") >= 0) {
+    if (stateHandler.indexOf("eventToSvgCoordinates") >= 0) {
         // We'll need this helper function
-        eventHandler += "\n\n" + convertPixelToSvgCoord.toString();
+        eventHandler += "\n\n" + eventToSvgCoordinates.toString();
     }
 
     return {stateHandler, eventHandler};

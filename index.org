@@ -714,7 +714,7 @@ Here's an attempt at a =<Draggable>= component in Vue v3, Options API:
 </template>
 
 <script>
-  import {convertPixelToSvgCoord} from './svgcoords.js';
+  import {eventToSvgCoordinates} from './svgcoords.js';
   
   export default {
     props: {modelValue: Object}, // should be {x, y}
@@ -722,7 +722,7 @@ Here's an attempt at a =<Draggable>= component in Vue v3, Options API:
     methods: {
       start(event) {
         if (event.ctrlKey) return;
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = eventToSvgCoordinates(event);
         this.dragging = {dx: this.modelValue.x - x, dy: this.modelValue.y - y};
         event.currentTarget.setPointerCapture(event.pointerId);
       },
@@ -730,7 +730,7 @@ Here's an attempt at a =<Draggable>= component in Vue v3, Options API:
         this.dragging = null;
       },
       move(event) {
-        let {x, y} = convertPixelToSvgCoord(event);
+        let {x, y} = eventToSvgCoordinates(event);
         this.$emit('update:modelValue', {
           x: x + this.dragging.dx,
           y: y + this.dragging.dy,
@@ -763,7 +763,7 @@ and here's the same thing in the Composition API:
 
 <script setup>  
   import {ref} from 'vue';
-  import {convertPixelToSvgCoord} from './svgcoords.js';
+  import {eventToSvgCoordinates} from './svgcoords.js';
   
   const props = defineProps({
     modelValue: Object // should be {x, y}
@@ -775,7 +775,7 @@ and here's the same thing in the Composition API:
 
   function start(event) {
     if (event.ctrlKey) return;
-    let {x, y} = convertPixelToSvgCoord(event);
+    let {x, y} = eventToSvgCoordinates(event);
     dragging.value = {dx: props.modelValue.x - x, dy: props.modelValue.y - y};
     event.currentTarget.setPointerCapture(event.pointerId);
   }
@@ -785,7 +785,7 @@ and here's the same thing in the Composition API:
   }
 
   function move(event) {
-    let {x, y} = convertPixelToSvgCoord(event);
+    let {x, y} = eventToSvgCoordinates(event);
     emit('update:modelValue', {
       x: x + dragging.value.dx,
       y: y + dragging.value.dy,
@@ -896,6 +896,6 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 01 Jan 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 16 Feb 2024<!-- hhmts end -->
 </x:footer>
 #+end_export

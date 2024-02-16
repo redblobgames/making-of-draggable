@@ -8,7 +8,7 @@
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
-export function convertPixelToSvgCoord(event, el=event.currentTarget) {
+export function eventToSvgCoordinates(event, el=event.currentTarget) {
     const svg = el.ownerSVGElement;
     let p = svg.createSVGPoint();
     p.x = event.clientX;

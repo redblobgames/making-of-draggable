@@ -4,7 +4,7 @@
  * @license Apache-2.0 <https://www.apache.org/licenses/LICENSE-2.0.html>
  */
 
-import {makeDraggableOptions, convertPixelToSvgCoord, makeDraggable, modifySampleCode} from "./event-handling.js";
+import {makeDraggableOptions, eventToSvgCoordinates, makeDraggable, modifySampleCode} from "./event-handling.js";
 
 console.info("I'm happy to answer questions about the code; email me at redblobgames@gmail.com");
 
@@ -42,7 +42,7 @@ function makePositionState(selector, options={changeText: true}) {
 
     let state = {
         eventToCoordinates(event) {
-            return convertPixelToSvgCoord(event, el);
+            return eventToSvgCoordinates(event, el);
         },
         get dragging() {
             return dragging;

@@ -13,7 +13,7 @@ function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
-function convertPixelToSvgCoord(event, relativeTo=event.currentTarget.ownerSVGElement) {
+function eventToSvgCoordinates(event, relativeTo=event.currentTarget.ownerSVGElement) {
     // if relativeTo is the <svg> then its ownerSVGElement is null, so we want to point back to the <svg>
     // but otherwise we assume it's a child of <svg> and we want to find the <svg>
     let p = (relativeTo.ownerSVGElement ?? relativeTo).createSVGPoint();
@@ -24,7 +24,7 @@ function convertPixelToSvgCoord(event, relativeTo=event.currentTarget.ownerSVGEl
 
 /** Convert from event coordinate space (on the page) to Canvas coordinate
  * space (assuming there are no transforms on the canvas) */
-function convertPixelToCanvasCoord(event) {
+function eventToCanvasCoordinates(event) {
     const canvas = event.currentTarget;
     const bounds = canvas.getBoundingClientRect();
     return {
@@ -72,12 +72,12 @@ function Diagram(figure, config) {
 
 const svgDragHandlersCommon = {
     left: -300, right: 300, top: -20, bottom: 20,
-    convertPixelToSvgCoord(event) {
-        return convertPixelToSvgCoord(event);
+    eventToSvgCoordinates(event) {
+        return eventToSvgCoordinates(event);
     },
     onpointerdown(event) {
         if (event.button !== 0 || event.ctrlKey) return;
-        let initialPos = this.convertPixelToSvgCoord(event);
+        let initialPos = this.eventToSvgCoordinates(event);
         this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y};
         this.el.classList.add("dragging");
         // if you use event.target, the text will get the event and it
@@ -96,7 +96,7 @@ const svgDragHandlersCommon = {
     onpointermove(event) {
         if (!this.dragging) return;
         if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
-        let {x, y} = this.convertPixelToSvgCoord(event);
+        let {x, y} = this.eventToSvgCoordinates(event);
         this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
     },
     ondragstart(event) {
@@ -184,7 +184,7 @@ const diagrams = [
         onpointermove(event) {
             if (!this.dragging) return;
             if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
-            let {x, y} = convertPixelToCanvasCoord(event);
+            let {x, y} = eventToCanvasCoordinates(event);
             this.pos = {x, y};
         },
         ondragstart(event) {
@@ -218,13 +218,13 @@ const diagrams = [
             return Math.hypot(pos.x - this.pos.x, pos.y - this.pos.y) <= this.radius;
         },
         setCursor(event) {
-            let {x, y} = convertPixelToCanvasCoord(event);
+            let {x, y} = eventToCanvasCoordinates(event);
             this.el.style.cursor = !this.isOverDragHandle({x, y})
                 ? '' : this.dragging? 'grabbing' : 'grab';
         },
         onpointerdown(event) {
             if (event.button !== 0 || event.ctrlKey) return;
-            let initialPos = convertPixelToCanvasCoord(event);
+            let initialPos = eventToCanvasCoordinates(event);
             if (!this.isOverDragHandle(initialPos)) return;
             this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y,
                              pointerId: event.pointerId};
@@ -243,7 +243,7 @@ const diagrams = [
             if (!this.dragging) return;
             if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
             if (event.pointerId !== this.dragging.pointerId) return; // different finger dragging
-            let {x, y} = convertPixelToCanvasCoord(event);
+            let {x, y} = eventToCanvasCoordinates(event);
             this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
         },
         ondragstart(event) {
@@ -252,7 +252,7 @@ const diagrams = [
         },
         ontouchstart(event) {
             // Prevent scrolling on mobile, but only if over the drag handle
-            let pos = convertPixelToCanvasCoord(event);
+            let pos = eventToCanvasCoordinates(event);
             if (this.dragging || this.isOverDragHandle(pos)) event.preventDefault();
         },
     },
@@ -341,13 +341,13 @@ const diagrams = [
     },
     // Transform on the parent element; do we get the right coordinates?
     // by default we don't, but we can pass in the parent <g> element to
-    // convertPixelToSvgCoord
+    // eventToSvgCoordinates
     {
         ...svgDragHandlersCommon,
         left: -10000, right: 10000, top: -10000, bottom: 10000,
         el: "svg g rect.draggable",
-        convertPixelToSvgCoord(event) {
-            return convertPixelToSvgCoord(event, this.el.parentElement);
+        eventToSvgCoordinates(event) {
+            return eventToSvgCoordinates(event, this.el.parentElement);
         },
         draw() {
             this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);

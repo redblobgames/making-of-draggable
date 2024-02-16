@@ -74,7 +74,7 @@ I use this helper function quite a bit when working with SVG:
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
-function convertPixelToSvgCoord(event) {
+function eventToSvgCoordinates(event) {
     const svg = event.currentTarget.ownerSVGElement;
     let p = svg.createSVGPoint();
     p.x = event.clientX;
@@ -254,7 +254,7 @@ I don't have a test here but I wrote [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJj
 
 The draggable element might be inside another element that has a =transform= applied to it.
 
-The problem is that the =convertPixelToSvgCoord= function I use calculates coordinates relative
+The problem is that the =eventToSvgCoordinates= function I use calculates coordinates relative
 to the =<svg>= element. This is fine if your draggable object is positioned relative to the
 =<svg>='s coordinate system, but in this test there's =<svg>= then =<g>= with a =rotate()= on it.
 The pointer coordinates are in /screen/ coordinates, and we need to unrotate them if we want
@@ -275,13 +275,13 @@ the draggable to be placed within the rotated =<g>=.
 </figure>
 #+end_export
 
-To handle this, extend the =convertPixelToSvgCoord= function to take an element the coordinate should be relative to, instead of assuming the coordinates should be in the =<svg>='s coordinate space.
+To handle this, extend the =eventToSvgCoordinates= function to take an element the coordinate should be relative to, instead of assuming the coordinates should be in the =<svg>='s coordinate space.
 
 #+begin_src js
 /** Convert from event coordinate space (on the page) to SVG coordinate
  * space (within the svg, honoring responsive resizing, width/height,
  * and viewBox) */
-function convertPixelToSvgCoord(event, relativeTo=event.currentTarget.ownerSVGElement) {
+function eventToSvgCoordinates(event, relativeTo=event.currentTarget.ownerSVGElement) {
     // if relativeTo is the <svg> then its ownerSVGElement is null, so
     // we want to point back to the <svg> but otherwise we assume it's
     // a child of <svg> and we want to find the <svg>
