@@ -49,6 +49,8 @@ Notes:
 - ⁴I have a solution but rarely use it
 - ⁵Firefox will fire =mouseover=, =mouseenter= whereas Chrome will fire =pointerover=, =pointerenter=, =mouseover=, =mouseenter=. There are a lot of differences in over/enter events but I haven't investigated them yet.
 
+The Webplatform Tests folk [[https://wpt.fyi/results/pointerevents][have run a lot more tests across browsers]], like what happens if you remove an element in the middle of a pointer event.
+
 * SVG single element
 :PROPERTIES:
 :CUSTOM_ID: svg-single-element
@@ -182,23 +184,23 @@ The same drag event handlers can be used for painting instead of moving an objec
 <figure class="w-full">
   <div class="diagram" style="position:relative;width:100%;height:100px">
     <div class="draggable" style="position:absolute;width:10em;height:2.5em">abc 
-<a href="/" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
+<a href="/" target="_blank" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
   </div>
   <figcaption>Try left, middle, right clicking the link</figcaption>
   <button>Reset</button>
 </figure>
 #+end_export
 
-- The dragging code intercepts the left button so you can't click on the link.
+- The dragging code intercepts the left button so you can't click on the link /in Chrome/, but you can click in Firefox or Safari.
 - You can still middle click or right click on the link.
 
-However in this demo you can click the link or drag with it:
+I tweaked the demo so you can click the link in Chrome:
 
 #+begin_export html
 <figure class="w-full">
   <div class="diagram" style="position:relative;width:100%;height:100px">
     <div class="draggable" style="position:absolute;width:10em;height:2.5em">abc 
-<a href="/" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
+<a href="/" target="_blank" style="color:unset;text-decoration:underline">LINK</a> xyz</div>
   </div>
   <figcaption>Now try clicking the link</figcaption>
   <button>Reset</button>
