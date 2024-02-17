@@ -17,6 +17,17 @@ export function eventToSvgCoordinates(event, el=event.currentTarget) {
     return p;
 }
 
+/** Convert from event coordinate space (on the page) to Canvas
+ * coordinate space (within the canvas but *not* knowing about any
+ * local canvas transforms) */
+export function eventToCanvasCoordinates(event) {
+    const canvas = event.currentTarget;
+    const bounds = canvas.getBoundingClientRect();
+    return {
+        x: (event.x - bounds.left) / bounds.width * canvas.width,
+        y: (event.y - bounds.top) / bounds.height * canvas.height,
+    };
+}
 
 /** Default options for makeDraggable() */
 export function makeDraggableOptions() {
@@ -94,7 +105,11 @@ export function makeDraggable(state, el, options) {
  * Generate and syntax highlight sample code
  *
  * The code should be formatted like makeDraggable above,
- * where optional commands are on a single line each
+ * where optional commands are on a single line each.
+ *
+ * The flags are a field name from makeDraggableOptions()
+ * optionally with the suffix "=false" to override a default
+ * true field.
  *
  * @param {string} code - the source code to alter
  * @param {{show?: string, highlight?: string}} flags - how to modify it
@@ -105,7 +120,9 @@ export function modifySampleCode(code, flags) {
     const show = flags.show ?? "";
     let options = {};
     for (let option of show.split(" ")) {
-        options[option] = true;
+        let [name, value] = option.split("=");
+        if (!name) continue;
+        options[name] = (value === 'false')? false : true;
     }
     // highlight= should be a list of flag names to highlight
     let highlight = {};

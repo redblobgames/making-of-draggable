@@ -1,0 +1,23 @@
+<template>
+  <canvas width="660" height="200" style="cursor:crosshair">
+  </canvas>
+</template>
+
+<script>
+  const el = document.querySelector("canvas");
+  let state = {
+      eventToCoordinates: eventToCanvasCoordinates,
+      dragging: null,
+      set pos(p) {
+          let ctx = el.getContext('2d');
+          let hue = Date.now() % 360;
+          ctx.fillStyle = `hsl(${hue} 50% 50%)`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+          ctx.fill();
+      },
+  }
+  makeDraggable(state, el);
+
+  // event handlers: offset=false
+</script>

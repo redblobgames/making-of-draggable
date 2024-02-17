@@ -103,21 +103,24 @@ This structure gives me the flexibility I want for my projects. The state handle
   instead.
 </show-example>
 
+<show-example name="canvas-drawing">
+  Here's another example of how the drag events don't have
+  to move anything. Here we <em>don't</em> want to keep track
+  of the initial offset in the pointerdown event. Draw on the canvas:
+</show-example>
 #+end_export
 
 TODO: more examples I'm considering:
 
 1. SVG to paint elements instead of moving elements
 2. <canvas> to drag a circle
-3. <canvas> to draw a line
-4. number scrubbing with <span> instead of <input>
-5. snap to grid, like jquery-ui and react-draggable
-6. invisible larger drag area for mobile (from my little-details page)
-7. the drag + resize example from the main page, which needs =stopPropation()=
-8. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
-9. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
-10. some way to cancel a drag with keyboard
-11. .dragging class options (from little-details page)
+3. snap to grid, like jquery-ui and react-draggable
+4. invisible larger drag area for mobile (from my little-details page)
+5. the drag + resize example from the main page, which needs =stopPropation()=
+6. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
+7. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
+8. some way to cancel a drag with keyboard
+9. .dragging class options (from little-details page)
 
 
 #+begin_export html
