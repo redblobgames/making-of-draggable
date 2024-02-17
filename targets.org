@@ -51,82 +51,6 @@ Notes:
 
 The Webplatform Tests folk [[https://wpt.fyi/results/pointerevents][have run a lot more tests across browsers]], like what happens if you remove an element in the middle of a pointer event.
 
-* SVG single element
-:PROPERTIES:
-:CUSTOM_ID: svg-single-element
-:END:
-
-#+begin_export html
-<figure class="w-full">
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <circle class="draggable" stroke="black" stroke-width="0.5" r="30" />
-  </svg>
-  <figcaption>Draggable circle</figcaption>
-  <button>Reset</button>
-</figure>
-#+end_export
-
-- Basic tests work
-- On desktop, scrolling while dragging doesn't drag until you move your mouse a tiny amount. This could be solved either with a timer or by catching the scroll event. Low priority for me.
-
-I use this helper function quite a bit when working with SVG:
-
-#+begin_src js
-/** Convert from event coordinate space (on the page) to SVG coordinate
- * space (within the svg, honoring responsive resizing, width/height,
- * and viewBox) */
-function eventToSvgCoordinates(event) {
-    const svg = event.currentTarget.ownerSVGElement;
-    let p = svg.createSVGPoint();
-    p.x = event.clientX;
-    p.y = event.clientY;
-    return p.matrixTransform(svg.getScreenCTM().inverse());
-}
-#+end_src
-
-This function gives coordinates for the =<svg>= doesn't handle other SVG transforms; see [[#parent-transform][the parent transform section]] for a version that does.
-
-* SVG nested element with text
-:PROPERTIES:
-:CUSTOM_ID: svg-nested-element-with-text
-:END:
-
-#+begin_export html
-<figure class="w-full">
-  <svg viewBox="-330 -50 660 100">
-    <rect x="-330" y="-50" width="100%" height="100%" fill="url(#pattern-dots)" />
-    <g class="draggable">
-      <circle stroke="black" stroke-width="0.5" r="30" />
-      <g font-size="16" text-anchor="middle" fill="white">
-        <text dy="0.0em">Drag</text>
-        <text dy="1.0em">me</text>
-      </g>
-    </g>
-  </svg>
-  <figcaption>Draggable circle + text</figcaption>
-  <button>Reset</button>
-</figure>
-#+end_export
-
-- I use pointer capture on =currentTarget= not =target=. 
-- While dragging, I set CSS ~user-select: none~. This prevents selecting the text by dragging or double clicking (desktop) or long press (mobile). But I don't want this /all/ the time. When not dragging, I want the text to be selectable.
-- On desktop, if you select the text of the page and then try to drag it, it will let you drag that text outside the browser. But if you also try to drag this circle the two drag handlers will intefere. Use ~preventDefault()~ on the =dragstart= event to fix this.
-
-* Canvas painting
-:PROPERTIES:
-:CUSTOM_ID: canvas-drag-to-paint
-:END:
-
-The same drag event handlers can be used for painting instead of moving an object:
-
-#+begin_export html
-<figure class="w-full">
-  <canvas width="660" height="100" style="cursor:crosshair"/>
-  <figcaption>Drag to paint on the canvas</figcaption>
-</figure>
-#+end_export
-
 * Canvas dragging
 :PROPERTIES:
 :CUSTOM_ID: canvas-drag-a-handle
@@ -141,39 +65,6 @@ The same drag event handlers can be used for painting instead of moving an objec
 #+end_export
 
 - ⁴if I put a second finger on the diagram it had been jumping to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I checked the =.pointerId= field in the =pointermove= event to make sure it matches the =.pointerId= from the =pointerdown= event.
-
-* HTML div absolute positioned
-:PROPERTIES:
-:CUSTOM_ID: html-div-absolute-positioned
-:END:
-
-#+begin_export html
-<figure class="w-full">
-  <div class="diagram" style="position:relative;width:100%;height:100px">
-    <div class="draggable" style="position:absolute;width:5em;height:1.5em">Drag me</div>
-  </div>
-  <figcaption>Drag the box to move it</figcaption>
-  <button>Reset</button>
-</figure>
-#+end_export
-
-- It is possible to place the box outside the container by placing it on the right, then shrinking the browser size. I'm going to leave this up to the application and not try to solve it generically.
-
-* HTML div css transform
-:PROPERTIES:
-:CUSTOM_ID: html-div-css-transform
-:END:
-
-#+begin_export html
-<figure class="w-full">
-  <div class="diagram" style="position:relative;width:100%;height:100px">
-    <div class="draggable" style="transform:translate(0px,0px);width:5em;height:1.5em">Drag me</div>
-  </div>
-  <figcaption>Drag the box to move it</figcaption>
-  <button>Reset</button>
-</figure>
-#+end_export
-
 
 * HTML div with a link
 :PROPERTIES:
@@ -295,22 +186,6 @@ function eventToSvgCoordinates(event, relativeTo=event.currentTarget.ownerSVGEle
 #+end_src
 
 However, this function only handles transforms on the SVG elements. For transforms on non-SVG elements, /I don't know what to do/. This is an unsolved issue, not only for me, but also other libraries like d3.js. See [[https://github.com/d3/d3-selection/issues/67][d3-selection issue #67]]  and [[https://bugzilla.mozilla.org/show_bug.cgi?id=1610093][firefox bug #1610093]] . There's probably /something/ we can do using =window.getComputedStyle(element)= but I haven't tried.
-
-* Scrubbable number
-:PROPERTIES:
-:CUSTOM_ID: scrubbable-number
-:END:
-
-On some of my pages, like [[href:/articles/probability/damage-rolls.html][Probability of Damage Rolls]], I have some numbers in the text of the page, and those numbers are "scrubbable". The reader can drag them left/right to change the value. I want to be able to handle that with the same dragging code that I use for dragging objects.
-
-#+begin_export html
-<figure>
-  <input id="input-scrubbable-number" pattern="[0-9]+" />
-  <figcaption>Scrubbable number can be dragged left/right to set the value</figcaption>
-</figure>
-#+end_export
-
-It's a constrained drag. I ignore the =y= value from the drag. But the object doesn't actually move around on the screen. The =x= value is displayed as text instead of being used to set the position. This example, and those on [[href:/articles/curved-paths/making-of.html][my constrained dragging page]], show how the same basic recipe can be used for a wide variety of situations.
 
 * Painting state
 :PROPERTIES:

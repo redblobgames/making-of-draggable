@@ -74,7 +74,6 @@ function modifyScripts({stateHandler, eventHandler}) {
                                        .filter(([_key, value]) => value)
                                        .map(([key, _value]) => key)
                                        .join(" ");
-            console.log(defaultFlags);
             let {lines} = modifySampleCode(makeDraggable.toString(),
                                            {show: defaultFlags + " " + flags, highlight: ""});
             eventHandler = (eventHandler + "\n\n" + lines.join("\n")).trim();

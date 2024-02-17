@@ -15,6 +15,9 @@
           return {x: el.valueAsNumber ?? 0, y: 0};
       },
       set pos(p) { 
+          // This is a constrained drag that ignores the
+          // y value. The x value gets turned into the
+          // number.
           el.value = Math.round(clamp(p.x, 0, 1000));
       },
   }

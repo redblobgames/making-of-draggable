@@ -83,7 +83,9 @@ This structure gives me the flexibility I want for my projects. The state handle
 
 <show-example name="div">
   Here's the classic dragging of a <code>&lt;div&gt;</code> by setting its <code>transform</code> CSS property. In this example <code>eventToCoordinates</code> doesn't need to transform the coordinate system. The position is constrained
-  to the container <code>&lt;div&gt;</code>.
+  to the container <code>&lt;div&gt;</code>. To switch to absolute
+  positioning, the <code>set pos()</code> function would change, but
+  the event handler code would not.
 </show-example>
 
 <show-example name="div-handle">
@@ -94,8 +96,9 @@ This structure gives me the flexibility I want for my projects. The state handle
 
 <show-example name="number-scrubbing">
   The drag events don't have to involve moving anything.
-  This example shows how it can be used for changing the
+  This example shows how they can be used for changing the
   number stored in an <code>&lt;input&gt;</code> element.
+  I use this type of interaction on my <a href="/articles/probability/damage-rolls.html">Damage Rolls page</a>.
   Since it's a standard element you can change it with
   keyboard/mouse in addition to dragging. However, the standard
   input event has styling and text selection that may interfere

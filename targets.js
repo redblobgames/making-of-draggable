@@ -146,57 +146,6 @@ const divDragHandlersCommon = {
 
 const diagrams = [
     {
-        el: "svg circle",
-        draw() {
-            this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);
-        },
-        ...svgDragHandlersCommon
-    },
-    {
-        el: "svg g",
-        draw() {
-            this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);
-        },
-        ...svgDragHandlersCommon
-    },
-    {
-        el: "canvas",
-        left: 0, top: 0, right: 660, bottom: 100,
-        draw() {
-            if (!this.dragging) return;
-            let ctx = this.el.getContext('2d');
-            ctx.fillStyle = "hsl(0 50% 50%)";
-            ctx.beginPath();
-            ctx.arc(this.pos.x, this.pos.y, 5, 0, 2*Math.PI);
-            ctx.fill();
-        },
-        onpointerdown(event) {
-            if (event.button !== 0 || event.ctrlKey) return;
-            this.dragging = true;
-            event.currentTarget.setPointerCapture(event.pointerId);
-        },
-        onpointerup(event) {
-            this.dragging = null;
-        },
-        onpointercancel(event) {
-            this.onpointerup(event);
-        },
-        onpointermove(event) {
-            if (!this.dragging) return;
-            if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
-            let {x, y} = eventToCanvasCoordinates(event);
-            this.pos = {x, y};
-        },
-        ondragstart(event) {
-            // Prevent dragging text/images
-            event.preventDefault();
-        },
-        ontouchstart(event) {
-            // Prevent scrolling on mobile, anywhere in the canvas
-            event.preventDefault();
-        },
-    },
-    {
         el: "canvas",
         left: 46, top: 46, right: 1000-46, bottom: 150-46,
         radius: 45,
@@ -254,21 +203,6 @@ const diagrams = [
             // Prevent scrolling on mobile, but only if over the drag handle
             let pos = eventToCanvasCoordinates(event);
             if (this.dragging || this.isOverDragHandle(pos)) event.preventDefault();
-        },
-    },
-    {
-        ...divDragHandlersCommon,
-        el: "div.draggable",
-        draw() {
-            this.el.style.left = this.pos.x + 'px';
-            this.el.style.top = this.pos.y + 'px';
-        },
-    },
-    {
-        ...divDragHandlersCommon,
-        el: "div.draggable",
-        draw() {
-            this.el.style.transform = `translate(${this.pos.x}px, ${this.pos.y}px)`;
         },
     },
     // div with a link inside, but want the drag to override the link
@@ -352,37 +286,6 @@ const diagrams = [
         draw() {
             this.el.setAttribute('transform', `translate(${this.pos.x}, ${this.pos.y})`);
         },
-    },
-    // Scrubbable number
-    {
-        el: "#input-scrubbable-number",
-        draw() {
-            this.el.value = Math.round(this.pos.x);
-        },
-        onpointerdown(event) {
-            if (event.button !== 0 || event.ctrlKey) return;
-            this.dragging = {dx: this.pos.x - event.clientX};
-            event.currentTarget.setPointerCapture(event.pointerId);
-        },
-        onpointerup(event) {
-            this.dragging = null;
-        },
-        onpointercancel(event) {
-            this.onpointerup(event);
-        },
-        onpointermove(event) {
-            if (!this.dragging) return;
-            let x = event.clientX;
-            this.pos.x = clamp(x + this.dragging.dx, 0, 1000);
-            this.draw();
-        },
-        ondragstart(event) {
-            event.preventDefault();
-        },
-        ontouchstart(event) {
-            event.preventDefault();
-        },
-        
     },
 ];
 
