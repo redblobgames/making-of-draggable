@@ -1,61 +1,9 @@
-<body>
-  <div>
-    Dragging on a canvas uses a slightly different
-    recipe than dragging svg objects.
-  </div>
-  <canvas width="660" height="300" />
-</body>
+<template>
+  <canvas width="660" height="300">
+  </canvas>
+</template>
 
 <script>
-  /** Convert from event coordinate space (on the page) to Canvas coordinate
-   * space (assuming there are no transforms on the canvas) */
-  function eventToCanvasCoordinates(event) {
-      const canvas = event.currentTarget;
-      const bounds = canvas.getBoundingClientRect();
-      return {
-          x: (event.x - bounds.left) / bounds.width * canvas.width,
-          y: (event.y - bounds.top) / bounds.height * canvas.height,
-      };
-  }
-  
-  function setCursor(event) {
-      let {x, y} = state.eventToCoordinates(event);
-      el.style.cursor = !isOverDragHandle({x, y})
-                      ? '' : state.dragging? 'grabbing' : 'grab';
-  }
-
-  function makeDraggable(state, el) {
-      // from https://www.redblobgames.com/making-of/draggable/
-      function start(event) {
-          let {x, y} = state.eventToCoordinates(event);
-          state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
-          el.setPointerCapture(event.pointerId);
-          redraw();
-      }
-
-      function end(_event) {
-          state.dragging = null;
-          redraw();
-      }
-
-      function move(event) {
-          setCursor(event);
-          if (!state.dragging) return;
-          let {x, y} = state.eventToCoordinates(event);
-          state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
-          redraw();
-      }
-
-      el.addEventListener('pointerdown', start);
-      el.addEventListener('pointerup', end);
-      el.addEventListener('pointercancel', end);
-      el.addEventListener('pointermove', move)
-      el.addEventListener('touchstart', (e) => e.preventDefault());
-      el.addEventListener('dragstart', (e) => e.preventDefault());
-  }
-
-
-
   const radius = 45;
   let el = document.querySelector("canvas");
 
@@ -80,10 +28,53 @@
   }
 
   let state = {
-      eventToCoordinates: canvasToCanvasCoordinates,
+      eventToCoordinates: eventToCanvasCoordinates,
       dragging: null,
-      pos: {x: 100, y: 100},
+      _pos: {x: 100, y: 100},
+      get pos() { return this._pos; },
+      set pos(p) {
+          this._pos = p;
+          redraw();
+      },
   };
   redraw();
   makeDraggable(state, el);
 </script>
+
+<script class="events">
+  function setCursor(event) {
+      let {x, y} = state.eventToCoordinates(event);
+      el.style.cursor = !isOverDragHandle({x, y})
+                      ? '' : state.dragging? 'grabbing' : 'grab';
+  }
+
+  function makeDraggable(state, el) {
+      // from https://www.redblobgames.com/making-of/draggable/
+      function start(event) {
+          if (event.button !== 0) return; // left button only
+          let {x, y} = state.eventToCoordinates(event);
+          state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
+          el.setPointerCapture(event.pointerId);
+          setCursor(event);
+      }
+
+      function end(event) {
+          state.dragging = null;
+          setCursor(event);
+      }
+
+      function move(event) {
+          setCursor(event);
+          if (!state.dragging) return;
+          let {x, y} = state.eventToCoordinates(event);
+          state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
+      }
+
+      el.addEventListener('pointerdown', start);
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+      el.addEventListener('pointermove', move)
+      el.addEventListener('touchstart', (e) => e.preventDefault());
+      el.addEventListener('dragstart', (e) => e.preventDefault());
+  }
+</script>  
