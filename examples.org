@@ -118,19 +118,30 @@ This structure gives me the flexibility I want for my projects. The state handle
   on the canvas. I had to modify the event handler recipe
   to update the cursor whenever anything happened.
 </show-example>
+
+<show-example name="svg-painting">
+  This example shows multi-state painting. It keeps painting
+  with the <em>initial</em> paint color until the pointer up event.
+  The event handling in this example differs from the
+  standard recipe enough that I don't know if it's really worth 
+  keeping the state separate from the events. Each square has
+  an event handler, and we <em>release</em> the pointer capture
+  so that the pointer move goes to other squares while painting.
+  But that also means this doesn't behave properly when moving
+  the mouse outside the painting area and then back in.
+</show-example>
 #+end_export
 
 TODO: more examples I'm considering:
 
-1. SVG to paint elements instead of moving elements
-2. snap to grid, like jquery-ui and react-draggable, although this isn't any different from the svg-snapping example in theory
-3. invisible larger drag area for mobile (from my little-details page)
-4. the drag + resize example from the main page, which needs =stopPropation()=
-5. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
-6. some way to cancel a drag with keyboard → probably outside the scope
-7. .dragging class options (from little-details page)
-8. multiple draggables that are linked somehow, e.g. maybe they share a y but have independent x
-9. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
+1. snap to grid, like jquery-ui and react-draggable, although this isn't any different from the svg-snapping example in theory
+2. invisible larger drag area for mobile (from my little-details page)
+3. the drag + resize example from the main page, which needs =stopPropation()=
+4. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
+5. some way to cancel a drag with keyboard → probably outside the scope
+6. .dragging class options (from little-details page)
+7. multiple draggables that are linked somehow, e.g. maybe they share a y but have independent x
+8. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
 
 TODO: mark which event handling recipes were modified from the ones presented on the main page; this is why it's a recipe and not a library
 
@@ -186,7 +197,7 @@ TODO: mark which event handling recipes were modified from the ones presented on
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 19 Feb 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 20 Feb 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
 
