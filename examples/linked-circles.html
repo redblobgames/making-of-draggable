@@ -1,0 +1,44 @@
+<template>
+  <svg viewBox="-330 -50 660 200">
+    <circle class="draggable" r="30" />
+    <circle class="draggable" r="30" />
+  </svg>
+</template>
+
+<script>
+  const [el1, el2] = document.querySelectorAll("svg circle");
+
+  function makeLinkedStates(elements) {
+      let sharedState = {y: 0};
+      let states = elements.map((el) => ({
+          eventToCoordinates: eventToSvgCoordinates,
+          dragging: null,
+          x: 0,
+          get pos() {
+              return {x: this.x, y: sharedState.y};
+          },
+          set pos(p) { 
+              this.x = p.x;
+              sharedState.y = p.y;
+              el.setAttribute('cx', this.pos.x);
+              elements.forEach((circle) => circle.setAttribute('cy', this.pos.y));
+          },
+      }));
+      return states;
+  }
+
+  let [state1, state2] = makeLinkedStates([el1, el2]);
+  state1.pos = {x: -100, y: 0};
+  state2.pos = {x: +100, y: 0};
+  makeDraggable(state1, el1);
+  makeDraggable(state2, el2);
+
+  // event handlers: class
+</script>
+
+<style>
+    svg { background: #eee; }
+    circle { stroke: black; stroke-width: 0.5px; }
+    .draggable { cursor: grab; fill: hsl(0 50% 50%); }
+    .dragging { cursor: grabbing; fill: hsl(200 50% 50%); }
+</style>

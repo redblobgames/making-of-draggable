@@ -130,6 +130,11 @@ This structure gives me the flexibility I want for my projects. The state handle
   But that also means this doesn't behave properly when moving
   the mouse outside the painting area and then back in.
 </show-example>
+
+<show-example name="linked-circles">
+  State can be shared between draggables. Here, the x position
+  is separate and the y position is shared.
+</show-example>
 #+end_export
 
 TODO: more examples I'm considering:
@@ -140,8 +145,7 @@ TODO: more examples I'm considering:
 4. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
 5. some way to cancel a drag with keyboard → probably outside the scope
 6. .dragging class options (from little-details page)
-7. multiple draggables that are linked somehow, e.g. maybe they share a y but have independent x
-8. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
+7. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard?
 
 TODO: mark which event handling recipes were modified from the ones presented on the main page; this is why it's a recipe and not a library
 
