@@ -145,66 +145,6 @@ const divDragHandlersCommon = {
 };
 
 const diagrams = [
-    {
-        el: "canvas",
-        left: 46, top: 46, right: 1000-46, bottom: 150-46,
-        radius: 45,
-        draw() {
-            let ctx = this.el.getContext('2d');
-            ctx.clearRect(0, 0, this.el.width, this.el.height);
-            ctx.fillStyle = this.dragging? "hsl(200 50% 50%)" : "hsl(0 50% 50%)";
-            ctx.strokeStyle = "black";
-            ctx.beginPath();
-            ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2*Math.PI);
-            ctx.fill();
-            ctx.stroke();
-            ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.font = "24px serif";
-            ctx.fillText("Drag me", this.pos.x, this.pos.y + 5);
-        },
-        isOverDragHandle(pos) {
-            return Math.hypot(pos.x - this.pos.x, pos.y - this.pos.y) <= this.radius;
-        },
-        setCursor(event) {
-            let {x, y} = eventToCanvasCoordinates(event);
-            this.el.style.cursor = !this.isOverDragHandle({x, y})
-                ? '' : this.dragging? 'grabbing' : 'grab';
-        },
-        onpointerdown(event) {
-            if (event.button !== 0 || event.ctrlKey) return;
-            let initialPos = eventToCanvasCoordinates(event);
-            if (!this.isOverDragHandle(initialPos)) return;
-            this.dragging = {dx: this.pos.x - initialPos.x, dy: this.pos.y - initialPos.y,
-                             pointerId: event.pointerId};
-            event.currentTarget.setPointerCapture(event.pointerId);
-        },
-        onpointerup(event) {
-            this.dragging = null;
-            this.setCursor(event);
-            this.draw();
-        },
-        onpointercancel(event) {
-            this.onpointerup(event);
-        },
-        onpointermove(event) {
-            this.setCursor(event);
-            if (!this.dragging) return;
-            if (!(event.buttons & 1)) return this.onpointerup(event); // NOTE: chords
-            if (event.pointerId !== this.dragging.pointerId) return; // different finger dragging
-            let {x, y} = eventToCanvasCoordinates(event);
-            this.pos = {x: x + this.dragging.dx, y: y + this.dragging.dy};
-        },
-        ondragstart(event) {
-            // Prevent dragging text/images
-            event.preventDefault();
-        },
-        ontouchstart(event) {
-            // Prevent scrolling on mobile, but only if over the drag handle
-            let pos = eventToCanvasCoordinates(event);
-            if (this.dragging || this.isOverDragHandle(pos)) event.preventDefault();
-        },
-    },
     // div with a link inside, but want the drag to override the link
     {
         ...divDragHandlersCommon,

@@ -51,21 +51,6 @@ Notes:
 
 The Webplatform Tests folk [[https://wpt.fyi/results/pointerevents][have run a lot more tests across browsers]], like what happens if you remove an element in the middle of a pointer event.
 
-* Canvas dragging
-:PROPERTIES:
-:CUSTOM_ID: canvas-drag-a-handle
-:END:
-
-#+begin_export html
-<figure class="w-full">
-  <canvas width="1000" height="150" />
-  <figcaption>Drag the circle to move it</figcaption>
-  <button>Reset</button>
-</figure>
-#+end_export
-
-- ⁴if I put a second finger on the diagram it had been jumping to the second finger's position. This is because the /same/ is getting the =pointermove= event for the second finger, whereas in the other demos a /different/ element gets the events for the second finger. To fix this, I checked the =.pointerId= field in the =pointermove= event to make sure it matches the =.pointerId= from the =pointerdown= event.
-
 * HTML div with a link
 :PROPERTIES:
 :CUSTOM_ID: html-with-link
@@ -106,15 +91,6 @@ This was a little tricky and I don't know if it handles all cases but:
 - on =click=, if =moved= is =true=, =event.preventDefault()=
 
 In general though I don't try to do this type of thing. I don't put links inside my draggable objects.
-
-* Draggable with a nested draggable
-:PROPERTIES:
-:CUSTOM_ID: nested-draggable
-:END:
-
-I don't have a test here but I wrote [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh][one on another site]], where both the yellow and red boxes are draggable. To handle this case:
-
-- use =stopPropagation()= to prevent the pointer event from going up to the parent element
 
 * Click events
 :PROPERTIES:
@@ -186,14 +162,6 @@ function eventToSvgCoordinates(event, relativeTo=event.currentTarget.ownerSVGEle
 #+end_src
 
 However, this function only handles transforms on the SVG elements. For transforms on non-SVG elements, /I don't know what to do/. This is an unsolved issue, not only for me, but also other libraries like d3.js. See [[https://github.com/d3/d3-selection/issues/67][d3-selection issue #67]]  and [[https://bugzilla.mozilla.org/show_bug.cgi?id=1610093][firefox bug #1610093]] . There's probably /something/ we can do using =window.getComputedStyle(element)= but I haven't tried.
-
-* Painting state
-:PROPERTIES:
-:CUSTOM_ID: painting-state
-:END:
-
-I don't have a demo here but look at [[href:/x/1825-rounded-cell-painter/][Painting on a map]], where the /initial/ =pointerdown= event remembers what color we're painting, and then all subsequent =pointermove= events paint in that color. If you first painted in blue, then you continue painting in blue until the =pointerup=.
-
 
 
 #+begin_export html
