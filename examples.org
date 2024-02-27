@@ -59,6 +59,11 @@ digraph Handlers {
 
 This structure gives me the flexibility I want for my projects. The state handler isn't limited to /dragging/, or a fixed set of behaviors. This is /unlike/ the design of libraries like jquery-ui-draggable or react-draggable. Those libraries give you a list of possible behaviors like snapping to a grid or constrained movement or using a handle. In my projects the drag event handler is decoupled from the state handling, so you can implement any of those, and more, such as scrubble numbers or a painting program. On this page I'll give examples with code you can use.
 
+* Vanilla JS examples
+:PROPERTIES:
+:CUSTOM_ID: vanilla-js-examples
+:END:
+
 *These examples are starting points* using global variables. You'll have to adapt the recipe to fit into your own project.
 
 #+begin_export html
@@ -137,35 +142,42 @@ This structure gives me the flexibility I want for my projects. The state handle
 </show-example>
 #+end_export
 
-* More examples
+* Vue component
+:PROPERTIES:
+:CUSTOM_ID: vue-examples
+:END:
 
-TODO: more examples I'm considering:
+I use Vue in many of my projects. The event handlers can be put into a Vue  component that wraps a draggable element. This example is an SVG ~<g>~ wrapper, but the code would be similar for a ~<div>~ wrapper.
 
-1. snap to grid, like jquery-ui and react-draggable, although this isn't any different from the svg-snapping example in theory
-2. invisible larger drag area for mobile (from my little-details page)
-3. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
-4. some way to cancel a drag with keyboard → probably outside the scope
-5. .dragging class options (from little-details page)
+To use this component, create position variables (=data= in Options API or =ref= in Composition API) of type ={x, y}=, and then draw the desired shape as the child slot of the draggable component. In this example, I have =redCircle= and =blueSquare= positions:
 
-TODO: mark which event handling recipes were modified from the ones presented on the main page; this is why it's a recipe and not a library
+#+begin_src vue
+<svg viewBox="-100 -100 200 200" style="background: gray">
+  <Draggable v-model="redCircle">
+    <circle r="10" fill="red" />
+  </Draggable>
+  <Draggable v-model="blueSquare">
+    <rect x="-10" y="-10" width="20" height="20" fill="blue" />
+  </Draggable>
+</svg>
+#+end_src
 
-Vue playground examples:
+*[[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lAfbFSfbyimEYhgZIUGyYh1WWrmQ2kqiRlB8z/N93SD0sO26WtRj2pQZsi+S5l/d5RG4H35alv6x4MBkE58TrMC8zJplQrMKUwiLGgywpkYr0MiXOOOfC6KtZQURRWNCcKZexSATHZCStpHqglTALWpg86/BYkrWMZsaSKfUkCFarla84nmdynoY5az+SeZCHD6JIxzIJrAlpOM84oPNgVsyKax0pURroMFX5lVUn8lIqQ1vFyY4SJXM6gzNnbqsgaJe/bxU1ED/oZl6XRshC2xDUUv8sMpWAaGHl9mL2G0GRITg0FSqC5A2eE2+7ntCXFyPaTGh8ebEbOngNnWcV3/1ZhaqPHTfgBnsd1E7DXQwMIz+hYef8tc3IUvDqO7m+mQ3GLy8urDQkLwjPswFps8kYS/MwekiVrIp4Qp8x82zgFEDF3s/lGHnkDOjOgw4GYFT7pLD+0qpORGaxC515F/Dvc/sdYj5oNe8D9tRe+xD0N1McGWp8gs5N97QSsVlgdGkHCxbpwrSjnkGXl88yCaFdpni6DnphHYwG78s0euQoAWmteGJUWGj0SA4D3rqBxXgvts7NNyGc9Ne70cF4sxu+nQ1qBd+UUhSGVSxXhZ9xYp3SJlTmGFCVWOEihlftFJowcqF004fwXC5t+l0joanoa/TqEnbxEk05pAkVVZZ1QkZW0cJt65fKQSBrd7Lyj+cb36Ms1BoT23aX3b66dCZNE/7r4FGojxu67qKnWrpdQ/ssWZlbsebsXt4t06mUKm7hvs1rZGe0/04f92cJPtPot5gTUfCtHXnb2t59dib0ev7OFiFIRC9klcWW6LZrdObOYps23mvlXJhO6SsMtPfbWVXG8HSyV3v2+9C63Qp1eam7PwkzzVaxRSRVEdnCQw8j8F6TscZQkVA940dGZT/xZggFplJFzbGUMYLkjIXq08FqNDYCrSX+0poJoW0MKnKh8vs1TGOC2hj09Ghtg7XNrtHXGFcphf/7UKVsfCT5ti7LaVjCWG5caGr1x7g2BvE98B9lfeT9I2NtFZ+UddV+KPyvQ2Mz651I5ajVSIRQremLI7v8eD1qAYjX5gRg0wCaaoL1h2zv6Jt0JEuOXROltCUEVUs1oVSF8ysrg2m/q6QtVZrVWOPFGxn0tyz46kBkDpQTw1ZW/RHl9d6Hn+juP6K7g5PLh1EZr5006CasMmhx88b15IR6YW95bDd6H5OhnUITeuiPhkLw0Lo2IUdJtEPBoFRnBhTJZiFju0lb26f46Tkc9UHNaD9mIfS+4BuqcpOnmep46YCoPpKsXPd2bW6p6o/HkTg2uKOrQ+kTZPVxMXrxDOrq0deBmX326jHYEaYlsB6J9X3a2Z//mdn6/eMuOec0rYNYt5gLHeIKiCgQJ9JlGDF5eHuYBVMZpjy0F5u7Nz/0ULDtvEXa246o0dhsRAtZSGUtVqxLcKlY4tjMWvyFuVF9gg3qo6sN07m7ZDWn+KG76DTN3b3Fnkr6CFesmxMF3JVQfdKwN4UbQH0wLiv48qq+mPXOCyUAgPmRYjgIiKt/r81qiZaChnqnTODvl25lc7Tya7uC+dLPQ6PE+r59Z3h2E1h4h424mN7/7A19YR3U7A3b3RoqKjFEQge7vwFtIua8][Run it on the Vue Playground]],* with either the Options API or Composition API components. Or browse the component source code here:
 
-1. move the vue example from the main page to here
-2. [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh][nested draggables]], where both the yellow and red boxes are draggable. Modified recipe: use =stopPropagation()= to prevent the pointer event from going up to the parent element
-3. accessibility? - make the numbers also show up in an input box, or make things draggable by keyboard? - something for the vue playground
+#+begin_export html
+<details>
+<summary><b>&lt;Draggable&gt; component</b>, Options API:</summary>
+#+end_export
 
-Here's an attempt at a =<Draggable>= component in Vue v3, Options API:
-
-#+begin_src xml
+#+begin_src vue
 <template>
   <g
     :transform="`translate(${modelValue.x},${modelValue.y})`"
+    :class="{dragging}"
     @pointerdown.left="start"
     @pointerup="end" @pointercancel="end"
     @pointermove="dragging ? move($event) : null"
-    @touchstart.prevent="" @dragstart.prevent=""
-    :class="{dragging}">
+    @touchstart.prevent="" @dragstart.prevent="">
     <slot />
   </g>
 </template>
@@ -203,22 +215,28 @@ Here's an attempt at a =<Draggable>= component in Vue v3, Options API:
 </style>
 #+end_src
 
-and here's the same thing in the Composition API:
+#+begin_export html
+</details>
 
-#+begin_src xml
+<details>
+<summary><b>&lt;Draggable&gt; component</b>, Composition API:</summary>
+#+end_export
+
+
+#+begin_src vue
 <template>
   <g
     :transform="`translate(${modelValue.x},${modelValue.y})`"
+    :class="{dragging}"
     @pointerdown.left="start"
     @pointerup="end" @pointercancel="end"
     @pointermove="dragging ? move($event) : null"
-    @touchstart.prevent="" @dragstart.prevent=""
-    :class="{dragging}">
+    @touchstart.prevent="" @dragstart.prevent="">
     <slot />
   </g>
 </template>
 
-<script setup>  
+<script setup>
   import {ref} from 'vue';
   import {eventToSvgCoordinates} from './svgcoords.js';
   
@@ -256,23 +274,31 @@ and here's the same thing in the Composition API:
 </style>
 #+end_src
 
-This component only handles SVG elements, as that's my primary need. You'll have to modify it if you're dragging HTML elements. You can use /computed setters/ on the model value if you want to apply constraints like bounds checking or grid snapping. If you're using Vue v2 (whether Options API or Composition API), you'll need to change the v-model prop from =modelValue= to =value= and the event from =update:modelValue= to =input=.
+#+begin_export html
+</details>
+#+end_export
 
-To use this component, create position variables (=data= in Options API or =ref= in Composition API) of type ={x, y}=, and then draw the desired shape as the child slot of the draggable component. In this example, I have =redCircle= and =blueSquare= positions:
+If you're using Vue v2 (whether Options API or Composition API), you'll need to change the v-model prop from =modelValue= to =value= and the event from =update:modelValue= to =input=.
 
-#+begin_src xml
-<svg viewBox="-100 -100 200 200" style="background: #eee">
-  <Draggable v-model="redCircle">
-    <circle r="10" fill="hsl(0 50% 50%)" />
-  </Draggable>
-  <Draggable v-model="blueSquare">
-    <rect x="-10" y="-10" width="20" height="20" fill="hsl(220 50% 50%)" />
-  </Draggable>
-</svg>
-#+end_src
+Add /computed setters/ on the model value to apply constraints like bounds checking or grid snapping. 
 
-I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lAfbFSfbyimEYhgZIUGyYh1WWrmQ2kqiRlB8z/N93SD0sO26WtRj2pQZsi+S5l/d5RG4H35alv6x4MBkE58TrMC8zJplQrMKUwiLGgywpkYr0MiXOOOfC6KtZQURRWNCcKZexSATHZCStpHqglTALWpg86/BYkrWMZsaSKfUkCFarla84nmdynoY5az+SeZCHD6JIxzIJrAlpOM84oPNgVsyKax0pURroMFX5lVUn8lIqQ1vFyY4SJXM6gzNnbqsgaJe/bxU1ED/oZl6XRshC2xDUUv8sMpWAaGHl9mL2G0GRITg0FSqC5A2eE2+7ntCXFyPaTGh8ebEbOngNnWcV3/1ZhaqPHTfgBnsd1E7DXQwMIz+hYef8tc3IUvDqO7m+mQ3GLy8urDQkLwjPswFps8kYS/MwekiVrIp4Qp8x82zgFEDF3s/lGHnkDOjOgw4GYFT7pLD+0qpORGaxC515F/Dvc/sdYj5oNe8D9tRe+xD0N1McGWp8gs5N97QSsVlgdGkHCxbpwrSjnkGXl88yCaFdpni6DnphHYwG78s0euQoAWmteGJUWGj0SA4D3rqBxXgvts7NNyGc9Ne70cF4sxu+nQ1qBd+UUhSGVSxXhZ9xYp3SJlTmGFCVWOEihlftFJowcqF004fwXC5t+l0joanoa/TqEnbxEk05pAkVVZZ1QkZW0cJt65fKQSBrd7Lyj+cb36Ms1BoT23aX3b66dCZNE/7r4FGojxu67qKnWrpdQ/ssWZlbsebsXt4t06mUKm7hvs1rZGe0/04f92cJPtPot5gTUfCtHXnb2t59dib0ev7OFiFIRC9klcWW6LZrdObOYps23mvlXJhO6SsMtPfbWVXG8HSyV3v2+9C63Qp1eam7PwkzzVaxRSRVEdnCQw8j8F6TscZQkVA940dGZT/xZggFplJFzbGUMYLkjIXq08FqNDYCrSX+0poJoW0MKnKh8vs1TGOC2hj09Ghtg7XNrtHXGFcphf/7UKVsfCT5ti7LaVjCWG5caGr1x7g2BvE98B9lfeT9I2NtFZ+UddV+KPyvQ2Mz651I5ajVSIRQremLI7v8eD1qAYjX5gRg0wCaaoL1h2zv6Jt0JEuOXROltCUEVUs1oVSF8ysrg2m/q6QtVZrVWOPFGxn0tyz46kBkDpQTw1ZW/RHl9d6Hn+juP6K7g5PLh1EZr5006CasMmhx88b15IR6YW95bDd6H5OhnUITeuiPhkLw0Lo2IUdJtEPBoFRnBhTJZiFju0lb26f46Tkc9UHNaD9mIfS+4BuqcpOnmep46YCoPpKsXPd2bW6p6o/HkTg2uKOrQ+kTZPVxMXrxDOrq0deBmX326jHYEaYlsB6J9X3a2Z//mdn6/eMuOec0rYNYt5gLHeIKiCgQJ9JlGDF5eHuYBVMZpjy0F5u7Nz/0ULDtvEXa246o0dhsRAtZSGUtVqxLcKlY4tjMWvyFuVF9gg3qo6sN07m7ZDWn+KG76DTN3b3Fnkr6CFesmxMF3JVQfdKwN4UbQH0wLiv48qq+mPXOCyUAgPmRYjgIiKt/r81qiZaChnqnTODvl25lc7Tya7uC+dLPQ6PE+r59Z3h2E1h4h424mN7/7A19YR3U7A3b3RoqKjFEQge7vwFtIua8][on the Vue Playground]], with both Options API and Composition API components.
+* More examples
+:PROPERTIES:
+:CUSTOM_ID: more
+:END:
 
+TODO: more examples I'm considering:
+
+1. snap to grid, like jquery-ui and react-draggable, although this isn't any different from the svg-snapping example in theory
+2. invisible larger drag area for mobile (from my little-details page)
+3. [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh][nested draggables]], where both the yellow and red boxes are draggable. Modified recipe: use =stopPropagation()= to prevent the pointer event from going up to the parent element
+4. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
+5. accessibility - make the numbers also show up in an =<input>= box, or make things draggable by keyboard? - something for the vue playground
+6. =.dragging= class options (from little-details page)
+
+TODO: mark which event handling recipes were modified from the ones presented on the main page; this is why it's a recipe and not a library
+
+I should also construct some examples with React and Svelte etc.
 
 #+begin_export html
 <style>
@@ -340,7 +366,7 @@ I put a full example of this [[https://play.vuejs.org/#eNrtV2tv2zYU/SsXXofImS2lA
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 26 Feb 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 27 Feb 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
 

@@ -6,6 +6,18 @@
 
 import {eventToSvgCoordinates, eventToCanvasCoordinates, makeDraggableOptions, makeDraggable, modifySampleCode} from "./event-handling.js";
 
+/* Highlight Vue attributes as containing javascript values */
+Prism.languages.markup.tag.addAttribute(
+    /(?:v-|:|@)[-.a-zA-Z0-9]+/.source,
+    'javascript'
+);
+/* Highlight Vue template inside js; based on prism-js-templates.js */
+Prism.languages.javascript['template-string'].inside.string = {
+    pattern: /[\s\S]+/,
+    inside: Prism.languages.html
+};
+
+
 const htmlEscape = (unescaped) => {
     return unescaped
         .replaceAll('&', '&amp;')
@@ -241,3 +253,16 @@ class ShowExampleElement extends HTMLElement {
     }
 }
 customElements.define('show-example', ShowExampleElement);
+
+
+
+// Highlight the Vue sample code, which is inside <pre>
+for (let el of document.querySelectorAll("pre.src.src-vue")) {
+    let source = el.innerText;
+    // My site build system puts in the longhand v-bind v-on
+    // but I want these to be the shorthand in the example code
+    source = source.replace(/v-bind:/g, ":");
+    source = source.replace(/v-on:/g, "@");
+    el.innerHTML = Prism.highlight(source, Prism.languages.markup, 'markup');
+    console.log(el)
+}

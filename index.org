@@ -672,7 +672,7 @@ I normally work with SVG, but if working with a =<canvas>= (either 2D Canvas or 
 1. =pointerdown=, =touchstart=, =dragstart=: early ~return~ if not over a draggable object
 2. =pointermove=: set the cursor based on whether it's over a draggable object
 
-I have a [[href:targets.html#canvas-drag-to-paint][demo]] but haven't written up the code yet.
+I have a [[href:examples.html][demo]] on the examples page.
 
 ** Variant: hover with mouse
 :PROPERTIES:
@@ -688,6 +688,8 @@ Do I need to release the capture? *Yes*, sometimes. When moving the mouse from i
 ** Variant: toggle paint
 
 For the [[https://www.redblobgames.com/x/1825-rounded-cell-painter/][Rounded Cell Painter]], the =pointerdown= captures the initial paint color, and then all =pointermove= events will use that same paint color, until =pointerup=. To do this, the =state.dragging= variable should contain not only the initial =x=, =y= but also the initial paint color.
+
+I have a demo on the examples page.
 
 ** TODO: lostpointercapture
 
@@ -774,6 +776,6 @@ I know that =lostpointercapture= can be used to detect that we lost pointer capt
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 26 Feb 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 27 Feb 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
