@@ -154,7 +154,6 @@ class ShowExampleElement extends HTMLElement {
         const title = document.createElement('h3');
         title.innerHTML = `<a href="#${name}">${name}</a>`;
         title.setAttribute('id', name);
-        this.append(title);
 
         // NOTE: HTML5 says the <script> contents are *not* html-escaped
         // and that you can't use <!-- or <script or </script . I'm not
@@ -180,17 +179,20 @@ class ShowExampleElement extends HTMLElement {
            `;
 
         const iframe = document.createElement("iframe");
-        this.append(iframe);
         iframe.setAttribute('scrolling', "no");
         iframe.addEventListener('load', () => {
             iframe.contentDocument.body.style.margin = "0";
             iframe.contentDocument.body.style.padding = "0";
             iframe.style.height = iframe.contentDocument.body.clientHeight + 'px';
         });
-        iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(iframeContents);
-        iframe.contentWindow.document.close();
 
+        const codeContainer = document.createElement('details');
+        const codeInvitation = document.createElement('summary');
+        codeInvitation.innerHTML = `<b>See code</b>:`;
+        const codeLayout = document.createElement('div');
+        codeContainer.className = "code";
+        codeContainer.append(codeInvitation, codeLayout);
+        
         const preBody = document.createElement('pre');
         preBody.className = "body language-html";
         preBody.innerHTML = highlightCode(body, 'html');
@@ -207,13 +209,12 @@ class ShowExampleElement extends HTMLElement {
         preStyle.className = "style language-css";
         preStyle.innerHTML = highlightCode(style, 'css');
 
-        this.append(stateScript, preBody, preStyle, eventScript);
+        codeLayout.append(stateScript, preBody, preStyle, eventScript);
 
         // Original content inside the <show-example> tag
         const childDiv = document.createElement('div');
         childDiv.setAttribute('class', "explanation");
         childDiv.innerHTML = childContent;
-        this.append(childDiv);
 
         // jsfiddle: https://docs.jsfiddle.net/api/display-a-fiddle-from-post
         // codepen: https://blog.codepen.io/documentation/prefill
@@ -231,7 +232,12 @@ class ShowExampleElement extends HTMLElement {
              <button type="submit">Open in codepen</button>
              <input type="hidden" name="data" value="${htmlEscapeAttribute(JSON.stringify(codepen))}">
            </form>`;
-        this.append(editors);
+
+        // Top level contents
+        this.append(title, editors, childDiv, iframe, codeContainer);
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(iframeContents);
+        iframe.contentWindow.document.close();
     }
 }
 customElements.define('show-example', ShowExampleElement);
