@@ -53,6 +53,7 @@
       function start(event) {
           if (event.button !== 0) return; // left button only
           let {x, y} = state.eventToCoordinates(event);
+          if (!isOverDragHandle({x, y})) return; // only want to start a drag over the circle
           state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
           el.setPointerCapture(event.pointerId);
           setCursor(event);
