@@ -36,7 +36,7 @@
       // from https://www.redblobgames.com/making-of/draggable/
       function start(event) {
           if (event.button !== 0) return; // left button only
-          state.dragging = state.nextColorAt(event.currentTarget);
+          state.dragging = state.nextColorAt(event.currentTarget); //*
           event.currentTarget.releasePointerCapture(event.pointerId);
       }
 
@@ -46,7 +46,7 @@
 
       function move(event) {
           if (!state.dragging) return;
-          state.paintAt(event.currentTarget);
+          state.paintAt(event.currentTarget); //*
       }
 
       for (let el of parent.querySelectorAll("rect")) {

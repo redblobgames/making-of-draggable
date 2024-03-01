@@ -19,7 +19,7 @@
       ctx.stroke();
       ctx.fillStyle = "white";
       ctx.textAlign = "center";
-      ctx.font = "24px serif";
+      ctx.font = "20px serif";
       ctx.fillText("Drag me", state.pos.x, state.pos.y + 5);
   }
   
@@ -53,19 +53,19 @@
       function start(event) {
           if (event.button !== 0) return; // left button only
           let {x, y} = state.eventToCoordinates(event);
-          if (!isOverDragHandle({x, y})) return; // only want to start a drag over the circle
+          if (!isOverDragHandle({x, y})) return; // only want to start a drag over the circle //*
           state.dragging = {dx: state.pos.x - x, dy: state.pos.y - y};
           el.setPointerCapture(event.pointerId);
-          setCursor(event);
+          setCursor(event); //*
       }
 
       function end(event) {
           state.dragging = null;
-          setCursor(event);
+          setCursor(event); //*
       }
 
       function move(event) {
-          setCursor(event);
+          setCursor(event); //*
           if (!state.dragging) return;
           let {x, y} = state.eventToCoordinates(event);
           state.pos = {x: x + state.dragging.dx, y: y + state.dragging.dy};
