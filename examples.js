@@ -264,5 +264,4 @@ for (let el of document.querySelectorAll("pre.src.src-vue")) {
     source = source.replace(/v-bind:/g, ":");
     source = source.replace(/v-on:/g, "@");
     el.innerHTML = Prism.highlight(source, Prism.languages.markup, 'markup');
-    console.log(el)
 }

@@ -140,6 +140,15 @@ This structure gives me the flexibility I want for my projects. The state handle
   State can be shared between draggables. Here, the x position
   is separate and the y position is shared.
 </show-example>
+
+<show-example name="nested-element">
+  When nesting draggable elements, use <kbd>stopPropagation()</kbd>
+  to prevent the inner draggable from sending events to the outer
+  draggable handler.
+  <!--  Original demo
+   https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh
+  -->
+</show-example>
 #+end_export
 
 * Vue component
@@ -291,14 +300,10 @@ TODO: more examples I'm considering:
 
 1. snap to grid, like jquery-ui and react-draggable, although this isn't any different from the svg-snapping example in theory
 2. invisible larger drag area for mobile (from my little-details page)
-3. [[https://sfc.vuejs.org/#eNq1VU1zmzAQ/StbJjPYUxs7V+p02mkvveXQQzLDIdisQSlIGknYUMp/7wpBCo4b99M+oH37Vuy+XaTGey9lcCjRC72N3ikmDWg0pXwbcVZIoQw0oHAPLeyVKMAnqh/xiO8E1wYquLHe2Xo+IPUz5MgSk/Xo9foHniFLMzNxDK5ExSk5mohDt04ZT0PYx7nGhcWkYNygSsSRz/CA3MwdF8BkTAdDiN0iqUKogkOclwhL6MjBLmf0uFtAUodQn3Xet2/chj1YKkXPz7FK0QQk0K3L4EMsTanQJRH0aX1K5l1wO861lBcy7ap7HleIQ7/9UyTbw+zVJHxOGlIevM95qPdmWi+8nr40SKo+YNBgGnD/PKB+SrAdeqVQs6829J906xi6eflpx7KwH5z/1rYhWBshb5WQcRobJvjs75r6G7v+Sctf2hwmkl4cimMfNJH54mRk48nYrNxRQocIGQYLmccGyQLYJOwAoTZ1jjeR1xgVc70XqgjhoVtb4uyqqVpZLa6amh7zh4UrgChXTbcilECXYIe6pYO38e5LqkTJkxD8GvNcHP0F+KVGtdSY48745OCCI8FSaGalIkQhvZsdLEpzo4UizLbCbyPPKUK/d6NhDnLcGyrCijAMkcXP0Et5wivlGZZ92wnPQiNmJyHAR3s+FgiNk+Pbum3vml4EazjWidSjUuOtFnlpbKnKaeivab0VxgjqRGf0kvvXa1mROYg92BOVFSZj1fhR49KdCxfFc7RfkW/KfEnAKfNEwicRNyvSx81kv9qsRqPq/t7Cc9fgsohl8KgFp4uy+yij3qEjLxw+08ij69HakZcZI3W4Wun9zl6vjzoQKl3RKlAlN6zAAHWx3CpBWina2GVInWu99ju1AZkh][nested draggables]], where both the yellow and red boxes are draggable. Modified recipe: use =stopPropagation()= to prevent the pointer event from going up to the parent element
 4. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
 5. accessibility - make the numbers also show up in an =<input>= box, or make things draggable by keyboard? - something for the vue playground
 6. =.dragging= class options (from little-details page)
-
-TODO: mark which event handling recipes were modified from the ones presented on the main page; this is why it's a recipe and not a library
-
-I should also construct some examples with React and Svelte etc.
+7. maybe a React or Svelte example
 
 Although I think of the state handling and the event handling as separate concepts, I will sometimes "inline" the state handling into the event handling code.
 

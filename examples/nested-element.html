@@ -1,0 +1,88 @@
+<template>
+  <div class="container">
+    <div class="movable">
+      <b>Drag</b> me, or <b>resize</b> from the blue corner
+      <div class="resize-handle">
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+  const el = document.querySelector(".movable");
+  let state = {
+      x: 30,
+      y: 10,
+      width: 100,
+      height: 100,
+  };
+
+  function resizeAndPosition() {
+      let {x, y, width, height} = state;
+      el.style.transform = `translate(${x}px,${y}px)`;
+      el.style.width = `${width}px`;
+      el.style.height = `${height}px`;
+  }
+  
+  let outerState = {
+      eventToCoordinates(event) { return {x: event.clientX, y: event.clientY}; },
+      dragging: false,
+      get pos() { return {x: state.x, y: state.y}; },
+      set pos(p) {
+          const container = el.parentNode.getBoundingClientRect();
+          const bounds = el.getBoundingClientRect();
+          state.x = p.x;
+          state.y = p.y;
+          resizeAndPosition();
+      },
+  }
+
+  let innerState = {
+      eventToCoordinates(event) { return {x: event.clientX, y: event.clientY}; },
+      dragging: false,
+      get pos() { return {x: state.x + state.width, y: state.y + state.height}; },
+      set pos(p) {
+          state.width = Math.max(40, p.x - state.x);
+          state.height = Math.max(40, p.y - state.y);
+          resizeAndPosition();
+      },
+  }
+  resizeAndPosition();
+  makeDraggable(outerState, el);
+  makeDraggable(innerState, document.querySelector(".resize-handle"));
+  // event handlers: nopropagate
+</script>
+<style>
+    .container {
+        background: #eee;
+        height: 15em;
+        width: 100%;
+    }
+    .draggable {
+    }
+    .movable {
+        font-family: sans-serif;
+        text-align: center;
+        border-radius: 4px;
+        user-select: none;
+        position: relative;
+        cursor: move;
+        overflow: hidden;
+        
+        background: hsl(0 0% 98%);
+        color: black;
+        box-shadow: 0 1px 2px 1px rgb(0 0 0 / 0.2);
+    }
+    .resize-handle {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        width: 15px;
+        height: 15px;
+        background: blue;
+        background: linear-gradient(-45deg, blue 25%, white 30%, blue 35%, blue 45%, white 50%, blue 55%, blue 65%, hsl(0 0% 0% / 0.0) 70%);
+        cursor: nwse-resize;
+    }
+    .dragging {
+        cursor: grabbing;
+    }
+</style>
