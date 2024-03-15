@@ -18,34 +18,35 @@
   for (let i = 0; i <= 7; i++) { // grid on left
       for (let j = -2; j <= 2; j++) {
           if (i + Math.abs(j) >= 8) continue;
-          snap.push([-100 + i * 50, j * 50]);
+          snap.push({x: -100 + i * 50, y: j * 50});
       }
   }
   for (let i = 0; i < 9; i++) { // circle on right
       let angle = i / 9 * (2 * Math.PI);
-      snap.push([400 - 100 * Math.cos(angle), 100 * Math.sin(angle)]);
+      snap.push({x: 400 - 100 * Math.cos(angle),
+                 y: 100 * Math.sin(angle)});
   }
   
   // Make a gray dot at each snap point
   for (let pos of snap) {
       let circle = document.createElementNS(
           'http://www.w3.org/2000/svg', 'circle');
-      circle.setAttribute('cx', pos[0]);
-      circle.setAttribute('cy', pos[1]);
+      circle.setAttribute('cx', pos.x);
+      circle.setAttribute('cy', pos.y);
       circle.setAttribute('r', 8);
       document.querySelector("#snap-to").appendChild(circle);
   }
 
   // Find the closest snap point
   function findClosestSnapPoint(pos) {
-      let closest = snap[0];
+      let best = snap[0];
       for (let p of snap) {
-          if (Math.hypot(p[0] - pos.x,       p[1] - pos.y) <
-              Math.hypot(closest[0] - pos.x, closest[1] - pos.y)) {
-              closest = p;
+          if (Math.hypot(   p.x - pos.x,    p.y - pos.y) <
+              Math.hypot(best.x - pos.x, best.y - pos.y)) {
+              best = p;
           }
       }
-      return closest;
+      return best;
   }
   
   // Make the circle draggable only to the snap points
@@ -53,14 +54,14 @@
   let state = {
       eventToCoordinates: eventToSvgCoordinates,
       dragging: null,
-      _pos: [0, 0],
+      _pos: {x: 0, y: 0},
       get pos() {
-          return {x: this._pos[0], y: this._pos[1]};
+          return this._pos;
       },
       set pos(p) {
           this._pos = findClosestSnapPoint(p); //*
-          el.setAttribute('cx', this._pos[0]);
-          el.setAttribute('cy', this._pos[1]);
+          el.setAttribute('cx', this._pos.x);
+          el.setAttribute('cy', this._pos.y);
       },
   }
   state.pos = {x: 0, y: 0};

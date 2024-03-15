@@ -30,10 +30,14 @@
   let state = {
       eventToCoordinates: eventToCanvasCoordinates,
       dragging: null,
-      _pos: {x: 100, y: 100},
-      get pos() { return this._pos; },
+      // internal representation [x, y] can
+      // be different from external type {x, y}
+      _pos: [100, 100],
+      get pos() {
+          return {x: this._pos[0], y: this._pos[1] };
+      },
       set pos(p) {
-          this._pos = p;
+          this._pos = [p.x, p.y];
           redraw();
       },
   };

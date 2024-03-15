@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="movable">
-      <b>Drag</b> me, or <b>resize</b> from the blue corner
+      <b>Drag</b> me, or <b>resize</b> from the resize corner
       <div class="resize-handle">
       </div>
     </div>
@@ -70,6 +70,7 @@
         
         background: hsl(0 0% 98%);
         color: black;
+        border-top: 5px solid #c44;
         box-shadow: 0 1px 2px 1px rgb(0 0 0 / 0.2);
     }
     .resize-handle {
@@ -78,8 +79,8 @@
         bottom: 0;
         width: 15px;
         height: 15px;
-        background: blue;
-        background: linear-gradient(-45deg, blue 25%, white 30%, blue 35%, blue 45%, white 50%, blue 55%, blue 65%, hsl(0 0% 0% / 0.0) 70%);
+        background: #c44;
+        background: linear-gradient(-45deg, #c44 25%, white 30%, #c44 35%, #c44 45%, white 50%, #c44 55%, #c44 65%, hsl(0 0% 0% / 0.0) 70%);
         cursor: nwse-resize;
     }
     .dragging {

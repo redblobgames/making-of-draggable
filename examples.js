@@ -164,7 +164,7 @@ class ShowExampleElement extends HTMLElement {
         // Assemble the component output
 
         const title = document.createElement('h3');
-        title.innerHTML = `<a href="#${name}">${name}</a>`;
+        title.innerHTML = `<a href="#${name}"><span class="hash">#</span>${name}</a>`;
         title.setAttribute('id', name);
 
         // NOTE: HTML5 says the <script> contents are *not* html-escaped
@@ -200,7 +200,7 @@ class ShowExampleElement extends HTMLElement {
 
         const codeContainer = document.createElement('details');
         const codeInvitation = document.createElement('summary');
-        codeInvitation.innerHTML = `<b>See code</b>:`;
+        codeInvitation.innerHTML = `<span><b>See code here</b>👇 or</span>`;
         const codeLayout = document.createElement('div');
         codeContainer.className = "code";
         codeContainer.append(codeInvitation, codeLayout);
@@ -244,9 +244,10 @@ class ShowExampleElement extends HTMLElement {
              <button type="submit">Open in codepen</button>
              <input type="hidden" name="data" value="${htmlEscapeAttribute(JSON.stringify(codepen))}">
            </form>`;
+        codeInvitation.append(...editors.children);
 
         // Top level contents
-        this.append(title, editors, childDiv, iframe, codeContainer);
+        this.append(title, childDiv, iframe, codeContainer);
         iframe.contentWindow.document.open();
         iframe.contentWindow.document.write(iframeContents);
         iframe.contentWindow.document.close();

@@ -1,7 +1,6 @@
 #+title: Draggable objects: examples
 #+date: <2023-12-01 Fri>
 #+property: header-args:dot    :cache yes
-#+draft: t
 
 On the [[href:./][main page]] I show the /event handler recipe/ I use for dragging objects around in my interactive diagrams. That's only handles the /input/. It doesn't draw or move anything. The
 @@html:<em style="background:#e6d4c3"> event handler </em>@@
@@ -55,7 +54,7 @@ digraph Handlers {
 #+results[1448242050c1bc0770103c323e50452fdc75dbc4]:
 [[file:build/diagram-state-and-event-handlers.svg]]
 
-This structure gives me the flexibility I want for my projects. The state handler isn't limited to /dragging/, or a fixed set of behaviors. This is /unlike/ the design of libraries like jquery-ui-draggable or react-draggable. Those libraries give me a list of predefined behaviors like snapping to a grid or constrained movement or using a handle, but the behavior I want isn't always in that list. In my projects I decouple the drag event handler from the state handler, so I can implement any of those, and more, such as scrubble numbers or a painting program. On this page I'll give examples with code you can use. Although I treat the state handlers and event handlers as separate concepts, in practice I will sometimes combine the two.
+This structure gives me the flexibility I want for my projects. The state handler isn't limited to /dragging/, or a fixed set of behaviors. This is unlike the design of libraries like jquery-ui-draggable or react-draggable. Those libraries give me a list of predefined behaviors like snapping to a grid or constrained movement or using a handle, but the behavior I want isn't always in that list. In my projects I decouple the drag event handler from the state handler, so I can implement any of those, and more, such as scrubble numbers or a painting program. On this page I'll give examples with code you can use.
 
 * Vanilla JS examples
 :PROPERTIES:
@@ -81,9 +80,7 @@ This structure gives me the flexibility I want for my projects. The state handle
 <show-example name="svg-snapping">
   In this state handler the setter for <code>pos</code> snaps the x,y position to
   the nearest gray dot. On the left is snap-to-grid as seen in other libraries
-  but the right side shows the flexibility of being able to write my own state handler. This example
-  also shows how the internal representation <code>[x,y]</code> can be different from the
-  external type <code>{x,y}</code>.
+  but the right side shows the flexibility of being able to write my own state handler.
 </show-example>
 
 <show-example name="div">
@@ -124,6 +121,9 @@ This structure gives me the flexibility I want for my projects. The state handle
   stays in place. But I'm moving a marker that's drawn
   on the canvas. I had to modify the event handler recipe
   to update the cursor whenever anything happened.
+  This example also shows how the internal representation 
+  <code>[x,y]</code> can be different from the
+  external type <code>{x,y}</code>.
 </show-example>
 
 <show-example name="svg-painting">
@@ -295,19 +295,27 @@ Add /computed setters/ on the model value to apply constraints like bounds check
 
 In Vue, multiple elements can point to the same reactive data. In this [[https://play.vuejs.org/#eNqVVm1v2zYQ/isHb0PszJbSbPviOtnWLBi6YWvQBMWGeUBl6SyzkUSNpGxphv97H5KS7Dhp0H6QTfKeO947bzv4uSyDdcWD6SA8Ja6jvMyY5JISFaUUFQkWsqSlVKTXKXHGORdGv5wXRBRHBS2YcpmIpeCEjKSNVPe0EWZFK5NnPR4k6Xk0M0im1NMw3Gw2geJkkclFGuWsg1jmYR7diyKdyGVoVUijRcYhOVb3Y1ZCk17JjSb82CvBwDhmp7LDUym1MEIWmjgRxh453kVD99wsZKQSqjRugYEkirIynaJ0Gs6LeTHTsRKlgbKmKi8tr8hLqQxtFS93tFQypxN47cTZ1NJ+6a/39CDsT64kIF4l62zPZr8YOhqCD66EisF5gfVyuK2n9MPZmJopTc7PdiMH99BFVvHtf1WkDrGTFtxiZ6FXH4pjYxghjQw7M2Y2iGvBm1eyvpgPJi/Oziw3OM8I6/mAtGkyBmkRxfepklWRTOkrZp4PnACI2Nu5niD0nAHdW9DDAIy9TQr0F1b0UmQWu9LZ8Az2fWO/Ec7DTvLeYc/dtXfB4WWKY0OtTZDZ9KuNSMwKu3O7WbFIV6bbHSh0fv5ZKsG169SvXFp1MKRflFzOjMK3urxdRSXPQqzsru5XjV+FFoaVZen4FzJp9sYA0K2d8Mu3qC7vTifikIhrfQq3HgqKKl+wdXoflKB2JoG1u/DzWZvHrM6AT+v6CvEh7QL0Bcruo/rl2h7wPq8ulr2jsW4jiNW+RmauABzCRYi2dFwKL2nnyt4ps/UJhoLl3BGQIk7CYDz4VP2j2R6VZer1mxoVFRrNNodV793GYoZfb53F7yIYGtS78YN9sxu9nw+8gJ9KKQrDKpGbIsh4aVNdm0iZY0BVgsJFAnd1R+jmsSswd/wQnsu1bQquw9q++SOa/hp68RpNc0RTKqos65mMrOKVuzYolYOA195k+R+ft7bHWaQ1DrbdLbt9z9GZNG1RzkJbgA9idtywfW/9jJa9RVNdszI3oubsTt6u0yspVdLBA1vtsT3RwQd93LVLPIwaXTjhpSj4xu6GW6/vPjpTerP4YFtTGNpXq8oS+2Jua/Rrl0Rtc99L5VyYXug1Nnr4z0lVJrB0uhd78u/Imt0x9XHxb8IyyjRbwRaxrIrYJh46Oxw/bCPWKiqW5E+C2Kjsd25GEGAqVfjHmjKGk5yyEP20s1qJLUOnSbC2aoJpm+CBcq4KDnOYJgSxCR6tR7QGtGbXymuVq5TC/12kUjYBgnzj0/IqKqEstya0ufo68crAvw/sR1ofWf9IWZvFT/K6bH/I/MWusZEdPhHKcSeRCK6q6dsjvYKkHncA+Kt5AtC0gDabfBc6mAFcRyIdy5J9X0zRt+BULdWUUhUt2paWBn0mbTEhsZpoDEaxQX3LAn3vkGUB1IOGNy8OW96b0g1gbbsD5bCU3LR5Slfea77anK/gSEBEAReRLqOYaQjv2+GujFIe2XHv9t2vByhofdoh7dgpPBqXjTEfFlJZWxTrErqINYYR1uJ/nI192w79QGDdd+qm3XY2GrlBkGvXJfoseC7KY4yQF09ka58vvlLt/HUBaIAGzQq2XPvB86DeSgAAC2LFMBAQl+zDLo1KFA8k+Jsygb+/ekpzRPm7o+C8DPLIKFHfdU/M0F4CDW9xERdXd38MR4GwBmoejrrbfDegEluEGmE0yKJiKVJEURaIo7NuPsDkXoqMVRv2+WDa2T0fRFkmN7+5M6MqbnMVPCuO7584/6AxAUyxuEG0WK0x5/U09DCo7MnXt39yjXVPRFFVdgR9hviWtcwqq6OHvcKrDrUPcE7b1+59QJ7c6evaMHKnNcoq6krM4ecDpLd93D9l+l7d74Lv29LcDXYfAW9feBs=][*Vue Playground example*]] there's an ~<input>~ element with ~v-model~ bound to the same state to make the position editable by keyboard.
 
-* More examples
+* More
 :PROPERTIES:
 :CUSTOM_ID: more
 :END:
 
+*I feel like I should make the event handlers into a library* but so far I'm treating it as a mere "recipe" that I copy and paste. This is in part because I have needed to modify it for the various examples on this page, and it seemed simpler to present something as something to copy /and modify/ than to try to make one piece of code that handles all situations.
+
 TODO: more examples I'm considering:
 
-2. invisible larger drag area for mobile (from my little-details page)
-4. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
-6. =.dragging= class options (from little-details page)
-7. maybe a React or Svelte example
+1. invisible larger drag area for mobile (from my little-details page)
+2. constrain position to a non-rectangular area, like my [[href:/articles/curved-paths/making-of.html][making-of curved-paths page]]
+3. =.dragging= class options (from little-details page)
+4. maybe a React or Svelte example
 
 Although I think of the state handling and the event handling as separate concepts, I will sometimes "inline" the state handling into the event handling code.
+
+Other libraries to consider
+
+- https://www.neodrag.dev/
+- https://github.com/atlassian/pragmatic-drag-and-drop
+- https://drag-and-drop.formkit.com/
 
 #+begin_export html
 <style>
@@ -322,20 +330,34 @@ Although I think of the state handling and the event handling as separate concep
   }
 
   show-example {
-    display: grid;
     width: unset;
-    margin-inline: 0.5em;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto min-content;
-    grid-template-areas:
-        'title editors'
-        'explanation explanation'
-        'demo demo'
-        'code code';
-    border-top: 1em solid hsl(var(--hue), 50%, 45%);
+    max-width: calc(2 * var(--body-width));
+    margin-top: 2em;
   }
-  show-example > .code {
-    grid-area: code;
+  show-example > h3 {
+    max-width: var(--body-width);
+    margin-block: 0;
+    padding: 10px 0;
+    border-image: linear-gradient(180deg, hsl(0 50% 50%) 4px, #0000 0) fill 0//0 1em;
+  }
+  show-example > h3 > a > .hash {
+    color: hsl(0 10% 80%);
+  }
+  show-example > h3 > a:hover > .hash {
+    color: unset;
+  }
+  show-example > * {
+    margin-inline: auto;
+  }
+  show-example .code summary {
+    display: flex;
+    gap: 1em;
+  }
+  show-example .code summary > span {
+    flex: 1;
+  }
+  show-example .editors form {
+    display: inline-block;
   }
   show-example > .code summary {
     max-width: var(--body-width);
@@ -352,15 +374,13 @@ Although I think of the state handling and the event handling as separate concep
         'state event';
   }
 
-  show-example > h3 { grid-area: title; margin: 1em 1em 1em 0; justify-self: end; }
-  show-example > .explanation { grid-area: explanation; width: var(--body-width); justify-self: center; }
-  show-example > iframe { grid-area: demo; width: var(--body-width); justify-self: center; }
+  show-example > .explanation { width: var(--body-width); }
+  show-example > iframe { width: var(--body-width); }
   show-example > .code pre { width: unset; font-size: clamp(0.5rem, 1.2vw, 0.9rem); border: none; margin: 0.25em; padding: 0.25em; }
   show-example > .code .state { grid-area: state; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 240), oklch(90% 0.01 240)); font-size: clamp(0.5rem, 1.5vw, 1.1rem); }
   show-example > .code .event { grid-area: event; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 30), oklch(90% 0.01 30)); }
   show-example > .code .body { grid-area: body; background: radial-gradient(circle at left 25% top 75%, oklch(95% 0.0 310), oklch(95% 0.01 310)); }
   show-example > .code .style { grid-area: style; background: radial-gradient(circle at left 25% top 25%, oklch(95% 0.0 150), oklch(95% 0.01 150)); }
-  show-example > .editors { grid-area: editors; margin-left: 1em; align-self: center; }
   show-example > .editors form { display: inline-block; }
 
 </style>
@@ -375,6 +395,6 @@ Although I think of the state handling and the event handling as separate concep
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 03 Mar 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 09 Mar 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
