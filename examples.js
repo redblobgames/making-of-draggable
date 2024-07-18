@@ -259,7 +259,10 @@ customElements.define('show-example', ShowExampleElement);
 
 // Highlight the Vue sample code, which is inside <pre>
 for (let el of document.querySelectorAll("pre.src.src-vue")) {
-    let source = el.innerText;
+    // NOTE: there's a browser incompatibility here. Chrome will set .innerText to be empty
+    // inside a collapsed <details> element, while Firefox and Safari will have the full text.
+    // I'm using .textContent instead to get the full text.
+    let source = el.textContent;
     // My site build system puts in the longhand v-bind v-on
     // but I want these to be the shorthand in the example code
     source = source.replace(/v-bind:/g, ":");
