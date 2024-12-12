@@ -691,10 +691,16 @@ For the [[https://www.redblobgames.com/x/1825-rounded-cell-painter/][Rounded Cel
 
 I have a demo on the examples page.
 
-** TODO: lostpointercapture
+** Edge case: lostpointercapture
 
-I know that =lostpointercapture= can be used to detect that we lost pointer capture, but I haven't yet figured out all the situations in which it fires, and what I should do about them.
+I know that =lostpointercapture= can be used to detect that we lost pointer capture, but I haven't yet figured out all the situations in which it fires, and what I should do about them. In the comments, [[href:#comment-6606271359][Kirill Kleimenov gives this scenario]]:
 
+1. Start dragging a circle with left button
+2. Get outside the drag area holding left button down
+3. Press right button, then release left button
+4. Click anywhere outside drag area
+
+The [[https://www.w3.org/TR/pointerevents/#the-lostpointercapture-event][standard]] says "The user agent MUST fire a pointer event named =lostpointercapture= after pointer capture is released for a pointer" but browser behavior varies quite a bit. In the "I made some notes" expandable section in the [[href:#fix-contextmenu][Fix: context menu]] section of this page, I list a /lot/ of platform-specific and browser-specific behavior when it comes to the right mouse button. In some of these, =lostpointercapture= fires, but in some systems it will not fire until you click elsewhere.
  
 #+begin_export html
 <style>
@@ -776,6 +782,6 @@ I know that =lostpointercapture= can be used to detect that we lost pointer capt
   Created Jan 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 27 Feb 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 12 Dec 2024<!-- hhmts end -->
 </x:footer>
 #+end_export
