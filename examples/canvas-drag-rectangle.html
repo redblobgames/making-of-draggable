@@ -1,0 +1,70 @@
+<template>
+  <canvas width="660" height="200" style="cursor:crosshair;background:#eee">
+  </canvas>
+</template>
+
+<script>
+  const el = document.querySelector("canvas");
+  function clamp(x, lo, hi) { return x < lo ? lo : x > hi ? hi : x; }
+  let state = {
+      eventToCoordinates: eventToCanvasCoordinates,
+      dragging: false,
+      firstPos: {x: 0, y: 0},
+      _pos: {x: 0, y: 0},
+      get pos() {
+          return this._pos;
+      },
+      set pos(p) {
+          this._pos = {x: clamp(p.x, 1, el.width-1), y: clamp(p.y, 1, el.height-1)};
+          if (!this.dragging) this.firstPos = this._pos; // mouse down event
+          this.draw();
+      },
+      draw() {
+          let ctx = el.getContext('2d');
+          ctx.clearRect(0, 0, el.width, el.height);
+          ctx.fillStyle = this.dragging? "hsl(60 50% 90%)" : "hsl(0 30% 90%)";
+          ctx.strokeStyle = this.dragging? "hsl(0 100% 75%)" : "hsl(0 50% 30%)";
+          ctx.setLineDash(this.dragging? [5, 3] : []);
+          ctx.beginPath();
+          ctx.rect(Math.min(this.firstPos.x, this._pos.x),
+                   Math.min(this.firstPos.y, this._pos.y),
+                   Math.abs(this.firstPos.x - this._pos.x),
+                   Math.abs(this.firstPos.y - this._pos.y));
+          ctx.fill();
+          ctx.stroke();
+      },
+  }
+  makeDraggable(state, el);
+</script>
+
+<script class="events">
+  function makeDraggable(state, el) {
+      // from https://www.redblobgames.com/making-of/draggable/
+      function start(event) {
+          if (event.button !== 0) return; // left button only
+          let {x, y} = state.eventToCoordinates(event);
+          state.pos = {x, y};
+          state.dragging = true;
+          el.setPointerCapture(event.pointerId);
+      }
+
+      function end(event) {
+          let {x, y} = state.eventToCoordinates(event);
+          state.pos = {x, y};
+          state.dragging = false;
+          state.draw(); // after mouse up event
+      }
+
+      function move(event) {
+          if (!state.dragging) return;
+          let {x, y} = state.eventToCoordinates(event);
+          state.pos = {x, y};
+      }
+
+      el.addEventListener('pointerdown', start);
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+      el.addEventListener('pointermove', move)
+      el.addEventListener('touchstart', (e) => e.preventDefault());
+  }
+</script>

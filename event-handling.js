@@ -23,6 +23,7 @@ export function eventToSvgCoordinates(event, el=event.currentTarget) {
 export function eventToCanvasCoordinates(event) {
     const canvas = event.currentTarget;
     const bounds = canvas.getBoundingClientRect();
+    // TODO: this code assumes the <canvas> has no border or padding
     return {
         x: (event.x - bounds.left) / bounds.width * canvas.width,
         y: (event.y - bounds.top) / bounds.height * canvas.height,

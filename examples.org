@@ -126,6 +126,12 @@ This structure gives me the flexibility I want for my projects. The state handle
   external type <code>{x,y}</code>.
 </show-example>
 
+<show-example name="canvas-drag-rectangle">
+  Here we're not dragging an element. This draws
+  a rectangular region between the mouse-down 
+  and mouse-up points.
+</show-example>
+
 <show-example name="svg-painting">
   This example shows multi-state painting. It remembers the color
   you are painting with, and keeps using it until the pointer up event.
@@ -320,6 +326,7 @@ Other libraries to consider
 - https://www.neodrag.dev/
 - https://github.com/atlassian/pragmatic-drag-and-drop
 - https://drag-and-drop.formkit.com/
+- https://daybrush.com/moveable/
 
 #+begin_export html
 <style>
@@ -399,6 +406,6 @@ Other libraries to consider
   Created Dec 2023
   with the help of
   <a href="https://prismjs.com/">Prism.js</a>; &#160;
-  <!-- hhmts start -->Last modified: 12 Dec 2024<!-- hhmts end -->
+  <!-- hhmts start -->Last modified: 19 May 2025<!-- hhmts end -->
 </x:footer>
 #+end_export
